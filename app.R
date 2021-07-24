@@ -9,7 +9,12 @@ library(metaDigitise)
 library(fresh)
 library(shinythemes)
 
-dir <- "~/Downloads/Image"
+
+if(Sys.info()["user"]=="joelpick"){
+	dir <- "/Users/joelpick/Desktop/images"
+}else{
+	dir <- "~/Downloads/Image"
+}
 
 if( (substring(dir, nchar(dir)) == "/") == FALSE){
 		dir <- paste0(dir, "/")
@@ -18,6 +23,8 @@ if( (substring(dir, nchar(dir)) == "/") == FALSE){
  done_details <- dir_details(dir)
 details <- get_notDone_file_details(dir)
 
+counter_total <- length(details$paths)
+
 ui <- fluidPage(
     useShinyalert(),
     useShinyjs(),
@@ -25,6 +32,13 @@ ui <- fluidPage(
     titlePanel(title=div(img(src="shiny.jpg", height = 100)), windowTitle = "shinyDigitise"),
 
     fluidRow(
+			tags$head(tags$script('$(document).on("shiny:connected", function(e) {
+                            Shiny.onInputChange("innerWidth", window.innerWidth);
+                            });
+                            $(window).resize(function(e) {
+                            Shiny.onInputChange("innerWidth", window.innerWidth);
+                            });
+                            ')),
         column(3,
           # shinyDirButton('dir', 'Select a folder', 'Please select a folder', FALSE),
           # verbatimTextOutput("dir", placeholder = TRUE),
@@ -196,8 +210,8 @@ ui <- fluidPage(
             )
 
         ),
-        column(6,wellPanel(
-        uiOutput("metaPlot")
+        column(6,mainPanel(
+        plotOutput("metaPlot", click="plot_click")
     ))
       )
     )
@@ -250,23 +264,33 @@ server <- function(input, output, session) {
 # not_done_paths <- get_notDone_file_details(dir)$paths
 # counter_total <-
 # if(input$ShowOnlyNew == "yes"){
-#   length(not_done_paths)
+#   length(details$paths)
 # }
 # else{
-#   length(all_paths)
+#   length(details$paths)
 # }
-# })
+# # })
 
-addResourcePath(prefix = "imgResources", directoryPath = dir)
- images <-  paste0("imgResources/",list.files( dir))
-
+# addResourcePath(prefix = "imgResources", directoryPath = dir)
+ images <-  details$paths#paste0(dir,list.files( dir))
 
 counter <- reactiveValues(countervalue = 1)
 
-output$metaPlot <- renderUI({
-  img(src=paste(images[counter$countervalue]))
+# output$metaPlot <- renderUI({
+#
+#   img(src=paste(images[counter$countervalue]))
+#
+# })
+output$metaPlot <- renderPlot({
 
-})
+  image <- image_read(images[counter$countervalue])
+	plot(image)
+}
+	# list(src = image, contentType = "image/png")
+# } ,
+#     height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*3/5,0))
+)
+
 
 observeEvent(input$Next, {
     counter$countervalue <- counter$countervalue + 1
@@ -280,7 +304,12 @@ observeEvent(input$Previous, {
 observeEvent(counter$countervalue, {
     if(counter$countervalue == 0) {
       counter$countervalue <- counter$countervalue + 1
-}
+}})
+
+observeEvent(counter$countervalue, {
+	if(counter$countervalue > counter_total) {
+		counter$countervalue <- counter_total
+	}
 })
 
 # output$metaPlot <- renderImage({
@@ -293,9 +322,8 @@ observeEvent(counter$countervalue, {
 #   })
 
 
-
 output$progress <- renderText({
-    percent = round(counter$countervalue*100, 0)
+    percent = round(counter$countervalue/counter_total*100, 0)
     paste0("<font color=\"#ff3333\"><b>",percent,"%", " ", "screened","</b></font>")
 
 })
