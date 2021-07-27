@@ -7,6 +7,7 @@ library(metaDigitise)
 library(fresh)
 library(shinythemes)
 library(bslib)
+library(metaDigitise)
 
 if(Sys.info()["user"]=="joelpick"){
 	dir <- "/Users/joelpick/Desktop/images"
@@ -26,11 +27,11 @@ counter_total <- length(details$paths)
 ui <- fluidPage(
     tags$head(
       tags$style(".buttonagency .bttn-primary{background-color: darkblue;}"),
-      tags$style(type = 'text/css',".myclass1 {background-color: #EFF8CD;}"),
-      tags$style(type = 'text/css',".myclass2 {background-color: #EFF8CD;}"),
-      tags$style(type = 'text/css',".myclass3 {background-color: #EFF8CD;}"),
-      tags$style(type = 'text/css',".myclass4 {background-color: #EFF8CD;}"),
-      tags$style(type = 'text/css',".myclass5 {background-color: #c9d7e8;}")
+      tags$style(type = 'text/css',".myclass1 {background-color: #FFFFFF;}"),
+      tags$style(type = 'text/css',".myclass2 {background-color: #FFFFFF;}"),
+      tags$style(type = 'text/css',".myclass3 {background-color: #FFFFFF;}"),
+      tags$style(type = 'text/css',".myclass4 {background-color: #FFFFFF;}"),
+      tags$style(type = 'text/css',".myclass5 {background-color: #FFFFFF;}")
     ),
     theme = bs_theme(fg = "#3F1010", primary = "#332C50", base_font = "Arial", 
                                      font_scale = NULL, `enable-shadows` = TRUE, spacer = "0.8rem", 
@@ -52,13 +53,13 @@ ui <- fluidPage(
       actionBttn(
         inputId = "Previous",
         label = "Previous", 
-        style = "material-flat",
+        style = "float",
         color = "primary",
       ),
       actionBttn(
         inputId = "Next",
         label = "Next", 
-        style = "material-flat",
+        style = "float",
         color = "primary"
       ))
       
@@ -104,13 +105,13 @@ ui <- fluidPage(
           actionBttn(
             inputId = "Flip",
             label = "Flip",
-            style = "material-flat", 
+            style = "float", 
             color = "primary"
           ),
           actionBttn(
             inputId = "Rotate",
             label = "Rotate",
-            style = "material-flat", 
+            style = "float", 
             color = "primary"
           ))
           ),
@@ -120,8 +121,9 @@ ui <- fluidPage(
                 inputId = "PlotType",
                 label = h6(strong("Plot type:")),
                 choices = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
-                
-                inline=TRUE)
+                options = list(
+                  style = "btn-primary")
+            )
               ),
 
           wellPanel(
@@ -154,7 +156,7 @@ ui <- fluidPage(
                               br(),
                               actionButton(inputId = "calib",
                                 label = "Calibrate"),
-                             br(),
+                            br(),
                             br(),
                             textInput(inputId = "y1",
                                 label = "Y1 Value"),
@@ -180,7 +182,7 @@ ui <- fluidPage(
                               br(),
                               actionButton(inputId = "calib",
                            label = "Calibrate"),
-                           br(),
+                             br(),
                              br(),
                            textInput(inputId = "y1",
                                 label = "Y1 Value"),
@@ -193,10 +195,10 @@ ui <- fluidPage(
                                label = "X2 Value"),
                            br(),
                            awesomeCheckbox(
-                             inputId = "Id005",
+                             inputId = "log",
                              label = "Logged values?",
-                             value = TRUE,
-                             status = "danger"),
+                             value = FALSE,
+                             status = "info"),
                              br(),
                            textInput(inputId = "nsamp",
                                         label = "Known sample size"),
@@ -216,13 +218,10 @@ ui <- fluidPage(
                              label = "Y2 Value"),
                      br(),
                  awesomeCheckbox(
-                   inputId = "Id005",
+                   inputId = "log",
                    label = "Logged values?",
-                   value = F,
-                   status = "danger"),
-
-
-
+                   value = FALSE,
+                   status = "info"),
             )
           ),
           wellPanel(
@@ -232,13 +231,13 @@ ui <- fluidPage(
             actionBttn(
               inputId = "Add",
               label = "Add", 
-              style = "material-flat",
+              style = "float",
               color = "primary"
             ),
             actionBttn(
               inputId = "delete",
               label = "Delete", 
-              style = "material-flat",
+              style = "float",
               color = "primary"
             ))
               )
@@ -255,9 +254,6 @@ mainPanel(
     )
       )
     )
-
-
-
 
 server <- function(input, output, session) {
 #dirchoose function
@@ -320,10 +316,11 @@ counter <- reactiveValues(countervalue = 1)
 #   img(src=paste(images[counter$countervalue]))
 #
 # })
-output$metaPlot <- renderPlot({
 
+
+output$metaPlot <- renderPlot({
   image <- image_read(images[counter$countervalue])
-	plot(image)
+  plot(image)
 }
 
 	# list(src = image, contentType = "image/png")
@@ -352,6 +349,8 @@ observeEvent(counter$countervalue, {
 	}
 })
 
+
+
 # output$metaPlot <- renderImage({
 #   if(input$ShowOnlyNew == "yes"){
 #     not_done_paths[counter]
@@ -362,10 +361,12 @@ observeEvent(counter$countervalue, {
 #   })
 
 
-output$progress <- renderText({
-    percent = round(counter$countervalue/counter_total*100, 0)
-    paste0("<font color=\"#ff3333\"><b>",percent,"%", " ", "extracted","</b></font>")
+observeEvent(input$Next, {
+updateProgressBar(session = session, id = "progress", value = round(counter$countervalue/counter_total*100, 0))
+})
 
+observeEvent(input$Previous, {
+  updateProgressBar(session = session, id = "progress", value = round(counter$countervalue/counter_total*100, 0))
 })
 
 output$info <- renderText({
@@ -389,9 +390,5 @@ output$info <- renderText({
 
 
 }
-
-
-
-
 
 shinyApp(ui = ui, server = server)
