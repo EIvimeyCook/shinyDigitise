@@ -26,7 +26,7 @@ counter_total <- length(details$paths)
 
 ui <- fluidPage(
     tags$head(
-      tags$style(".buttonagency .bttn-primary{background-color: darkblue;}"),
+      tags$style(".buttonagency .bttn-primary{background-color: black; color: white;}"),
       tags$style(type = 'text/css',".myclass1 {background-color: #FFFFFF;}"),
       tags$style(type = 'text/css',".myclass2 {background-color: #FFFFFF;}"),
       tags$style(type = 'text/css',".myclass3 {background-color: #FFFFFF;}"),
