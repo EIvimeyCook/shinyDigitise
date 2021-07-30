@@ -24,49 +24,57 @@ details <- get_notDone_file_details(dir)
 
 counter_total <- length(details$paths)
 
+textInput3<-function (inputId, label, value = "",...) 
+{
+  div(style="display:inline-block",
+      tags$label(label, `for` = inputId), 
+      tags$input(id = inputId, type = "text", value = value,...))
+}
+
 ui <- fluidPage(
     tags$head(
       tags$style(".buttonagency .bttn-primary{background-color: black; color: white;}"),
-      tags$style(type = 'text/css',".myclass1 {background-color: #FFFFFF;}"),
-      tags$style(type = 'text/css',".myclass2 {background-color: #FFFFFF;}"),
-      tags$style(type = 'text/css',".myclass3 {background-color: #FFFFFF;}"),
-      tags$style(type = 'text/css',".myclass4 {background-color: #FFFFFF;}"),
-      tags$style(type = 'text/css',".myclass5 {background-color: #FFFFFF;}")
+      tags$style(type = 'text/css',".myclass1"),
+      tags$style(type = 'text/css',".myclass2}"),
+      tags$style(type = 'text/css',".myclass3"),
+      tags$style(type = 'text/css',".myclass4"),
+      tags$style(type = 'text/css',".myclass5")
     ),
     theme = bs_theme(fg = "#3F1010", primary = "#332C50", base_font = "Arial", 
                                      font_scale = NULL, `enable-shadows` = TRUE, spacer = "0.8rem", 
                                      bootswatch = "flatly", bg = "#FFFFFF"),
     fluidRow(
     titlePanel(title=div(img(src="shiny.jpg", height = 80),"shinyDigitise"), windowTitle = "shinyDigitise"),
-        column(2, wellPanel(
-          # shinyDirButton('dir', 'Select a folder', 'Please select a folder', FALSE),
-          # verbatimTextOutput("dir", placeholder = TRUE),
-          progressBar(id = "progress", value = 0, status = "danger", striped = TRUE, display_pct = T)
-        )),
-    column(3,wellPanel(
+    column(width = 3, offset = 2, 
+           wellPanel(
       # checkboxGroupButtons(
       #     inputId = "Next",
       #     choices = c("Next", "Previous"),
       #     status = "danger"
       # )
       div(class = "buttonagency",
+          fluidRow(
+            column(width = 8,
       actionBttn(
         inputId = "Previous",
         label = "Previous", 
         style = "float",
         color = "primary",
-      ),
+      )),
+      column(width = 2,
       actionBttn(
         inputId = "Next",
         label = "Next", 
         style = "float",
         color = "primary"
-      ))
-      
-    )),
+      )),
+      )
+    )
+    )
+    ),
     
         column(2, wellPanel(
-          strong("Show only unprocessed images:"), class = "myclass1", id = "myid1",
+          strong("Show processed images:"), class = "myclass1", id = "myid1",
           prettyToggle(
             inputId = "ShowOnlyNew",
             label_on = "Yes", 
@@ -79,18 +87,21 @@ ui <- fluidPage(
         )),
     
         column(2, wellPanel(
-               sliderTextInput(
+               sliderInput(
                  inputId = "general_cex",
-                 label = strong("Point Size:"), 
-                 choices = c(seq(from = 0.1, to = 3, by = 0.1)),
-                 grid = F)
+                 label = NULL, 
+                 value = 1,
+                 min = 0.1,
+                 max = 3, 
+                 ticks  = F)
         ))
     ),
     # Sidebar with a slider input for number of bins
     sidebarLayout(
       sidebarPanel( width = 4,
         id = "tPanel",style = "overflow-y:scroll; max-height: 600px; position:relative;",
-
+        
+        h5(htmlOutput("progress")),
         ## I've changed this because flip and rotate are different processes, so need two buttons
         wellPanel(
           strong("Image adjust:"), class = "myclass2", id = "myid1",
@@ -117,52 +128,64 @@ ui <- fluidPage(
           ),
 
           wellPanel(
-            pickerInput(
+            radioGroupButtons(
                 inputId = "PlotType",
-                label = h6(strong("Plot type:")),
+                label = strong("Plot type:"),
                 choices = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
-                options = list(
-                  style = "btn-primary")
+                checkIcon = list(
+                  yes = tags$i(class = "fa fa-check-square", 
+                               style = "color: white"),
+                  no = tags$i(class = "fa fa-square-o", 
+                              style = "color: white"))
             )
               ),
 
           wellPanel(
             conditionalPanel(
                  condition = "input.PlotType == 'Histogram'",
+                 actionButton(inputId = "calib",
+                              label = "Calibrate"),
+                 br(),
+                 br(),
                 textInput(inputId = "xvar",
-                      label = "X Axis Name"),
-                br(),
-                actionButton(inputId = "calib",
-                         label = "Calibrate"),
-                br(),
+                          label = NULL,
+                          placeholder = "X Axis Name"),
+                    splitLayout(
                 textInput(inputId = "y1",
-                          label = "Y1 Value"),
+                          label = NULL,
+                          placeholder = "Y1 Value" ),
                 textInput(inputId = "y2",
-                          label = "Y2 Value"),
-                br(),
+                          label = NULL,
+                          placeholder = "Y2 Value" ),
                 textInput(inputId = "x1",
-                          label = "X1 Value"),
+                          label = NULL,
+                          placeholder = "X1 Value" ),
                 textInput(inputId = "x2",
-                        label = "X2 Value"),
-                br(),
+                          label = NULL,
+                          placeholder = "X2 Value" )
+                    ),
                 textInput(inputId = "nsamp",
-                        label = "Known sample size"),
+                          placeholder = "Known sample size",
+                          label = NULL),
 
                        ),
                conditionalPanel(
                  condition = "input.PlotType == 'Mean/error'",
+                 actionButton(inputId = "calib",
+                              label = "Calibrate"),
+                 br(),
+                 br(),
                  textInput(inputId = "xvar",
-                              label = "X Axis Name"),
-                              br(),
-                              actionButton(inputId = "calib",
-                                label = "Calibrate"),
-                            br(),
-                            br(),
-                            textInput(inputId = "y1",
-                                label = "Y1 Value"),
-                            textInput(inputId = "y2",
-                                label = "Y2 Value"),
-                            br(),
+                           label = NULL,
+                           placeholder = "X Axis Name"),
+                 splitLayout(
+                 textInput(inputId = "y1",
+                           label = NULL,
+                           placeholder = "Y1 Value" ),
+                 textInput(inputId = "y2",
+                           label = NULL,
+                           placeholder = "Y2 Value" )
+                 ),
 	                         awesomeRadio(
 	                             inputId = "errortype",
 	                             label = h6(strong("Type of error")),
@@ -175,48 +198,59 @@ ui <- fluidPage(
                        ),
                conditionalPanel(
                  condition = "input.PlotType == 'Scatterplot'",
-                 textInput(inputId = "xvar",
-                              label = "X Axis Name"),
-                              textInput(inputId = "yvar",
-                                           label = "Y Axis Name"),
-                              br(),
-                              actionButton(inputId = "calib",
-                           label = "Calibrate"),
-                             br(),
-                             br(),
-                           textInput(inputId = "y1",
-                                label = "Y1 Value"),
-	                        textInput(inputId = "y2",
-	                             label = "Y2 Value"),
-                             br(),
-                             textInput(inputId = "x1",
-                              label = "X1 Value"),
-                              textInput(inputId = "x2",
-                               label = "X2 Value"),
-                           br(),
+                 actionButton(inputId = "calib",
+                              label = "Calibrate"),
+                 br(),
+                 br(),
+                 splitLayout(
+                   textInput(inputId = "xvar",
+                             label = NULL,
+                             placeholder = "X Axis Name"),
+                   textInput(inputId = "yvar",
+                             label = NULL,
+                             placeholder = "Y Axis Name")),
+                 splitLayout(
+                   textInput(inputId = "y1",
+                             label = NULL,
+                             placeholder = "Y1 Value" ),
+                   textInput(inputId = "y2",
+                             label = NULL,
+                             placeholder = "Y2 Value" ),
+                   textInput(inputId = "x1",
+                             label = NULL,
+                             placeholder = "X1 Value" ),
+                   textInput(inputId = "x2",
+                             label = NULL,
+                             placeholder = "X2 Value" )
+                   
+                 ),
                            awesomeCheckbox(
                              inputId = "log",
                              label = "Logged values?",
                              value = FALSE,
                              status = "info"),
-                             br(),
                            textInput(inputId = "nsamp",
-                                        label = "Known sample size"),
+                                        placeholder = "Known sample size",
+                                     label = NULL),
 
                        ),
                conditionalPanel(
                  condition = "input.PlotType == 'Boxplot'",
+                 actionButton(inputId = "calib",
+                              label = "Calibrate"),
+                 br(),
+                 br(),
                  textInput(inputId = "yvar",
-                      label = "Y Axis Name"),
-                      br(),
-                      actionButton(inputId = "calib",
-                                       label = "Calibrate"),
-	                   br(),
-                       textInput(inputId = "y1",
-		                    label = "Y1 Value"),
-                        textInput(inputId = "y2",
-                             label = "Y2 Value"),
-                     br(),
+                           label = NULL,
+                           placeholder = "Y Axis Name"),
+                 splitLayout(
+                   textInput(inputId = "y1",
+                             label = NULL,
+                             placeholder = "Y1 Value" ),
+                   textInput(inputId = "y2",
+                             label = NULL,
+                             placeholder = "Y2 Value" )
+                 ),
                  awesomeCheckbox(
                    inputId = "log",
                    label = "Logged values?",
@@ -249,7 +283,8 @@ mainPanel(
                    click="plot_click",
                    dblclick = "plot_dblclick",
                    hover = "plot_hover",
-                   brush = "plot_brush"),
+                   brush = "plot_brush",
+                   height = "100%", width = "100%"),
         verbatimTextOutput("info")
     )
       )
@@ -361,13 +396,10 @@ observeEvent(counter$countervalue, {
 #   })
 
 
-observeEvent(input$Next, {
-updateProgressBar(session = session, id = "progress", value = round(counter$countervalue/counter_total*100, 0))
-})
-
-observeEvent(input$Previous, {
-  updateProgressBar(session = session, id = "progress", value = round(counter$countervalue/counter_total*100, 0))
-})
+output$progress <- renderText({
+  paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
+  
+})    
 
 output$info <- renderText({
   xy_str <- function(e) {
