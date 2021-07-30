@@ -55,18 +55,18 @@ ui <- fluidPage(
       div(class = "buttonagency",
           fluidRow(
             column(width = 8,
-      actionBttn(
+      actionButton(
         inputId = "Previous",
         label = "Previous", 
-        style = "float",
-        color = "primary",
+        #style = "float",
+        #color = "primary",
       )),
       column(width = 2,
-      actionBttn(
+      actionButton(
         inputId = "Next",
         label = "Next", 
-        style = "float",
-        color = "primary"
+        #style = "float",
+        #color = "primary"
       )),
       )
     )
@@ -75,14 +75,16 @@ ui <- fluidPage(
     
         column(2, wellPanel(
           strong("Show processed images:"), class = "myclass1", id = "myid1",
-          prettyToggle(
+          checkboxInput(
             inputId = "ShowOnlyNew",
-            label_on = "Yes", 
-            icon_on = icon("check"),
-            status_on = "info",
-            status_off = "warning", 
-            label_off = "No",
-            icon_off = icon("remove")
+            label = NULL,
+            value = F,
+            #label_on = "Yes", 
+            #icon_on = icon("check"),
+            #status_on = "info",
+            #status_off = "warning", 
+            #label_off = "No",
+            #icon_off = icon("remove")
           )
         )),
     
@@ -113,30 +115,31 @@ ui <- fluidPage(
             #     status = "danger"
             # )
           div(class = "buttonagency",
-          actionBttn(
+          actionButton(
             inputId = "Flip",
             label = "Flip",
-            style = "float", 
-            color = "primary"
+            #style = "float", 
+            #color = "primary"
           ),
-          actionBttn(
+          actionButton(
             inputId = "Rotate",
             label = "Rotate",
-            style = "float", 
-            color = "primary"
+            #style = "float", 
+            #color = "primary"
           ))
           ),
 
           wellPanel(
-            radioGroupButtons(
+            radioButtons(
                 inputId = "PlotType",
                 label = strong("Plot type:"),
                 choices = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
-                checkIcon = list(
-                  yes = tags$i(class = "fa fa-check-square", 
-                               style = "color: white"),
-                  no = tags$i(class = "fa fa-square-o", 
-                              style = "color: white"))
+                inline = T,
+                #checkIcon = list(
+                  #yes = tags$i(class = "fa fa-check-square", 
+                   #            style = "color: white"),
+                  #no = tags$i(class = "fa fa-square-o", 
+                              #style = "color: white"))
             )
               ),
 
@@ -224,11 +227,11 @@ ui <- fluidPage(
                              placeholder = "X2 Value" )
                    
                  ),
-                           awesomeCheckbox(
+                           checkboxInput(
                              inputId = "log",
                              label = "Logged values?",
-                             value = FALSE,
-                             status = "info"),
+                             value = FALSE),
+                             #status = "info"),
                            textInput(inputId = "nsamp",
                                         placeholder = "Known sample size",
                                      label = NULL),
@@ -251,28 +254,28 @@ ui <- fluidPage(
                              label = NULL,
                              placeholder = "Y2 Value" )
                  ),
-                 awesomeCheckbox(
+                 checkboxInput(
                    inputId = "log",
                    label = "Logged values?",
-                   value = FALSE,
-                   status = "info"),
+                   value = FALSE),
+                   #status = "info"),
             )
           ),
           wellPanel(
             strong("Groups:"), class = "myclass3", id = "myid1",
             br(),
             div(class = "buttonagency",
-            actionBttn(
+            actionButton(
               inputId = "Add",
               label = "Add", 
-              style = "float",
-              color = "primary"
+              #style = "float",
+              #color = "primary"
             ),
-            actionBttn(
+            actionButton(
               inputId = "delete",
               label = "Delete", 
-              style = "float",
-              color = "primary"
+              #style = "float",
+              #color = "primary"
             ))
               )
           
@@ -418,6 +421,10 @@ output$info <- renderText({
     "hover: ", xy_str(input$plot_hover),
     "brush: ", xy_range_str(input$plot_brush)
   )
+})
+
+session$onSessionEnded(function() {
+  stopApp()
 })
 
 
