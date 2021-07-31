@@ -7,22 +7,46 @@ library(metaDigitise)
 library(fresh)
 library(shinythemes)
 library(bslib)
-library(metaDigitise)
 
 if(Sys.info()["user"]=="joelpick"){
-	dir <- "/Users/joelpick/Desktop/images"
+  dir <- "/Users/joelpick/Desktop/images"
 }else{
-	dir <- "~/Downloads/Image"
+  dir <- "~/Downloads/Image"
 }
 
+
+dir_details <- function(dir){
+  detail_list <- list()
+# file_pattern <- "[.][pjt][dnip][fpg]*$"
+  file_pattern <- "(?i)[.][pjt][dnip][efpg]*$"
+  detail_list$images <- list.files(dir, pattern = file_pattern)
+  detail_list$name <- gsub(file_pattern, "", detail_list$images)
+  detail_list$paths <- paste0(dir, detail_list$images)
+  detail_list$cal_dir <- paste0(dir, "caldat/")
+  detail_list$calibrations <- list.files(paste0(dir, "caldat/"))
+  detail_list$doneCalFiles <- if(length(detail_list$calibrations)==0) { 
+    vector(mode="character") 
+  } else{ 
+    paste0(detail_list$cal_dir, detail_list$calibrations) 
+  }
+
+  return(detail_list)
+}
+
+
+
+
 if( (substring(dir, nchar(dir)) == "/") == FALSE){
-		dir <- paste0(dir, "/")
-	}
+    dir <- paste0(dir, "/")
+  }
   setup_calibration_dir(dir)
- done_details <- dir_details(dir)
-details <- get_notDone_file_details(dir)
+#  done_details <- dir_details(dir)
+# details <- get_notDone_file_details(dir)
+
+details <- dir_details(dir)
 
 counter_total <- length(details$paths)
+
 
 textInput3<-function (inputId, label, value = "",...) 
 {
@@ -31,79 +55,100 @@ textInput3<-function (inputId, label, value = "",...)
       tags$input(id = inputId, type = "text", value = value,...))
 }
 
+
 ui <- fluidPage(
-    tags$head(
-      tags$style(".buttonagency .bttn-primary{background-color: black; color: white;}"),
-      tags$style(type = 'text/css',".myclass1"),
-      tags$style(type = 'text/css',".myclass2}"),
-      tags$style(type = 'text/css',".myclass3"),
-      tags$style(type = 'text/css',".myclass4"),
-      tags$style(type = 'text/css',".myclass5")
-    ),
-    theme = bs_theme(fg = "#3F1010", primary = "#332C50", base_font = "Arial", 
-                                     font_scale = NULL, `enable-shadows` = TRUE, spacer = "0.8rem", 
-                                     bootswatch = "flatly", bg = "#FFFFFF"),
-    fluidRow(
-    titlePanel(title=div(img(src="shiny.jpg", height = 80),"shinyDigitise"), windowTitle = "shinyDigitise"),
-    column(width = 3, offset = 2, 
-           wellPanel(
-      # checkboxGroupButtons(
-      #     inputId = "Next",
-      #     choices = c("Next", "Previous"),
-      #     status = "danger"
-      # )
-      div(class = "buttonagency",
-          fluidRow(
-            column(width = 8,
-      actionButton(
-        inputId = "Previous",
-        label = "Previous", 
-        #style = "float",
-        #color = "primary",
-      )),
-      column(width = 2,
-      actionButton(
-        inputId = "Next",
-        label = "Next", 
-        #style = "float",
-        #color = "primary"
-      )),
-      )
-    )
-    )
-    ),
-    
-        column(2, wellPanel(
-          strong("Show processed images:"), class = "myclass1", id = "myid1",
-          checkboxInput(
-            inputId = "ShowOnlyNew",
-            label = NULL,
-            value = F,
-            #label_on = "Yes", 
-            #icon_on = icon("check"),
-            #status_on = "info",
-            #status_off = "warning", 
-            #label_off = "No",
-            #icon_off = icon("remove")
+  tags$head(
+    tags$style(".buttonagency .bttn-primary{background-color: black; color: white;}"),
+    tags$style(type = 'text/css',".myclass1"),
+    tags$style(type = 'text/css',".myclass2}"),
+    tags$style(type = 'text/css',".myclass3"),
+    tags$style(type = 'text/css',".myclass4"),
+    tags$style(type = 'text/css',".myclass5")
+  ),
+  theme = bs_theme(fg = "#3F1010", primary = "#332C50", base_font = "Arial", 
+                                   font_scale = NULL, `enable-shadows` = TRUE, spacer = "0.8rem", 
+                                   bootswatch = "flatly", bg = "#FFFFFF"),
+  fluidRow(
+     column(width = 4,
+      titlePanel(title=div(img(src="shiny.jpg", height = 60),"shinyDigitise"), windowTitle = "shinyDigitise"),
+      ),
+      # column(width = 1,
+      #   br(),
+      # ),
+      column(width = 8, 
+        br(),
+        div(style="display: inline-block;vertical-align:top; width: 10%; font-size:x-large;",
+          p(htmlOutput("progress", inline=TRUE)),
+        ),
+        # div(style="display: inline-block;vertical-align:top; width: 50px;",HTML("<br>")),
+        div(style="display: inline-block;vertical-align:top; width: 20%; ",
+          actionButton(
+            inputId = "Previous",
+            label = "Previous", 
+            style='padding:4px'
+            #style = "float",
+            #color = "primary",
+          ),  
+          actionButton(
+            inputId = "Next",
+            label = "Next", 
+            style='padding:4px'
+            #style = "float",
+            #color = "primary"
           )
+        ),
+        # div(style="display: inline-block;vertical-align:top; width: 5%;",HTML("<br>")),
+
+      # ),
+      # column(3,
+      #   br(), 
+        div(style="display: inline-block;vertical-align:top; width: 20% ",strong("Show processed images:")),
+        div(style="display: inline-block;vertical-align:top; width: 5%; ",checkboxInput(
+          inputId = "ShowOnlyNew",
+          label = NULL,
+          value = F,
+          #label_on = "Yes", 
+          #icon_on = icon("check"),
+          #status_on = "info",
+          #status_off = "warning", 
+          #label_off = "No",
+          #icon_off = icon("remove")
         )),
-    
-        column(2, wellPanel(
-               sliderInput(
-                 inputId = "general_cex",
-                 label = NULL, 
-                 value = 1,
-                 min = 0.1,
-                 max = 3, 
-                 ticks  = F)
-        ))
+        
+      # ), 
+      # # column(1, align="left",
+      # #   #class = "myclass1", id = "myid1",
+      # #   br(),
+        
+      # # ),
+      # column(3, 
+      #   br(), 
+        # div(style="display: inline-block;vertical-align:top; width: 10%;",HTML("<br>")),
+
+        div(style="display: inline-block;vertical-align:top; width: 10%;",strong("point size:")),
+        div(style="display: inline-block;vertical-align:top;  width: 20%;",
+          sliderInput(
+          inputId = "general_cex",
+          label = NULL, 
+          value = 1,
+          min = 0.1,
+          max = 3, 
+          ticks  = FALSE))
+      )
+      # column(2, 
+      #   br(),
+        
+      # )
     ),
+
+
+
     # Sidebar with a slider input for number of bins
     sidebarLayout(
       sidebarPanel( width = 4,
         id = "tPanel",style = "overflow-y:scroll; max-height: 600px; position:relative;",
         
-        h5(htmlOutput("progress")),
+        
         ## I've changed this because flip and rotate are different processes, so need two buttons
         wellPanel(
           strong("Image adjust:"), class = "myclass2", id = "myid1",
@@ -189,13 +234,13 @@ ui <- fluidPage(
                            label = NULL,
                            placeholder = "Y2 Value" )
                  ),
-	                         awesomeRadio(
-	                             inputId = "errortype",
-	                             label = h6(strong("Type of error")),
-	                             choices = c("SE", "95%CI", "SD"),
-	                             status = "warning",
-	                             inline=TRUE
-	                         )
+                           awesomeRadio(
+                               inputId = "errortype",
+                               label = h6(strong("Type of error")),
+                               choices = c("SE", "95%CI", "SD"),
+                               status = "warning",
+                               inline=TRUE
+                           )
 
 
                        ),
@@ -282,12 +327,13 @@ ui <- fluidPage(
 
         ),
 mainPanel(
+        verbatimTextOutput("image_name"),
         plotOutput("metaPlot", 
                    click="plot_click",
                    dblclick = "plot_dblclick",
                    hover = "plot_hover",
                    brush = "plot_brush",
-                   height = "100%", width = "100%"),
+                   height = "600px", width = "100%"),
         verbatimTextOutput("info")
     )
       )
@@ -349,6 +395,7 @@ server <- function(input, output, session) {
 
 counter <- reactiveValues(countervalue = 1)
 
+output$image_name <- renderText({details$name[counter$countervalue]})
 # output$metaPlot <- renderUI({
 #
 #   img(src=paste(images[counter$countervalue]))
@@ -358,10 +405,11 @@ counter <- reactiveValues(countervalue = 1)
 
 output$metaPlot <- renderPlot({
   image <- image_read(images[counter$countervalue])
+  par(mar=c(0,0,0,0))
   plot(image)
 }
 
-	# list(src = image, contentType = "image/png")
+  # list(src = image, contentType = "image/png")
 # } ,
 #height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*3/5,0))
 )
@@ -382,9 +430,9 @@ observeEvent(counter$countervalue, {
 }})
 
 observeEvent(counter$countervalue, {
-	if(counter$countervalue > counter_total) {
-		counter$countervalue <- counter_total
-	}
+  if(counter$countervalue > counter_total) {
+    counter$countervalue <- counter_total
+  }
 })
 
 
