@@ -46,7 +46,7 @@ if( (substring(dir, nchar(dir)) == "/") == FALSE){
 details <- dir_details(dir)
 
 counter_total <- length(details$paths)
-
+# filename(details$paths[1])
 
 textInput3<-function (inputId, label, value = "",...) 
 {
@@ -128,7 +128,7 @@ ui <- fluidPage(
         div(style="display: inline-block;vertical-align:top; width: 10%;",strong("point size:")),
         div(style="display: inline-block;vertical-align:top;  width: 20%;",
           sliderInput(
-          inputId = "general_cex",
+          inputId = "cex",
           label = NULL, 
           value = 1,
           min = 0.1,
@@ -176,7 +176,7 @@ ui <- fluidPage(
 
           wellPanel(
             radioButtons(
-                inputId = "PlotType",
+                inputId = "plot_type",
                 label = strong("Plot type:"),
                 choices = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
                 inline = T,
@@ -190,7 +190,7 @@ ui <- fluidPage(
 
           wellPanel(
             conditionalPanel(
-                 condition = "input.PlotType == 'Histogram'",
+                 condition = "input.plot_type == 'Histogram'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
@@ -218,7 +218,7 @@ ui <- fluidPage(
 
                        ),
                conditionalPanel(
-                 condition = "input.PlotType == 'Mean/error'",
+                 condition = "input.plot_type == 'Mean/error'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
@@ -245,7 +245,7 @@ ui <- fluidPage(
 
                        ),
                conditionalPanel(
-                 condition = "input.PlotType == 'Scatterplot'",
+                 condition = "input.plot_type == 'Scatterplot'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
@@ -283,7 +283,7 @@ ui <- fluidPage(
 
                        ),
                conditionalPanel(
-                 condition = "input.PlotType == 'Boxplot'",
+                 condition = "input.plot_type == 'Boxplot'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
@@ -340,101 +340,120 @@ mainPanel(
     )
 
 server <- function(input, output, session) {
-#dirchoose function
-  # shinyDirChoose(
-  #   input,
-  #   'dir',
-  #   roots = c(home = '~'),
-  #   filetypes = c('', 'txt', 'bigWig', "tsv", "csv", "bw")
-  # )
+  
+  ################################################
+  #    Counter and previous/next buttons
+  ################################################
+  
+  # start counter at 1
+  counter <- reactiveValues(countervalue = 1)
 
-#create reactive object of dir
-  # dir <- reactive(input$dir)
+  # when next is pressed up the counter and check that its within total
+  observeEvent(input$Next, {
+    cv <- counter$countervalue + 1
+    if(cv > counter_total) {
+      counter$countervalue <- counter_total
+    }else{
+      counter$countervalue <- cv
+    }
+  })
 
-#render the file path in the outut
- # output$dir <- renderText({  # use renderText instead of renderPrint
- #   parseDirPath(c(home = '~'), dir())
- # })
+  # when next is pressed up the counter and check that its above 0
+  observeEvent(input$Previous, {
+    cv <- counter$countervalue - 1
+    if(cv == 0) {
+      counter$countervalue <- 1
+    }else{
+      counter$countervalue <- cv
+    }
+  })
+  
+  observeEvent(counter$countervalue, {
+    counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue]) 
+    # if(file.exists(counter$caldat)){
+    #   # plot_values <- readRDS(values$caldat)
+    #   values <- do.call("reactiveValues",readRDS(counter$caldat))
+    # }else{
+    #   # plot_values <- reactiveValuesToList(values)
+    #       # updateRadioButtons(session, "plot_type", selected=)
 
+    #   values <- reactiveValues(
+    #     image_name = details$name[counter$countervalue],
+    #     image_file = details$paths[counter$countervalue]
+    #     # cex = input$cex,
+    #     # plot_type = input$plot_type
+    #   )
+    # }
+  })
 
-# # done files
-# done_details$names
-#
-# dir<-"/Users/joelpick/Desktop/images/"
-# metaDigitise(dir)
-# setup_calibration_dir(dir)
-#setup caldat file
-     values <- reactiveValues(images = NULL, images_paths = NULL)
-
-# observeEvent(input$dir, {
-  # values$images <-  list.files( parseDirPath( c(home = '~'), dir()))
-
-
-   # Add directory of static resources to Shiny's web server
-   # addResourcePath(prefix = "imgResources", directoryPath = dir)
-   #  values$images <-  paste0("imgResources/",list.files( dir)
-   # <- paste0("imgResources/myplot", seq_len(3), ".png")
-
-
-# setup_calibration_dir(paste0(parseDirPath(c(home = '~'), dir())))
-# done_details <- dir_details(paste0(parseDirPath(c(home = '~'), dir())))
-# details <- get_notDone_file_details(paste0(parseDirPath(c(home = '~'), dir())))
-# all_paths <- dir_details(dir)$paths
-# not_done_paths <- get_notDone_file_details(dir)$paths
-# counter_total <-
-# if(input$ShowOnlyNew == "yes"){
-#   length(details$paths)
-# }
-# else{
-#   length(details$paths)
-# }
-# # })
-
-# addResourcePath(prefix = "imgResources", directoryPath = dir)
- images <-  details$paths#paste0(dir,list.files( dir))
-
-counter <- reactiveValues(countervalue = 1)
-
-output$image_name <- renderText({details$name[counter$countervalue]})
-# output$metaPlot <- renderUI({
-#
-#   img(src=paste(images[counter$countervalue]))
-#
-# })
+## when counter changes
+## values - save if past certain point? some raw_data?
+## values - empty
+## check caldat
+## if no caldat fill in some stuff
+##  if caldat load caldat and fill in some stuff
+    # updateRadioButtons(session, "plot_type", selected=)
+    # updateRadioButtons(session, "plot_type", selected=)
+## #updateSelectInput
 
 
-output$metaPlot <- renderPlot({
-  image <- image_read(images[counter$countervalue])
-  par(mar=c(0,0,0,0))
-  plot(image)
-}
-
-  # list(src = image, contentType = "image/png")
-# } ,
-#height=reactive(ifelse(!is.null(input$innerWidth),input$innerWidth*3/5,0))
-)
 
 
-observeEvent(input$Next, {
-    counter$countervalue <- counter$countervalue + 1
-})
+  ################################################
+  #   Digitisation and plotting
+  ################################################
 
-observeEvent(input$Previous, {
-    counter$countervalue <- counter$countervalue - 1
-})
+  # work out image 
+  # observe( values$image_name <- details$name[counter$countervalue] )
 
-#alert for trying to go backward below 1
-observeEvent(counter$countervalue, {
-    if(counter$countervalue == 0) {
-      counter$countervalue <- counter$countervalue + 1
-}})
+  # observe({
+  #   if(file.exists(paste0(details$cal_dir,details$name[counter$countervalue]))){
 
-observeEvent(counter$countervalue, {
-  if(counter$countervalue > counter_total) {
-    counter$countervalue <- counter_total
-  }
-})
+  #     values <- do.call("reactiveValues",readRDS(paste0(details$cal_dir,details$name[counter$countervalue]))))
+  #   }else{
+  #     values$image_name <- details$name[counter$countervalue] 
+  #     values$image_file <- details$paths[counter$countervalue] 
+  #     values$cex <- input$cex 
+  #     values$caldat <- paste0(details$cal_dir,values$image_name) 
+  #     values$plot_type <- input$plot_type 
+  #   }
 
+  # })
+
+  values <- reactiveValues()
+
+  observe( values$image_name <- details$name[counter$countervalue] )
+  observe( values$image_file <- details$paths[counter$countervalue] )
+  observe( values$cex <- input$cex )
+  observe( values$plot_type <- input$plot_type )
+
+
+  output$image_name <- renderText({values$image_name})
+
+  output$metaPlot <- renderPlot({
+    # image <- image_read(values$image_file)
+    # par(mar=c(0,0,0,0))
+    # plot(image)
+    par(mar=c(0,0,0,0))
+
+    if(file.exists(counter$caldat)){
+      plot_values <- readRDS(counter$caldat)
+    }else{
+      plot_values <- reactiveValuesToList(values)
+    }
+    # plot_values <- reactiveValuesToList(values)
+
+    do.call(internal_redraw,plot_values)
+
+    
+  })
+
+
+
+  output$progress <- renderText({
+    paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
+    
+  }) 
 
 
 # output$metaPlot <- renderImage({
@@ -447,35 +466,34 @@ observeEvent(counter$countervalue, {
 #   })
 
 
-output$progress <- renderText({
-  paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
-  
-})    
+   
 
-output$info <- renderText({
-  xy_str <- function(e) {
-    if(is.null(e)) return("NULL\n")
-    paste0("x=", round(e$x, 1), " y=", round(e$y, 1), "\n")
-  }
-  xy_range_str <- function(e) {
-    if(is.null(e)) return("NULL\n")
-    paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1), 
-           " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
-  }
-  
-  paste0(
-    "click: ", xy_str(input$plot_click),
-    "dblclick: ", xy_str(input$plot_dblclick),
-    "hover: ", xy_str(input$plot_hover),
-    "brush: ", xy_range_str(input$plot_brush)
-  )
-})
+  output$info <- renderText({
+    xy_str <- function(e) {
+      if(is.null(e)) return("NULL\n")
+      paste0("x=", round(e$x, 1), " y=", round(e$y, 1), "\n")
+    }
+    xy_range_str <- function(e) {
+      if(is.null(e)) return("NULL\n")
+      paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1), 
+             " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
+    }
+    
+    paste0(
+      "click: ", xy_str(input$plot_click),
+      "dblclick: ", xy_str(input$plot_dblclick),
+      "hover: ", xy_str(input$plot_hover),
+      "brush: ", xy_range_str(input$plot_brush)
+    )
+  })
 
-session$onSessionEnded(function() {
-  stopApp()
-})
+  session$onSessionEnded(function() {
+    stopApp()
+  })
 
 
 }
+
+names(readRDS(paste0(details$cal_dir,details$name[1])))
 
 shinyApp(ui = ui, server = server)
