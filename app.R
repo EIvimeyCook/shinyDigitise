@@ -14,6 +14,7 @@ if(Sys.info()["user"]=="joelpick"){
   dir <- "~/Downloads/Image"
 }
 
+source("/Users/joelpick/github/ShinyDigitise/R/redraw.R")
 
 dir_details <- function(dir){
   detail_list <- list()
@@ -347,6 +348,8 @@ server <- function(input, output, session) {
   
   # start counter at 1
   counter <- reactiveValues(countervalue = 1)
+  values <- reactiveValues()
+  
 
   # when next is pressed up the counter and check that its within total
   observeEvent(input$Next, {
@@ -368,24 +371,16 @@ server <- function(input, output, session) {
     }
   })
   
-  observeEvent(counter$countervalue, {
-    counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue]) 
-    # if(file.exists(counter$caldat)){
-    #   # plot_values <- readRDS(values$caldat)
-    #   values <- do.call("reactiveValues",readRDS(counter$caldat))
-    # }else{
-    #   # plot_values <- reactiveValuesToList(values)
-    #       # updateRadioButtons(session, "plot_type", selected=)
+  output$progress <- renderText({
+    paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
+    
+  }) 
 
-    #   values <- reactiveValues(
-    #     image_name = details$name[counter$countervalue],
-    #     image_file = details$paths[counter$countervalue]
-    #     # cex = input$cex,
-    #     # plot_type = input$plot_type
-    #   )
-    # }
-  })
 
+  ################################################
+  #    when counter changes
+  ################################################
+  
 ## when counter changes
 ## values - save if past certain point? some raw_data?
 ## values - empty
@@ -397,73 +392,60 @@ server <- function(input, output, session) {
 ## #updateSelectInput
 
 
-
-
-  ################################################
-  #   Digitisation and plotting
-  ################################################
-
-  # work out image 
-  # observe( values$image_name <- details$name[counter$countervalue] )
-
-  # observe({
-  #   if(file.exists(paste0(details$cal_dir,details$name[counter$countervalue]))){
-
-  #     values <- do.call("reactiveValues",readRDS(paste0(details$cal_dir,details$name[counter$countervalue]))))
-  #   }else{
-  #     values$image_name <- details$name[counter$countervalue] 
-  #     values$image_file <- details$paths[counter$countervalue] 
-  #     values$cex <- input$cex 
-  #     values$caldat <- paste0(details$cal_dir,values$image_name) 
-  #     values$plot_type <- input$plot_type 
-  #   }
-
-  # })
-
-  values <- reactiveValues()
-
-  observe( values$image_name <- details$name[counter$countervalue] )
-  observe( values$image_file <- details$paths[counter$countervalue] )
-  observe( values$cex <- input$cex )
-  observe( values$plot_type <- input$plot_type )
-
-
-  output$image_name <- renderText({values$image_name})
-
-  output$metaPlot <- renderPlot({
-    # image <- image_read(values$image_file)
-    # par(mar=c(0,0,0,0))
-    # plot(image)
-    par(mar=c(0,0,0,0))
-
+  observeEvent(counter$countervalue, {
+    counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue]) 
     if(file.exists(counter$caldat)){
-      plot_values <- readRDS(counter$caldat)
+      # plot_values <- readRDS(values$caldat)
+      values <- do.call("reactiveValues",readRDS(counter$caldat))
     }else{
-      plot_values <- reactiveValuesToList(values)
+      # plot_values <- reactiveValuesToList(values)
+          # updateRadioButtons(session, "plot_type", selected=)
+
+      values <- reactiveValues(
+        image_name = details$name[counter$countervalue],
+        image_file = details$paths[counter$countervalue]
+        # cex = input$cex,
+        # plot_type = input$plot_type
+      )
     }
-    # plot_values <- reactiveValuesToList(values)
 
-    do.call(internal_redraw,plot_values)
+    output$image_name <- renderText({values$image_name})
 
-    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
   })
 
 
-
-  output$progress <- renderText({
-    paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
-    
-  }) 
+  ################################################
+  #   Flip
+  ################################################
 
 
-# output$metaPlot <- renderImage({
-#   if(input$ShowOnlyNew == "yes"){
-#     not_done_paths[counter]
-#   }
-#   else{
-#     all_paths[counter]
-#   }
-#   })
+  ################################################
+  #   Rotate
+  ################################################
+
+
+  ################################################
+  #   Plot type
+  ################################################
+
+  observe( values$plot_type <- input$plot_type )
+
+
+  ################################################
+  #   Calibrate
+  ################################################
+
+
+  ################################################
+  #   Digitisation
+  ################################################
+
+  observe( values$cex <- input$cex )
 
 
    
@@ -487,13 +469,16 @@ server <- function(input, output, session) {
     )
   })
 
+
+  ################################################
+  #   What happens when you quit
+  ################################################
+
   session$onSessionEnded(function() {
     stopApp()
   })
 
 
 }
-
-names(readRDS(paste0(details$cal_dir,details$name[1])))
 
 shinyApp(ui = ui, server = server)
