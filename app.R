@@ -14,7 +14,7 @@ if(Sys.info()["user"]=="joelpick"){
   dir <- "~/Downloads/Image"
 }
 
-source("/Users/joelpick/github/ShinyDigitise/R/redraw.R")
+#source("/Users/joelpick/github/ShinyDigitise/R/redraw.R")
 
 dir_details <- function(dir){
   detail_list <- list()
@@ -58,17 +58,11 @@ textInput3<-function (inputId, label, value = "",...)
 
 
 ui <- fluidPage(
-  tags$head(
-    tags$style(".buttonagency .bttn-primary{background-color: black; color: white;}"),
-    tags$style(type = 'text/css',".myclass1"),
-    tags$style(type = 'text/css',".myclass2}"),
-    tags$style(type = 'text/css',".myclass3"),
-    tags$style(type = 'text/css',".myclass4"),
-    tags$style(type = 'text/css',".myclass5")
-  ),
-  theme = bs_theme(fg = "#3F1010", primary = "#332C50", base_font = "Arial", 
-                                   font_scale = NULL, `enable-shadows` = TRUE, spacer = "0.8rem", 
-                                   bootswatch = "flatly", bg = "#FFFFFF"),
+  theme = bs_theme(base_font = font_collection(font_google("News Cycle"), 
+                                               "Arial Narrow Bold", "sans-serif"), code_font = font_collection(font_google("News Cycle"), 
+                                                "Arial Narrow Bold", "sans-serif"), font_scale = NULL, `enable-gradients` = TRUE,
+                                                 `enable-shadows` = TRUE, bootswatch = "journal"),
+  
   fluidRow(
      column(width = 4,
       titlePanel(title=div(img(src="shiny.jpg", height = 60),"shinyDigitise"), windowTitle = "shinyDigitise"),
@@ -103,11 +97,14 @@ ui <- fluidPage(
       # ),
       # column(3,
       #   br(), 
-        div(style="display: inline-block;vertical-align:top; width: 20% ",strong("Show processed images:")),
-        div(style="display: inline-block;vertical-align:top; width: 5%; ",checkboxInput(
+        div(style="display: inline-block;vertical-align:top; width: 12% ",strong("Show processed images:")),
+        div(style="display: inline-block;vertical-align:top; width: 5%; ",prettyCheckbox(
+          value = F,
+          icon = icon("check"),
+          status = "danger",
+          animation = "jelly",
           inputId = "ShowOnlyNew",
           label = NULL,
-          value = F,
           #label_on = "Yes", 
           #icon_on = icon("check"),
           #status_on = "info",
@@ -117,8 +114,8 @@ ui <- fluidPage(
         )),
         
       # ), 
-      # # column(1, align="left",
-      # #   #class = "myclass1", id = "myid1",
+      # # column(1, align="left"
+      # # 
       # #   br(),
         
       # # ),
@@ -126,7 +123,7 @@ ui <- fluidPage(
       #   br(), 
         # div(style="display: inline-block;vertical-align:top; width: 10%;",HTML("<br>")),
 
-        div(style="display: inline-block;vertical-align:top; width: 10%;",strong("point size:")),
+        div(style="display: inline-block;vertical-align:top; width: 6%;",strong("Point size:")),
         div(style="display: inline-block;vertical-align:top;  width: 20%;",
           sliderInput(
           inputId = "cex",
@@ -152,7 +149,7 @@ ui <- fluidPage(
         
         ## I've changed this because flip and rotate are different processes, so need two buttons
         wellPanel(
-          strong("Image adjust:"), class = "myclass2", id = "myid1",
+          strong("Image adjust:"),
           br(),
             # checkboxGroupButtons(
             #     inputId = "Orient",
@@ -176,11 +173,15 @@ ui <- fluidPage(
           ),
 
           wellPanel(
-            radioButtons(
+            prettyRadioButtons(
                 inputId = "plot_type",
                 label = strong("Plot type:"),
                 choices = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
                 inline = T,
+                icon = icon("check"), 
+                bigger = TRUE,
+                status = "info",
+                animation = "jelly"
                 #checkIcon = list(
                   #yes = tags$i(class = "fa fa-check-square", 
                    #            style = "color: white"),
@@ -235,12 +236,15 @@ ui <- fluidPage(
                            label = NULL,
                            placeholder = "Y2 Value" )
                  ),
-                           awesomeRadio(
+                 prettyRadioButtons(
                                inputId = "errortype",
                                label = h6(strong("Type of error")),
                                choices = c("SE", "95%CI", "SD"),
-                               status = "warning",
-                               inline=TRUE
+                               inline = T,
+                               icon = icon("check"), 
+                               bigger = TRUE,
+                               status = "danger",
+                               animation = "jelly"
                            )
 
 
@@ -273,11 +277,11 @@ ui <- fluidPage(
                              placeholder = "X2 Value" )
                    
                  ),
-                           checkboxInput(
+                 prettyCheckbox(
                              inputId = "log",
                              label = "Logged values?",
-                             value = FALSE),
-                             #status = "info"),
+                             value = FALSE,
+                             status = "info"),
                            textInput(inputId = "nsamp",
                                         placeholder = "Known sample size",
                                      label = NULL),
@@ -300,15 +304,15 @@ ui <- fluidPage(
                              label = NULL,
                              placeholder = "Y2 Value" )
                  ),
-                 checkboxInput(
+                 prettyCheckbox(
                    inputId = "log",
                    label = "Logged values?",
-                   value = FALSE),
-                   #status = "info"),
+                   value = FALSE,
+                   status = "info"),
             )
           ),
           wellPanel(
-            strong("Groups:"), class = "myclass3", id = "myid1",
+            strong("Groups:"),
             br(),
             div(class = "buttonagency",
             actionButton(
@@ -345,7 +349,6 @@ server <- function(input, output, session) {
   ################################################
   #    Counter and previous/next buttons
   ################################################
-  
   # start counter at 1
   counter <- reactiveValues(countervalue = 1)
   values <- reactiveValues()
