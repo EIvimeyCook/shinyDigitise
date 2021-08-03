@@ -100,7 +100,8 @@ shinyUI(fluidPage(
             #     status = "danger"
             # )
           div(class = "buttonagency",
-              splitLayout(
+              splitLayout(cellWidths = c(150, 100, 100),
+              cellArgs = list(style = "padding: 1px"),
               switchInput(
                 inputId = "flip",
                 label = strong("Flip"),
@@ -115,9 +116,9 @@ shinyUI(fluidPage(
             label = "Rotate",
             #style = "float", 
             #color = "primary"
-          )),
-          htmlOutput("rotation", inline=TRUE)
-          )),
+          ),
+          textOutput("rotation", inline=TRUE)
+          ))),
 
           wellPanel(
             prettyRadioButtons(
@@ -258,23 +259,29 @@ shinyUI(fluidPage(
                    status = "info"),
             )
           ),
-          wellPanel(
-            strong("Groups:"),
-            br(),
+        wellPanel(
+          strong("Groups:"),
+          br(),
+          splitLayout(
             div(class = "buttonagency",
-            actionButton(
-              inputId = "Add",
-              label = "Add", 
-              #style = "float",
-              #color = "primary"
-            ),
-            actionButton(
-              inputId = "delete",
-              label = "Delete", 
-              #style = "float",
-              #color = "primary"
-            ))
-              )
+                actionButton(
+                  inputId = "add",
+                  label = "Add", 
+                  #style = "float",
+                  #color = "primary"
+                ),
+                actionButton(
+                  inputId = "delete",
+                  label = "Delete", 
+                  #style = "float",
+                  #color = "primary"
+                )),
+            pickerInput(inputId = "delete_row", label = NULL, options = list(
+              title = "Delete Row"), choices = 1:nrow(basic))),
+        ),
+        wellPanel(
+          DTOutput("group_table")
+        )
           
 
         ),

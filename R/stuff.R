@@ -8,6 +8,12 @@ library(metaDigitise)
 library(fresh)
 library(shinythemes)
 library(bslib)
+library(tibble)
+library(DT)
+library(tidyr)
+library(dplyr)
+library(RColorBrewer)
+
 
 if(Sys.info()["user"]=="joelpick"){
   dir <- "/Users/joelpick/Desktop/images"
@@ -27,3 +33,16 @@ details <- dir_details(dir)
 
 counter_total <- length(details$paths)
 # filename(details$paths[1])
+
+n <- 20
+qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+
+col=sample(col_vector, n)
+
+basic <- tibble(
+  Group_Name = "Insert group name",
+  Sample_Size = "Insert sample size",
+  Point_Colour = "#8B0000"
+)  
+

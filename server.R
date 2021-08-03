@@ -83,6 +83,43 @@ If they are not then chose flip to correct this.
 If figures are wonky, chose rotate."
 })
   })
+  
+  ###############################################
+  # Group Table
+  ##############################################  
+  mod_df <- reactiveValues(x = basic)
+  
+  output$group_table<- DT::renderDT({
+    DT::datatable(
+      isolate(mod_df$x),
+      editable = list(target = 'column', disable = list(columns = 3)),
+      options = list(lengthChange = TRUE, dom = 't')) %>%
+      formatStyle("Point_Colour", backgroundColor = styleEqual(mod_df$x$Point_Colour, mod_df$x$Point_Colour)) %>%
+      formatStyle(columns = c(1:NCOL(mod_df$x)))
+  })
+  
+  observeEvent(input$add, {
+    mod_df$x <- mod_df$x %>%
+      dplyr::bind_rows(
+        dplyr::tibble(Group_Name = "Insert group name",
+                      Sample_Size = "Insert sample size",
+                      Point_Colour = sample(col, 1, F))
+      )
+    
+  })
+  
+  observeEvent(input$delete, {
+    
+    mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
+    
+  })
+  
+  proxy <- DT::dataTableProxy('group_table')
+  
+  observe({
+    DT::replaceData(proxy, mod_df$x)
+  })
+  
 
 
   ################################################
@@ -120,9 +157,9 @@ Click left hand then right hand side of x axis\n"
 
   })
 
-output$rotation <- renderText({
-
-  
+  output$rotation <- renderText({
+    "Wooooo"
+    
   })
   
 
