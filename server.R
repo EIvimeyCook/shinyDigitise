@@ -91,11 +91,6 @@ If figures are wonky, chose rotate."
   observeEvent(input$flip, {
     values$flip <<- input$flip
 
-output$info <- renderText({
-      "**** ROTATE ****
-Click left hand then right hand side of x axis\n"
-})
-
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
@@ -112,6 +107,10 @@ Click left hand then right hand side of x axis\n"
 
   observeEvent(input$rotate, {
       
+      output$info <- renderText({
+      "**** ROTATE ****
+Click left hand then right hand side of x axis\n"
+})
     # x.dist <- rot_angle$x[2] - rot_angle$x[1]
     # y.dist <- rot_angle$y[2] - rot_angle$y[1]
     
