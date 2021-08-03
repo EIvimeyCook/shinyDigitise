@@ -1,3 +1,5 @@
+rm(list = ls())
+
 #load packages
 library(shiny)
 library(shinyWidgets)
@@ -14,7 +16,7 @@ if(Sys.info()["user"]=="joelpick"){
   dir <- "~/Downloads/Image"
 }
 
-#source("/Users/joelpick/github/ShinyDigitise/R/redraw.R")
+source("R/redraw.R")
 
 dir_details <- function(dir){
   detail_list <- list()
@@ -33,8 +35,6 @@ dir_details <- function(dir){
 
   return(detail_list)
 }
-
-
 
 
 if( (substring(dir, nchar(dir)) == "/") == FALSE){
@@ -158,9 +158,13 @@ ui <- fluidPage(
             #     status = "danger"
             # )
           div(class = "buttonagency",
-          actionButton(
-            inputId = "Flip",
-            label = "Flip",
+              splitLayout(
+              switchInput(
+                inputId = "Flip",
+                label = strong("Flip"),
+                labelWidth = "60px",
+                onLabel = "Yes",
+                offLabel = "No"
             #style = "float", 
             #color = "primary"
           ),
@@ -169,8 +173,9 @@ ui <- fluidPage(
             label = "Rotate",
             #style = "float", 
             #color = "primary"
-          ))
-          ),
+          )),
+          htmlOutput("rotation", inline=TRUE)
+          )),
 
           wellPanel(
             prettyRadioButtons(
@@ -430,7 +435,11 @@ server <- function(input, output, session) {
   ################################################
   #   Rotate
   ################################################
+output$rotation <- renderText({
 
+  
+  })
+  
 
   ################################################
   #   Plot type
