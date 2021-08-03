@@ -1,63 +1,5 @@
-rm(list = ls())
 
-#load packages
-library(shiny)
-library(shinyWidgets)
-library(shinyFiles)
-library(magick)
-library(metaDigitise)
-library(fresh)
-library(shinythemes)
-library(bslib)
-
-if(Sys.info()["user"]=="joelpick"){
-  dir <- "/Users/joelpick/Desktop/images"
-}else{
-  dir <- "~/Downloads/Image"
-}
-
-source("R/redraw.R")
-
-dir_details <- function(dir){
-  detail_list <- list()
-# file_pattern <- "[.][pjt][dnip][fpg]*$"
-  file_pattern <- "(?i)[.][pjt][dnip][efpg]*$"
-  detail_list$images <- list.files(dir, pattern = file_pattern)
-  detail_list$name <- gsub(file_pattern, "", detail_list$images)
-  detail_list$paths <- paste0(dir, detail_list$images)
-  detail_list$cal_dir <- paste0(dir, "caldat/")
-  detail_list$calibrations <- list.files(paste0(dir, "caldat/"))
-  detail_list$doneCalFiles <- if(length(detail_list$calibrations)==0) { 
-    vector(mode="character") 
-  } else{ 
-    paste0(detail_list$cal_dir, detail_list$calibrations) 
-  }
-
-  return(detail_list)
-}
-
-
-if( (substring(dir, nchar(dir)) == "/") == FALSE){
-    dir <- paste0(dir, "/")
-  }
-  setup_calibration_dir(dir)
-#  done_details <- dir_details(dir)
-# details <- get_notDone_file_details(dir)
-
-details <- dir_details(dir)
-
-counter_total <- length(details$paths)
-# filename(details$paths[1])
-
-textInput3<-function (inputId, label, value = "",...) 
-{
-  div(style="display:inline-block",
-      tags$label(label, `for` = inputId), 
-      tags$input(id = inputId, type = "text", value = value,...))
-}
-
-
-ui <- fluidPage(
+shinyUI(fluidPage(
   theme = bs_theme(base_font = font_collection(font_google("News Cycle"), 
                                                "Arial Narrow Bold", "sans-serif"), code_font = font_collection(font_google("News Cycle"), 
                                                 "Arial Narrow Bold", "sans-serif"), font_scale = NULL, `enable-gradients` = TRUE,
@@ -97,7 +39,7 @@ ui <- fluidPage(
       # ),
       # column(3,
       #   br(), 
-        div(style="display: inline-block;vertical-align:top; width: 12% ",strong("Show processed images:")),
+        div(style="display: inline-block;vertical-align:top; width: 20% ",strong("Show processed images:")),
         div(style="display: inline-block;vertical-align:top; width: 5%; ",prettyCheckbox(
           value = F,
           icon = icon("check"),
@@ -123,8 +65,8 @@ ui <- fluidPage(
       #   br(), 
         # div(style="display: inline-block;vertical-align:top; width: 10%;",HTML("<br>")),
 
-        div(style="display: inline-block;vertical-align:top; width: 6%;",strong("Point size:")),
-        div(style="display: inline-block;vertical-align:top;  width: 20%;",
+        div(style="display: inline-block;vertical-align:top; width: 10%;",strong("Point size:")),
+        div(style="display: inline-block;vertical-align:top;  width: 15%;",
           sliderInput(
           inputId = "cex",
           label = NULL, 
@@ -160,7 +102,7 @@ ui <- fluidPage(
           div(class = "buttonagency",
               splitLayout(
               switchInput(
-                inputId = "Flip",
+                inputId = "flip",
                 label = strong("Flip"),
                 labelWidth = "60px",
                 onLabel = "Yes",
@@ -169,7 +111,7 @@ ui <- fluidPage(
             #color = "primary"
           ),
           actionButton(
-            inputId = "Rotate",
+            inputId = "rotate",
             label = "Rotate",
             #style = "float", 
             #color = "primary"
@@ -348,149 +290,4 @@ mainPanel(
     )
       )
     )
-
-server <- function(input, output, session) {
-  
-  ################################################
-  #    Counter and previous/next buttons
-  ################################################
-  # start counter at 1
-  counter <- reactiveValues(countervalue = 1)
-  values <- reactiveValues()
-  
-
-  # when next is pressed up the counter and check that its within total
-  observeEvent(input$Next, {
-    cv <- counter$countervalue + 1
-    if(cv > counter_total) {
-      counter$countervalue <- counter_total
-    }else{
-      counter$countervalue <- cv
-    }
-  })
-
-  # when next is pressed up the counter and check that its above 0
-  observeEvent(input$Previous, {
-    cv <- counter$countervalue - 1
-    if(cv == 0) {
-      counter$countervalue <- 1
-    }else{
-      counter$countervalue <- cv
-    }
-  })
-  
-  output$progress <- renderText({
-    paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
-    
-  }) 
-
-
-  ################################################
-  #    when counter changes
-  ################################################
-  
-## when counter changes
-## values - save if past certain point? some raw_data?
-## values - empty
-## check caldat
-## if no caldat fill in some stuff
-##  if caldat load caldat and fill in some stuff
-    # updateRadioButtons(session, "plot_type", selected=)
-    # updateRadioButtons(session, "plot_type", selected=)
-## #updateSelectInput
-
-
-  observeEvent(counter$countervalue, {
-    counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue]) 
-    if(file.exists(counter$caldat)){
-      # plot_values <- readRDS(values$caldat)
-      values <- do.call("reactiveValues",readRDS(counter$caldat))
-    }else{
-      # plot_values <- reactiveValuesToList(values)
-          # updateRadioButtons(session, "plot_type", selected=)
-
-      values <- reactiveValues(
-        image_name = details$name[counter$countervalue],
-        image_file = details$paths[counter$countervalue]
-        # cex = input$cex,
-        # plot_type = input$plot_type
-      )
-    }
-
-    output$image_name <- renderText({values$image_name})
-
-    output$metaPlot <- renderPlot({
-      par(mar=c(0,0,0,0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw,plot_values)
-    })
-  })
-
-
-  ################################################
-  #   Flip
-  ################################################
-
-
-  ################################################
-  #   Rotate
-  ################################################
-output$rotation <- renderText({
-
-  
-  })
-  
-
-  ################################################
-  #   Plot type
-  ################################################
-
-  observe( values$plot_type <- input$plot_type )
-
-
-  ################################################
-  #   Calibrate
-  ################################################
-
-
-  ################################################
-  #   Digitisation
-  ################################################
-
-  observe( values$cex <- input$cex )
-
-
-   
-
-  output$info <- renderText({
-    xy_str <- function(e) {
-      if(is.null(e)) return("NULL\n")
-      paste0("x=", round(e$x, 1), " y=", round(e$y, 1), "\n")
-    }
-    xy_range_str <- function(e) {
-      if(is.null(e)) return("NULL\n")
-      paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1), 
-             " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
-    }
-    
-    paste0(
-      "click: ", xy_str(input$plot_click),
-      "dblclick: ", xy_str(input$plot_dblclick),
-      "hover: ", xy_str(input$plot_hover),
-      "brush: ", xy_range_str(input$plot_brush)
-    )
-  })
-
-
-  ################################################
-  #   What happens when you quit
-  ################################################
-
-  session$onSessionEnded(function() {
-    stopApp()
-  })
-
-
-}
-
-shinyApp(ui = ui, server = server)
+)
