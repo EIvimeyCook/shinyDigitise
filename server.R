@@ -108,15 +108,15 @@ Click left hand then right hand side of x axis\n"
   #   Rotate
   ################################################
   
-  plot_click_slow <- debounce(reactive(input$plot_click), 300)
+  # plot_click_slow <- debounce(reactive(input$plot_click), 300)
 
   observeEvent(input$rotate, {
       
-    x.dist <- rot_angle$x[2] - rot_angle$x[1]
-    y.dist <- rot_angle$y[2] - rot_angle$y[1]
+    # x.dist <- rot_angle$x[2] - rot_angle$x[1]
+    # y.dist <- rot_angle$y[2] - rot_angle$y[1]
     
-    f <- atan2(y.dist, x.dist) * 180/pi
-    values$rotate <<- rotate + f
+    # f <- atan2(y.dist, x.dist) * 180/pi
+    # values$rotate <<- rotate + f
 
 
   })
