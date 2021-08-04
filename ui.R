@@ -124,7 +124,8 @@ shinyUI(fluidPage(
             prettyRadioButtons(
                 inputId = "plot_type",
                 label = strong("Plot type:"),
-                choices = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
+                choiceNames = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
+                choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
                 inline = T,
                 icon = icon("check"), 
                 bigger = TRUE,
@@ -140,14 +141,14 @@ shinyUI(fluidPage(
 
           wellPanel(
             conditionalPanel(
-                 condition = "input.plot_type == 'Histogram'",
+                 condition = "input.plot_type == 'histogram'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
                  br(),
                 textInput(inputId = "xvar",
                           label = NULL,
-                          placeholder = "X Axis Name"),
+                          placeholder = "X Variable"),
                     splitLayout(
                 textInput(inputId = "y1",
                           label = NULL,
@@ -168,14 +169,14 @@ shinyUI(fluidPage(
 
                        ),
                conditionalPanel(
-                 condition = "input.plot_type == 'Mean/error'",
+                 condition = "input.plot_type == 'mean_error",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
                  br(),
-                 textInput(inputId = "xvar",
+                 textInput(inputId = "yvar",
                            label = NULL,
-                           placeholder = "X Axis Name"),
+                           placeholder = "Y Variable"),
                  splitLayout(
                  textInput(inputId = "y1",
                            label = NULL,
@@ -198,18 +199,19 @@ shinyUI(fluidPage(
 
                        ),
                conditionalPanel(
-                 condition = "input.plot_type == 'Scatterplot'",
+                 condition = "input.plot_type == 'scatterplot'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
                  br(),
                  splitLayout(
-                   textInput(inputId = "xvar",
-                             label = NULL,
-                             placeholder = "X Axis Name"),
                    textInput(inputId = "yvar",
                              label = NULL,
-                             placeholder = "Y Axis Name")),
+                             placeholder = "Y Variable")),                   
+                   textInput(inputId = "xvar",
+                             label = NULL,
+                             placeholder = "X Variable"),
+
                  splitLayout(
                    textInput(inputId = "y1",
                              label = NULL,
@@ -236,14 +238,14 @@ shinyUI(fluidPage(
 
                        ),
                conditionalPanel(
-                 condition = "input.plot_type == 'Boxplot'",
+                 condition = "input.plot_type == 'boxplot'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
                  br(),
                  textInput(inputId = "yvar",
                            label = NULL,
-                           placeholder = "Y Axis Name"),
+                           placeholder = "Y Variable"),
                  splitLayout(
                    textInput(inputId = "y1",
                              label = NULL,

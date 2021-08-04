@@ -55,6 +55,8 @@ shinyServer(function(input, output, session) {
     if(file.exists(counter$caldat)){
       # plot_values <- readRDS(values$caldat)
       values <<- do.call("reactiveValues",readRDS(counter$caldat))
+      updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
+      updateSwitchInput(session,"flip",value=values$flip)
     }else{
       # plot_values <- reactiveValuesToList(values)
           # updateRadioButtons(session, "plot_type", selected=)
@@ -167,7 +169,7 @@ Click left hand then right hand side of x axis\n"
   #   Plot type
   ################################################
 
-  observe( values$plot_type <- input$plot_type )
+  observe( values$plot_type <<- input$plot_type )
 
 
   ################################################
@@ -179,7 +181,7 @@ Click left hand then right hand side of x axis\n"
   #   Digitisation
   ################################################
 
-  observe( values$cex <- input$cex )
+  observe( values$cex <<- input$cex )
 
 
    
