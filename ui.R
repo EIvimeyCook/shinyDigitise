@@ -1,9 +1,13 @@
 
 shinyUI(fluidPage(
-  theme = bs_theme(base_font = font_collection(font_google("News Cycle"),
-                                               "Arial Narrow Bold", "sans-serif"), code_font = font_collection(font_google("News Cycle"),
-                                                "Arial Narrow Bold", "sans-serif"), font_scale = NULL, `enable-gradients` = TRUE,
-                                                 `enable-shadows` = TRUE, bootswatch = "journal"),
+  theme = bs_theme(
+    base_font = font_collection(font_google("News Cycle"), "Arial Narrow Bold", "sans-serif"), 
+    code_font = font_collection(font_google("News Cycle"),
+      "Arial Narrow Bold", "sans-serif"), 
+    font_scale = NULL, 
+    `enable-gradients` = TRUE,
+    `enable-shadows` = TRUE, 
+    bootswatch = "journal"),
 
   fluidRow(
      column(width = 4,
@@ -111,12 +115,22 @@ shinyUI(fluidPage(
             #style = "float",
             #color = "primary"
           ),
-          actionButton(
-            inputId = "rotate",
-            label = "Rotate",
+        
+              switchInput(
+                inputId = "rotate_mode",
+                label = strong("Rotate"),
+                labelWidth = "100px",
+                onLabel = "Yes",
+                offLabel = "No"
             #style = "float",
             #color = "primary"
-          ),
+          ), 
+          # actionButton(
+          #   inputId = "rotate",
+          #   label = "Rotate",
+          #   #style = "float",
+          #   #color = "primary"
+          # ),
           textOutput("rotation", inline=TRUE)
           ))),
 

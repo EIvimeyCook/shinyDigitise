@@ -127,7 +127,8 @@ redraw_points <- function(plot_type, raw_data, image_details, cex){
 
 #image_file, flip, rotate, image_details, plot_type, calpoints, point_vals, raw_data
 
-internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, ...){
+internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, ... 
+	){
 
 	# op <- graphics::par(mar=c(3,0,2,0), mfrow=c(1,1))
 	# on.exit(graphics::par(op))
@@ -148,5 +149,13 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
  
 	if(is.null(raw_data)) points=FALSE
 	if(points) redraw_points(plot_type=plot_type,raw_data=raw_data,image_details=image_details,  cex=cex)
+
+	if(rotate_mode) {
+		abline(
+			v=seq(0,image_details["width"], length.out=20),
+			h=seq(0,image_details["height"], length.out=20),
+			col=alpha(1,0.5)
+			)
+		}
 
 }

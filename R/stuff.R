@@ -13,6 +13,7 @@ library(DT)
 library(tidyr)
 library(dplyr)
 library(RColorBrewer)
+library(scales)
 
 
 if(Sys.info()["user"]=="joelpick"){

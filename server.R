@@ -58,13 +58,10 @@ shinyServer(function(input, output, session) {
       
       updateSliderInput(session, "cex", value=values$cex)
 
-      
-
       updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
       
       if(values$plot_type=="mean_error")       updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
       # update
-
 
     }else{
       # plot_values <- reactiveValuesToList(values)
@@ -75,12 +72,16 @@ shinyServer(function(input, output, session) {
         image_file = details$paths[counter$countervalue],
         flip = FALSE,
         rotate=0
+        # rotate_mode=FALSE,
         # cex = input$cex,
         # plot_type = input$plot_type
       )
     }
 
     updateSwitchInput(session,"flip",value=values$flip)
+    updateSwitchInput(session,"rotate_mode",value=FALSE)
+    values$rotate_mode <- FALSE
+
     output$rotation <- renderText({values$rotate})
 
     output$image_name <- renderText({values$image_name})
@@ -91,12 +92,12 @@ shinyServer(function(input, output, session) {
       do.call(internal_redraw,plot_values)
     })
 
-        output$info <- renderText({
+    output$info <- renderText({
       "**** NEW PLOT ****
 mean_error and boxplots should be vertically orientated.
 If they are not then chose flip to correct this.
 If figures are wonky, chose rotate."
-})
+    })
   })
 
 
@@ -121,7 +122,7 @@ If figures are wonky, chose rotate."
 
   # plot_click_slow <- debounce(reactive(input$plot_click), 300)
 
-  observeEvent(input$rotate, {
+  observeEvent(input$rotate_mode, {
 
       output$info <- renderText({
       "**** ROTATE ****
@@ -133,13 +134,20 @@ Click left hand then right hand side of x axis\n"
     # f <- atan2(y.dist, x.dist) * 180/pi
     # values$rotate <<- rotate + f
 
+   output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      values$rotate_mode <- input$rotate_mode
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+
 
   })
 
-  output$rotation <- renderText({
-    "Wooooo"
+  # output$rotation <- renderText({
+  #   "Wooooo"
 
-  })
+  # })
 
 
   ################################################
