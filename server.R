@@ -1,13 +1,13 @@
 
 shinyServer(function(input, output, session) {
-  
+
   ################################################
   #    Counter and previous/next buttons
   ################################################
   # start counter at 1
   counter <- reactiveValues(countervalue = 1)
   values <- reactiveValues()
-  
+
 
   # when next is pressed up the counter and check that its within total
   observeEvent(input$Next, {
@@ -28,17 +28,17 @@ shinyServer(function(input, output, session) {
       counter$countervalue <- cv
     }
   })
-  
+
   output$progress <- renderText({
     paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
-    
-  }) 
+
+  })
 
 
   ################################################
   #    when counter changes
   ################################################
-  
+
 ## when counter changes
 ## values - save if past certain point? some raw_data?
 ## values - empty
@@ -51,12 +51,21 @@ shinyServer(function(input, output, session) {
 
 
   observeEvent(counter$countervalue, {
-    counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue]) 
+    counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue])
     if(file.exists(counter$caldat)){
       # plot_values <- readRDS(values$caldat)
       values <<- do.call("reactiveValues",readRDS(counter$caldat))
+      
+      updateSliderInput(session, "cex", value=values$cex)
+
+      
+
       updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
-      updateSwitchInput(session,"flip",value=values$flip)
+      
+      if(values$plot_type=="mean_error")       updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
+      # update
+
+
     }else{
       # plot_values <- reactiveValuesToList(values)
           # updateRadioButtons(session, "plot_type", selected=)
@@ -64,11 +73,15 @@ shinyServer(function(input, output, session) {
       values <<- reactiveValues(
         image_name = details$name[counter$countervalue],
         image_file = details$paths[counter$countervalue],
-        flip = FALSE
+        flip = FALSE,
+        rotate=0
         # cex = input$cex,
         # plot_type = input$plot_type
       )
     }
+
+    updateSwitchInput(session,"flip",value=values$flip)
+    output$rotation <- renderText({values$rotate})
 
     output$image_name <- renderText({values$image_name})
 
@@ -80,48 +93,12 @@ shinyServer(function(input, output, session) {
 
         output$info <- renderText({
       "**** NEW PLOT ****
-mean_error and boxplots should be vertically orientated. 
-If they are not then chose flip to correct this. 
+mean_error and boxplots should be vertically orientated.
+If they are not then chose flip to correct this.
 If figures are wonky, chose rotate."
 })
   })
-  
-  ###############################################
-  # Group Table
-  ##############################################  
-  mod_df <- reactiveValues(x = basic)
-  
-  output$group_table<- DT::renderDT({
-    DT::datatable(
-      isolate(mod_df$x),
-      editable = list(target = 'column', disable = list(columns = 3)),
-      options = list(lengthChange = TRUE, dom = 't')) %>%
-      formatStyle("Point_Colour", backgroundColor = styleEqual(mod_df$x$Point_Colour, mod_df$x$Point_Colour)) %>%
-      formatStyle(columns = c(1:NCOL(mod_df$x)))
-  })
-  
-  observeEvent(input$add, {
-    mod_df$x <- mod_df$x %>%
-      dplyr::bind_rows(
-        dplyr::tibble(Group_Name = "Insert group name",
-                      Sample_Size = "Insert sample size",
-                      Point_Colour = sample(col, 1, F))
-      )
-    
-  })
-  
-  observeEvent(input$delete, {
-    
-    mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
-    
-  })
-  
-  proxy <- DT::dataTableProxy('group_table')
-  
-  observe({
-    DT::replaceData(proxy, mod_df$x)
-  })
-  
+
 
 
   ################################################
@@ -141,18 +118,18 @@ If figures are wonky, chose rotate."
   ################################################
   #   Rotate
   ################################################
-  
+
   # plot_click_slow <- debounce(reactive(input$plot_click), 300)
 
   observeEvent(input$rotate, {
-      
+
       output$info <- renderText({
       "**** ROTATE ****
 Click left hand then right hand side of x axis\n"
 })
     # x.dist <- rot_angle$x[2] - rot_angle$x[1]
     # y.dist <- rot_angle$y[2] - rot_angle$y[1]
-    
+
     # f <- atan2(y.dist, x.dist) * 180/pi
     # values$rotate <<- rotate + f
 
@@ -161,9 +138,9 @@ Click left hand then right hand side of x axis\n"
 
   output$rotation <- renderText({
     "Wooooo"
-    
+
   })
-  
+
 
   ################################################
   #   Plot type
@@ -184,7 +161,51 @@ Click left hand then right hand side of x axis\n"
   observe( values$cex <<- input$cex )
 
 
-   
+
+    ###############################################
+    # Group Table
+    ##############################################
+    mod_df <- reactiveValues(x = basic)
+
+    output$group_table<- DT::renderDT({
+      DT::datatable(
+        isolate(mod_df$x),
+        editable = list(target = 'column', disable = list(columns = 3)),
+        options = list(lengthChange = TRUE, dom = 't')) %>%
+        formatStyle("Point_Colour", backgroundColor = styleEqual(mod_df$x$Point_Colour, mod_df$x$Point_Colour)) %>%
+        formatStyle(columns = c(1:NCOL(mod_df$x)))
+    })
+
+    observe({
+      updatePickerInput(session = session, inputId = "delete_row",
+                        choices = 1:nrow(mod_df$x))
+    })
+
+
+    observeEvent(input$add, {
+      mod_df$x <- mod_df$x %>%
+        dplyr::bind_rows(
+          dplyr::tibble(Group_Name = "Insert group name",
+                        Sample_Size = "Insert sample size",
+                        Point_Colour = sample(col, 1, F))
+        )
+
+    })
+
+
+    observeEvent(input$delete, {
+
+      mod_df$x <- mod_df$x[-as.integer(input$delete_row), ]
+
+    })
+
+    proxy <- DT::dataTableProxy('group_table')
+
+    observe({
+      DT::replaceData(proxy, mod_df$x)
+
+    })
+
 
   # output$info <- renderText({
   #   xy_str <- function(e) {
@@ -193,10 +214,10 @@ Click left hand then right hand side of x axis\n"
   #   }
   #   xy_range_str <- function(e) {
   #     if(is.null(e)) return("NULL\n")
-  #     paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1), 
+  #     paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1),
   #            " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
   #   }
-    
+
   #   paste0(
   #     "click: ", xy_str(input$plot_click),
   #     "dblclick: ", xy_str(input$plot_dblclick),
