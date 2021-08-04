@@ -169,7 +169,7 @@ shinyUI(fluidPage(
 
                        ),
                conditionalPanel(
-                 condition = "input.plot_type == 'mean_error",
+                 condition = "input.plot_type == 'mean_error'",
                  actionButton(inputId = "calib",
                               label = "Calibrate"),
                  br(),
