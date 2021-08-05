@@ -126,13 +126,15 @@ shinyUI(fluidPage(
                 #style = "float",
                 #color = "primary"
               )),
+              hidden(
+                div(id="togslide",
               sliderInput(
                 inputId = "rotate",
                 label = NULL,
                 value=0,
                 min=0,
                 max=360
-              )
+              )))
 
           )),
 
