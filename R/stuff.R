@@ -3,6 +3,7 @@
 library(shiny)
 library(shinyWidgets)
 library(shinyFiles)
+library(shinyjs)
 library(magick)
 library(metaDigitise)
 library(fresh)

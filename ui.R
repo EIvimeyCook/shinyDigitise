@@ -1,12 +1,13 @@
 
 shinyUI(fluidPage(
+    useShinyjs(),
   theme = bs_theme(
-    base_font = font_collection(font_google("News Cycle"), "Arial Narrow Bold", "sans-serif"), 
+    base_font = font_collection(font_google("News Cycle"), "Arial Narrow Bold", "sans-serif"),
     code_font = font_collection(font_google("News Cycle"),
-      "Arial Narrow Bold", "sans-serif"), 
-    font_scale = NULL, 
+      "Arial Narrow Bold", "sans-serif"),
+    font_scale = NULL,
     `enable-gradients` = TRUE,
-    `enable-shadows` = TRUE, 
+    `enable-shadows` = TRUE,
     bootswatch = "journal"),
 
   fluidRow(
@@ -104,34 +105,39 @@ shinyUI(fluidPage(
             #     status = "danger"
             # )
           div(class = "buttonagency",
-              splitLayout(cellWidths = c(150, 100, 100),
-              cellArgs = list(style = "padding: 1px"),
+
               switchInput(
                 inputId = "flip",
                 label = strong("Flip"),
                 labelWidth = "60px",
                 onLabel = "Yes",
                 offLabel = "No"
-            #style = "float",
-            #color = "primary"
-          ),
-        
+              #style = "float",
+              #color = "primary"
+            ),
+            splitLayout(cellWidths = c(150,200, 200),
+              cellArgs = list(style = "padding: 1px"),
+
+              textOutput("rotation", inline=TRUE),
               switchInput(
                 inputId = "rotate_mode",
-                label = strong("Rotate"),
-                labelWidth = "100px",
+                label = strong("Rotate mode"),
+                labelWidth = "60px",
                 onLabel = "Yes",
                 offLabel = "No"
-            #style = "float",
-            #color = "primary"
-          ), 
-          # actionButton(
-          #   inputId = "rotate",
-          #   label = "Rotate",
-          #   #style = "float",
-          #   #color = "primary"
-          # ),
-          textOutput("rotation", inline=TRUE)
+                #style = "float",
+                #color = "primary"
+              ),
+              hidden(
+                div(id="togslide",
+              sliderInput(
+                inputId = "rotate",
+                label = NULL,
+                value=0,
+                min=0,
+                max=360
+              )))
+
           ))),
 
           wellPanel(

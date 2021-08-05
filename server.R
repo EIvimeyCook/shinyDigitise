@@ -55,11 +55,11 @@ shinyServer(function(input, output, session) {
     if(file.exists(counter$caldat)){
       # plot_values <- readRDS(values$caldat)
       values <<- do.call("reactiveValues",readRDS(counter$caldat))
-      
+
       updateSliderInput(session, "cex", value=values$cex)
 
       updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
-      
+
       if(values$plot_type=="mean_error")       updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
       # update
 
@@ -82,7 +82,9 @@ shinyServer(function(input, output, session) {
     updateSwitchInput(session,"rotate_mode",value=FALSE)
     values$rotate_mode <- FALSE
 
-    output$rotation <- renderText({values$rotate})
+    updateSliderInput(session,"rotate",value=FALSE,values$rotate)
+
+    output$rotation <- renderText({paste("rotation angle:", values$rotate)})
 
     output$image_name <- renderText({values$image_name})
 
@@ -124,15 +126,15 @@ If figures are wonky, chose rotate."
 
   observeEvent(input$rotate_mode, {
 
+    if(input$rotate_mode){
       output$info <- renderText({
-      "**** ROTATE ****
-Click left hand then right hand side of x axis\n"
-})
-    # x.dist <- rot_angle$x[2] - rot_angle$x[1]
-    # y.dist <- rot_angle$y[2] - rot_angle$y[1]
-
-    # f <- atan2(y.dist, x.dist) * 180/pi
-    # values$rotate <<- rotate + f
+        "**** ROTATE ****\nUse the slider to change the rotation angle\n"
+      })
+      show("togslide")
+    }else{
+      hide("togslide")
+      output$info <- renderText({ " "})
+    }
 
    output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
@@ -141,14 +143,14 @@ Click left hand then right hand side of x axis\n"
       do.call(internal_redraw,plot_values)
     })
 
-
   })
 
-  # output$rotation <- renderText({
-  #   "Wooooo"
-
-  # })
-
+  observeEvent(input$rotate, {
+    if(input$rotate_mode){
+      values$rotate <<- input$rotate
+      output$rotation <- renderText({paste("rotation angle:", values$rotate)})
+    }
+  })
 
   ################################################
   #   Plot type
