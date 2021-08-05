@@ -2,13 +2,10 @@
 shinyUI(fluidPage(
     useShinyjs(),
   theme = bs_theme(
-    base_font = font_collection(font_google("News Cycle"), "Arial Narrow Bold", "sans-serif"),
-    code_font = font_collection(font_google("News Cycle"),
-      "Arial Narrow Bold", "sans-serif"),
-    font_scale = NULL,
-    `enable-gradients` = TRUE,
-    `enable-shadows` = TRUE,
-    bootswatch = "journal"),
+    primary = "#66947A", secondary = "#66947A", 
+    info = "#E51C23", font_scale = NULL, bootswatch = "materia",
+    base_font = font_collection(font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif"),
+    code_font = font_collection(font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif")),
 
   fluidRow(
      column(width = 4,
@@ -44,8 +41,8 @@ shinyUI(fluidPage(
       # ),
       # column(3,
       #   br(),
-        div(style="display: inline-block;vertical-align:top; width: 20% ",strong("Show processed images:")),
-        div(style="display: inline-block;vertical-align:top; width: 5%; ",prettyCheckbox(
+        div(style="display: inline-block;vertical-align:top; width: 15% ",strong("Show processed images:")),
+        div(style="display: inline-block;vertical-align:top; width: 10%; ",prettyCheckbox(
           value = F,
           icon = icon("check"),
           status = "danger",
@@ -205,7 +202,7 @@ shinyUI(fluidPage(
                  ),
                  prettyRadioButtons(
                                inputId = "errortype",
-                               label = h6(strong("Type of error")),
+                               label = h6(strong("Type of error:")),
                                choiceNames = c("SE", "95%CI", "SD"),
                                choiceValues = c("se","CI95","sd"),
                                inline = T,

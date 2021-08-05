@@ -1,6 +1,5 @@
 
 shinyServer(function(input, output, session) {
-
   ################################################
   #    Counter and previous/next buttons
   ################################################
