@@ -105,7 +105,7 @@ shinyUI(fluidPage(
             #     status = "danger"
             # )
           div(class = "buttonagency",
-
+              splitLayout(cellWidths = c(150, 200, 200),
               switchInput(
                 inputId = "flip",
                 label = strong("Flip"),
@@ -115,9 +115,7 @@ shinyUI(fluidPage(
               #style = "float",
               #color = "primary"
             ),
-            splitLayout(cellWidths = c(150,200, 200),
               cellArgs = list(style = "padding: 1px"),
-
               textOutput("rotation", inline=TRUE),
               switchInput(
                 inputId = "rotate_mode",
@@ -127,18 +125,16 @@ shinyUI(fluidPage(
                 offLabel = "No"
                 #style = "float",
                 #color = "primary"
-              ),
-              hidden(
-                div(id="togslide",
+              )),
               sliderInput(
                 inputId = "rotate",
                 label = NULL,
                 value=0,
                 min=0,
                 max=360
-              )))
+              )
 
-          ))),
+          )),
 
           wellPanel(
             prettyRadioButtons(
