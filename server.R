@@ -169,7 +169,9 @@ If figures are wonky, chose rotate."
   #   Calibrate
   ################################################
   observeEvent(input$calib_mode, {
-output$info <- renderText({
+    
+    if(input$calib_mode){
+    output$info <- renderText({
 "   Calibrate ---> Click on known values on axes in this order:
   |
   2
@@ -178,7 +180,14 @@ output$info <- renderText({
   1
   |___3___________4_____
   "
-})
+    })
+    } else{
+      output$info <- renderText({ " "})
+    }
+
+
+
+
 })
   ################################################
   #   Digitisation
