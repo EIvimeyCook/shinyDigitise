@@ -126,14 +126,12 @@ shinyUI(fluidPage(
               ),
               hidden(
                 div(id="togslide",
-              sliderInput(
+              sliderTextInput(
                 inputId = "rotate",
                 label = NULL,
-                value=0,
-                min=-45,
-                max=45,
-                ticks=FALSE,
-                step=0.1
+                choices = seq(from = -45, to = 45, by = 5),
+                selected = 0,
+                grid = T
               )))
 
           )),
