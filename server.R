@@ -59,6 +59,13 @@ shinyServer(function(input, output, session) {
 
       updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
 
+     #  updateTextInput(session,inputId = "yvar",value=values$variable["y"])
+     #  updateTextInput(session,inputId = "xvar",vvalue=alues$variable["x"])
+     # updateTextInput(session,inputId = "x1",value=values$point_vals["x1"])
+     #  updateTextInput(session,inputId = "x2",value=values$point_vals["x2"])
+     # updateTextInput(session,inputId = "y1",value=values$point_vals["y1"])
+     #  updateTextInput(session,inputId = "y2",value=values$point_vals["y2"])
+
       if(values$plot_type=="mean_error")       updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
       # update
 
@@ -161,8 +168,18 @@ If figures are wonky, chose rotate."
   ################################################
   #   Calibrate
   ################################################
-
-
+  observeEvent(input$calib_mode, {
+output$info <- renderText({
+"   Calibrate ---> Click on known values on axes in this order:
+  |
+  2
+  |
+  |
+  1
+  |___3___________4_____
+  "
+})
+})
   ################################################
   #   Digitisation
   ################################################

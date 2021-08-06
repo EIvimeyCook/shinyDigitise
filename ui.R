@@ -102,7 +102,7 @@ shinyUI(fluidPage(
             #     status = "danger"
             # )
           div(class = "buttonagency",
-              splitLayout(cellWidths = c(150, 200, 200),
+              # splitLayout(cellWidths = c(150, 200, 200),
               switchInput(
                 inputId = "flip",
                 label = strong("Flip"),
@@ -112,7 +112,7 @@ shinyUI(fluidPage(
               #style = "float",
               #color = "primary"
             ),
-              cellArgs = list(style = "padding: 1px"),
+              # cellArgs = list(style = "padding: 1px"),
               textOutput("rotation", inline=TRUE),
               switchInput(
                 inputId = "rotate_mode",
@@ -122,15 +122,18 @@ shinyUI(fluidPage(
                 offLabel = "No"
                 #style = "float",
                 #color = "primary"
-              )),
+              # )
+              ),
               hidden(
                 div(id="togslide",
               sliderInput(
                 inputId = "rotate",
                 label = NULL,
                 value=0,
-                min=0,
-                max=360
+                min=-45,
+                max=45,
+                ticks=FALSE,
+                step=0.1
               )))
 
           )),
@@ -255,7 +258,7 @@ shinyUI(fluidPage(
                 ),
                conditionalPanel(
                  condition = "input.plot_type == 'boxplot'",
-                 actionButton(inputId = "calib",
+                 actionButton(inputId = "calib_mode",
                               label = "Calibrate"),
                  br(),
                  br(),
