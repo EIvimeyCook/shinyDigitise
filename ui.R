@@ -160,7 +160,7 @@ shinyUI(fluidPage(
           wellPanel(
             conditionalPanel(
                  condition = "input.plot_type == 'histogram'",
-                 actionButton(inputId = "calib",
+                 actionButton(inputId = "calib_mode",
                               label = "Calibrate"),
                  br(),
                  br(),
@@ -188,7 +188,7 @@ shinyUI(fluidPage(
                        ),
                conditionalPanel(
                  condition = "input.plot_type == 'mean_error'",
-                 actionButton(inputId = "calib",
+                 actionButton(inputId = "calib_mode",
                               label = "Calibrate"),
                  br(),
                  br(),
@@ -219,7 +219,7 @@ shinyUI(fluidPage(
                        ),
                conditionalPanel(
                  condition = "input.plot_type == 'scatterplot'",
-                 actionButton(inputId = "calib",
+                 actionButton(inputId = "calib_mode",
                               label = "Calibrate"),
                  br(),
                  br(),
