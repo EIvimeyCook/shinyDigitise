@@ -9,7 +9,7 @@ shinyServer(function(input, output, session) {
 
 
   # when next is pressed up the counter and check that its within total
-  observeEvent(input$Next, {
+  observeEvent(input$continue, {
     cv <- counter$countervalue + 1
     if(cv > counter_total) {
       counter$countervalue <- counter_total
@@ -32,6 +32,7 @@ shinyServer(function(input, output, session) {
     paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
 
   })
+  
 
 
   ################################################
@@ -168,11 +169,31 @@ If figures are wonky, chose rotate."
   ################################################
   #   Calibrate
   ################################################
+  
+  
+  ################################################
+  #   Calibrate
+  ################################################
+  
+  #create mepty click counter
+  clickcounter <- reactiveValues(clickcount = 0)
+  
+  #add to calpoints and store click locations
   observeEvent(input$calib_mode, {
+    calpoints <- reactiveValues(x = NULL, y = NULL)
     
-    if(input$calib_mode){
-    output$info <- renderText({
-"   Calibrate ---> Click on known values on axes in this order:
+    observe({
+      input$plot_click2
+      isolate({
+        calpoints$x <- c(calpoints$x, input$plot_click2$x)
+        calpoints$y <- c(calpoints$y, input$plot_click2$y)
+      })
+    })
+    
+    #add click help
+    if (input$calib_mode) {
+      output$info <- renderText({
+        "   Calibrate ---> Click on known values on axes in this order:
   |
   2
   |
@@ -180,15 +201,39 @@ If figures are wonky, chose rotate."
   1
   |___3___________4_____
   "
-    })
-    } else{
-      output$info <- renderText({ " "})
+      })
+    } else {
+      output$info <- renderText({
+        " "
+      })
     }
-
-
-
-
-})
+    
+    #add click locationsin text
+    if (input$calib_mode) {
+      output$clickinfo <- renderText({
+        paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
+      })
+    } else {
+      output$clickinfo <- renderText({
+        " "
+      })
+    }
+  })
+  
+  #when clicks have reached four toggle calibrate
+  observeEvent(input$plot_click2, {
+    clicktot <- clickcounter$clickcount + 1
+    if (clicktot > 4) {
+      updateSwitchInput(
+        session = session,
+        inputId = "calib_mode",
+        value = FALSE
+      )
+    } else {
+      clickcounter$clickcount <- clicktot
+    }
+  })
+  
   ################################################
   #   Digitisation
   ################################################

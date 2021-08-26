@@ -20,22 +20,6 @@ shinyUI(fluidPage(
           p(htmlOutput("progress", inline=TRUE)),
         ),
         # div(style="display: inline-block;vertical-align:top; width: 50px;",HTML("<br>")),
-        div(style="display: inline-block;vertical-align:top; width: 20%; ",
-          actionButton(
-            inputId = "Previous",
-            label = "Previous",
-            style='padding:4px'
-            #style = "float",
-            #color = "primary",
-          ),
-          actionButton(
-            inputId = "Next",
-            label = "Next",
-            style='padding:4px'
-            #style = "float",
-            #color = "primary"
-          )
-        ),
         # div(style="display: inline-block;vertical-align:top; width: 5%;",HTML("<br>")),
 
       # ),
@@ -93,8 +77,6 @@ shinyUI(fluidPage(
 
         ## I've changed this because flip and rotate are different processes, so need two buttons
         wellPanel(
-          strong("Image adjust:"),
-          br(),
             # checkboxGroupButtons(
             #     inputId = "Orient",
             #     label = h3("Orientation:"),
@@ -139,7 +121,7 @@ shinyUI(fluidPage(
           wellPanel(
             prettyRadioButtons(
                 inputId = "plot_type",
-                label = strong("Plot type:"),
+                label = NULL,
                 choiceNames = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
                 choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
                 inline = T,
@@ -152,16 +134,21 @@ shinyUI(fluidPage(
                    #            style = "color: white"),
                   #no = tags$i(class = "fa fa-square-o",
                               #style = "color: white"))
+            ),
+            switchInput(
+              inputId = "calib_mode",
+              label = strong("Calibrate mode"),
+              labelWidth = "60px",
+              onLabel = "Yes",
+              offLabel = "No",
+              onStatus = "success",
             )
               ),
+        
 
           wellPanel(
             conditionalPanel(
                  condition = "input.plot_type == 'histogram'",
-                 actionButton(inputId = "calib_mode",
-                              label = "Calibrate"),
-                 br(),
-                 br(),
                 textInput(inputId = "xvar",
                           label = NULL,
                           placeholder = "X Variable"),
@@ -186,10 +173,6 @@ shinyUI(fluidPage(
                        ),
                conditionalPanel(
                  condition = "input.plot_type == 'mean_error'",
-                 actionButton(inputId = "calib_mode",
-                              label = "Calibrate"),
-                 br(),
-                 br(),
                  textInput(inputId = "yvar",
                            label = NULL,
                            placeholder = "Y Variable"),
@@ -217,10 +200,6 @@ shinyUI(fluidPage(
                        ),
                conditionalPanel(
                  condition = "input.plot_type == 'scatterplot'",
-                 actionButton(inputId = "calib_mode",
-                              label = "Calibrate"),
-                 br(),
-                 br(),
                  splitLayout(
                    textInput(inputId = "yvar",
                              label = NULL,
@@ -256,10 +235,6 @@ shinyUI(fluidPage(
                 ),
                conditionalPanel(
                  condition = "input.plot_type == 'boxplot'",
-                 actionButton(inputId = "calib_mode",
-                              label = "Calibrate"),
-                 br(),
-                 br(),
                  textInput(inputId = "yvar",
                            label = NULL,
                            placeholder = "Y Variable"),
@@ -279,8 +254,6 @@ shinyUI(fluidPage(
             )
           ),
           wellPanel(
-            strong("Groups:"),
-            br(),
             splitLayout(
               div(class = "buttonagency",
                   actionButton(
@@ -313,12 +286,24 @@ shinyUI(fluidPage(
 mainPanel(
         verbatimTextOutput("image_name"),
         plotOutput("metaPlot",
-                   click="plot_click",
+                   click = "plot_click2",
                    dblclick = "plot_dblclick",
                    hover = "plot_hover",
                    brush = "plot_brush",
-                   height = "600px", width = "100%"),
-        verbatimTextOutput("info")
+                   height = "600px", width = "100%"
+        ),
+        verbatimTextOutput("info"),
+        verbatimTextOutput("clickinfo"),
+        br(),
+        br(),
+          actionButton(
+            inputId = "continue",
+            label = "Continue",
+            style = "padding:4px"
+            # style = "float",
+            # color = "primary",
+          
+        )
     )
       )
     )
