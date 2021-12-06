@@ -171,6 +171,7 @@ If figures are wonky, chose rotate."
   ################################################
   
   
+  
   ################################################
   #   Calibrate
   ################################################
@@ -180,18 +181,21 @@ If figures are wonky, chose rotate."
   
   #add to calpoints and store click locations
   observeEvent(input$calib_mode, {
-    calpoints <- reactiveValues(x = NULL, y = NULL)
     
+    clickcounter$clickcount <- 0
+    calpoints <- reactiveValues(x = NULL, y = NULL)
     observe({
       input$plot_click2
       isolate({
         calpoints$x <- c(calpoints$x, input$plot_click2$x)
         calpoints$y <- c(calpoints$y, input$plot_click2$y)
-      })
+        })
     })
     
     #add click help
     if (input$calib_mode) {
+      
+    if(input$plot_type == "scatterplot"|input$plot_type == "mean_error"){
       output$info <- renderText({
         "   Calibrate ---> Click on known values on axes in this order:
   |
@@ -202,7 +206,21 @@ If figures are wonky, chose rotate."
   |___3___________4_____
   "
       })
-    } else {
+      }
+      else{
+        output$info <- renderText({
+          "   Calibrate ---> Click on known values on axes in this order:
+  |
+  2
+  |
+  |
+  1
+  |_____________________
+  "
+        })
+      }
+      }
+      else {
       output$info <- renderText({
         " "
       })
@@ -220,19 +238,24 @@ If figures are wonky, chose rotate."
     }
   })
   
-  #when clicks have reached four toggle calibrate
   observeEvent(input$plot_click2, {
+    
     clicktot <- clickcounter$clickcount + 1
-    if (clicktot > 4) {
+    if (clicktot == 4) {
       updateSwitchInput(
         session = session,
         inputId = "calib_mode",
         value = FALSE
       )
+      
+      clickcounter$clickcount <- 1
+
     } else {
       clickcounter$clickcount <- clicktot
     }
   })
+  
+  
   
   ################################################
   #   Digitisation

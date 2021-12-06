@@ -267,18 +267,28 @@ shinyUI(fluidPage(
                     label = "Delete Group",
                     #style = "float",
                     #color = "primary"
-                  ),
-                  actionButton(
-                    inputId = "newpoints",
-                    label = "New Points",
-                    #style = "float",
-                    #color = "primary"
+                  )
                   ))),
-              pickerInput(inputId = "delete_row", label = NULL,
-                          choices = NULL)
-          ),
         wellPanel(
           DTOutput("group_table")
+        ),
+        wellPanel(
+          splitLayout(
+            div(class = "buttonagency",
+                actionButton(
+                  inputId = "newpoints",
+                  label = "New Points",
+                  #style = "float",
+                  #color = "primary"
+                ),
+                actionButton(
+                  inputId = "delpoints",
+                  label = "Delete Points",
+                  #style = "float",
+                  #color = "primary"
+                ))),
+          pickerInput(inputId = "delete_row", label = NULL,
+                      choices = NULL)
         )
 
 
