@@ -178,6 +178,8 @@ If figures are wonky, chose rotate."
   
   #create mepty click counter
   clickcounter <- reactiveValues(clickcount = 0)
+  clickdat <- reactiveValues(xval = NULL, yval = NULL, data = NULL)
+  clickvec <<- tibble()
   
   #add to calpoints and store click locations
   observeEvent(input$calib_mode, {
@@ -189,12 +191,13 @@ If figures are wonky, chose rotate."
       isolate({
         calpoints$x <- c(calpoints$x, input$plot_click2$x)
         calpoints$y <- c(calpoints$y, input$plot_click2$y)
+        clickvec <<- unique(rbind(clickvec,cbind(input$plot_click2$x, input$plot_click2$y)))
+        readr::write_csv(clickvec, file = paste(details$name[counter$countervalue],".csv"))
         })
     })
     
     #add click help
     if (input$calib_mode) {
-      
     if(input$plot_type == "scatterplot"|input$plot_type == "mean_error"){
       output$info <- renderText({
         "   Calibrate ---> Click on known values on axes in this order:
@@ -241,28 +244,24 @@ If figures are wonky, chose rotate."
   observeEvent(input$plot_click2, {
     
     clicktot <- clickcounter$clickcount + 1
-    if (clicktot == 4) {
+    if (clicktot == 5) {
       updateSwitchInput(
         session = session,
         inputId = "calib_mode",
         value = FALSE
       )
-      
       clickcounter$clickcount <- 1
-
     } else {
       clickcounter$clickcount <- clicktot
     }
   })
-  
-  
+
   
   ################################################
   #   Digitisation
   ################################################
 
   observe( values$cex <<- input$cex )
-
 
 
     ###############################################
@@ -340,3 +339,4 @@ If figures are wonky, chose rotate."
 
 
 })
+
