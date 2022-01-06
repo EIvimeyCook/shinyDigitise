@@ -23,6 +23,12 @@ if(Sys.info()["user"]=="joelpick"){
   dir <- "~/Downloads/Image"
 }
 
+if(Sys.info()["user"]=="edwardivimey-cook"){
+  dir <- "/Volumes/GoogleDrive/My Drive/Postdoc/Other Projects/R Packages/ShinyDigitise/Image"
+}else{
+  dir <- "~/Downloads/Image"
+}
+
 
 if( (substring(dir, nchar(dir)) == "/") == FALSE){
     dir <- paste0(dir, "/")
