@@ -15,7 +15,6 @@ shinyServer(function(input, output, session) {
       inputId = "calib_mode",
       value = FALSE
     )
-    readr::write_csv(as.data.frame(clickvec), file = "click_dat.csv")
     clickcounter$clickcount <- 1
     cv <- counter$countervalue + 1
     if(cv > counter_total) {
@@ -177,18 +176,11 @@ If figures are wonky, chose rotate."
   #   Calibrate
   ################################################
   
-  
-  
-  ################################################
-  #   Calibrate
-  ################################################
-  
   #create mepty click counter
   clickcounter <- reactiveValues(clickcount = 0)
-  clickdat <- reactiveValues(xval = NULL, yval = NULL, data = NULL)
   clickvec <<- tibble()
   
-  #add to calpoints and store click locations
+  #add to calpoints and scrtore click locations
   observeEvent(input$calib_mode, {
     
     clickcounter$clickcount <- 0
@@ -200,9 +192,19 @@ If figures are wonky, chose rotate."
         calpoints$y <- c(calpoints$y, input$plot_click2$y)
         image_dat <<- details$name[counter$countervalue]
         clickvec <<- cbind(image_dat, calpoints$x,calpoints$y)
+        readr::write_csv(as.data.frame(clickvec), file = "click_dat.csv")
       })
+      
     })
-    
+    image <- magick::image_read(values$image_file)
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot(image)
+      if(input$calib_mode == T){
+      points(calpoints$x, calpoints$y, cex=input$cex, pch=19, col = mod_df$x$Point_Colour) 
+    }})
+
+
     #add click help
     if (input$calib_mode) {
       if(input$plot_type == "scatterplot"|input$plot_type == "mean_error"){
@@ -217,8 +219,7 @@ If figures are wonky, chose rotate."
   "
         })
       }
-      else{
-        output$info <- renderText({
+      else{ output$info <- renderText({
           "   Calibrate ---> Click on known values on axes in this order:
   |
   2
@@ -248,23 +249,37 @@ If figures are wonky, chose rotate."
     }
   })
   
+  
   observeEvent(input$plot_click2, {
     
-    clicktot <- clickcounter$clickcount + 1
-    if (clicktot == 5) {
-      updateSwitchInput(
-        session = session,
-        inputId = "calib_mode",
-        value = FALSE
-      )
-      clickcounter$clickcount <- 1
-    } else {
-      clickcounter$clickcount <- clicktot
+    if (input$calib_mode) {
+      clicktot <- clickcounter$clickcount + 1
+      if(input$plot_type == "scatterplot"|input$plot_type == "mean_error"){
+        if (clicktot == 4) {
+          updateSwitchInput(
+            session = session,
+            inputId = "calib_mode",
+            value = FALSE
+          )
+          clickcounter$clickcount <- 1
+        } else {
+          clickcounter$clickcount <- clicktot
+        }
+      }else {
+        if (clicktot == 2) {
+        updateSwitchInput(
+          session = session,
+          inputId = "calib_mode",
+          value = FALSE
+        )
+        clickcounter$clickcount <- 1
+      } else {
+        clickcounter$clickcount <- clicktot
+      }}
     }
   })
-  
-  
-  
+        
+    
   
   ################################################
   #   Digitisation
