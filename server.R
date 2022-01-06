@@ -201,7 +201,7 @@ If figures are wonky, chose rotate."
       par(mar=c(0,0,0,0))
       plot(image)
       if(input$calib_mode == T){
-      points(calpoints$x, calpoints$y, cex=input$cex, pch=19, col = mod_df$x$Point_Colour) 
+      points(calpoints$x, calpoints$y, cex=input$cex, pch=19, col = "blue") 
     }})
 
 
