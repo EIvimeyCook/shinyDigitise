@@ -17,6 +17,7 @@ library(RColorBrewer)
 library(scales)
 
 
+
 if(Sys.info()["user"]=="joelpick"){
   dir <- "/Users/joelpick/Desktop/images"
 }else{

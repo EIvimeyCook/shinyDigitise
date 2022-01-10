@@ -6,45 +6,49 @@ shinyServer(function(input, output, session) {
   # start counter at 1
   counter <- reactiveValues(countervalue = 1)
   values <- reactiveValues()
-  
-  
+
+
   # when next is pressed up the counter and check that its within total
   observeEvent(input$continue, {
+    plot_values <- reactiveValuesToList(values)
+    saveRDS(plot_values, paste0(details$cal_dir,details$name[counter$countervalue]))
     updateSwitchInput(
       session = session,
       inputId = "calib_mode",
       value = FALSE
     )
-    clickcounter$clickcount <- 1
+    clickcounter$clickcount <- 0
     cv <- counter$countervalue + 1
     if(cv > counter_total) {
       counter$countervalue <- counter_total
     }else{
       counter$countervalue <- cv
     }
+    
   })
-  
+
   # when next is pressed up the counter and check that its above 0
   observeEvent(input$Previous, {
     cv <- counter$countervalue - 1
     if(cv == 0) {
       counter$countervalue <- 1
+      clickcounter$clickcount <- 0
     }else{
       counter$countervalue <- cv
     }
   })
-  
+
   output$progress <- renderText({
     paste0("<font color=\"#ff3333\"><b>",counter$countervalue, "/", counter_total,"</b></font>")
-    
+
   })
-  
-  
-  
+
+
+
   ################################################
   #    when counter changes
   ################################################
-  
+
   ## when counter changes
   ## values - save if past certain point? some raw_data?
   ## values - empty
@@ -54,59 +58,62 @@ shinyServer(function(input, output, session) {
   # updateRadioButtons(session, "plot_type", selected=)
   # updateRadioButtons(session, "plot_type", selected=)
   ## #updateSelectInput
-  
-  
+
+
   observeEvent(counter$countervalue, {
     counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue])
     if(file.exists(counter$caldat)){
       # plot_values <- readRDS(values$caldat)
       values <<- do.call("reactiveValues",readRDS(counter$caldat))
-      
+
       updateSliderInput(session, "cex", value=values$cex)
-      
+
       updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
-      
+
       #  updateTextInput(session,inputId = "yvar",value=values$variable["y"])
       #  updateTextInput(session,inputId = "xvar",vvalue=alues$variable["x"])
       # updateTextInput(session,inputId = "x1",value=values$point_vals["x1"])
       #  updateTextInput(session,inputId = "x2",value=values$point_vals["x2"])
       # updateTextInput(session,inputId = "y1",value=values$point_vals["y1"])
       #  updateTextInput(session,inputId = "y2",value=values$point_vals["y2"])
-      
+
       if(values$plot_type=="mean_error")       updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
       # update
-      
+
     }else{
       # plot_values <- reactiveValuesToList(values)
       # updateRadioButtons(session, "plot_type", selected=)
-      
+
       values <<- reactiveValues(
         image_name = details$name[counter$countervalue],
         image_file = details$paths[counter$countervalue],
         flip = FALSE,
-        rotate=0
+        rotate=0,
+        calpoints=NULL,
+        variable=NULL,
+        point_vals=NULL
         # rotate_mode=FALSE,
         # cex = input$cex,
         # plot_type = input$plot_type
       )
     }
-    
+
     updateSwitchInput(session,"flip",value=values$flip)
     updateSwitchInput(session,"rotate_mode",value=FALSE)
     values$rotate_mode <- FALSE
-    
+
     updateSliderInput(session,"rotate",value=FALSE,values$rotate)
-    
+
     output$rotation <- renderText({paste("rotation angle:", values$rotate)})
-    
+
     output$image_name <- renderText({values$image_name})
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
-    
+
     output$info <- renderText({
       "**** NEW PLOT ****
 mean_error and boxplots should be vertically orientated.
@@ -114,31 +121,32 @@ If they are not then chose flip to correct this.
 If figures are wonky, chose rotate."
     })
   })
-  
-  
-  
+
+dat<-readRDS("Image/caldat/Screenshot 2021-12-13 at 11.57.16")
+dat
+
   ################################################
   #   Flip
   ################################################
   observeEvent(input$flip, {
     values$flip <<- input$flip
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
-    
+
   })
-  
+
   ################################################
   #   Rotate
   ################################################
-  
+
   # plot_click_slow <- debounce(reactive(input$plot_click), 300)
-  
+
   observeEvent(input$rotate_mode, {
-    
+
     if(input$rotate_mode){
       output$info <- renderText({
         "**** ROTATE ****\nUse the slider to change the rotation angle\n"
@@ -148,66 +156,69 @@ If figures are wonky, chose rotate."
       hide("togslide")
       output$info <- renderText({ " "})
     }
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       values$rotate_mode <- input$rotate_mode
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
-    
+
   })
-  
+
   observeEvent(input$rotate, {
     if(input$rotate_mode){
       values$rotate <<- input$rotate
       output$rotation <- renderText({paste("rotation angle:", values$rotate)})
     }
   })
-  
+
   ################################################
   #   Plot type
   ################################################
-  
+
   observe( values$plot_type <<- input$plot_type )
-  
-  
+
+
   ################################################
   #   Calibrate
   ################################################
-  
+
   #create mepty click counter
   clickcounter <- reactiveValues(clickcount = 0)
-  clickvec <<- tibble()
-  
+
   #add to calpoints and scrtore click locations
   observeEvent(input$calib_mode, {
-    
-    clickcounter$clickcount <- 0
+
+    if (input$calib_mode) {
     calpoints <- reactiveValues(x = NULL, y = NULL)
-    observe({
-      input$plot_click2
-      isolate({
+    clickcounter$clickcount <- 0
+    values$calpoints <<- NULL
+
+    observeEvent(input$plot_click2,{
+      if (input$calib_mode) {
         calpoints$x <- c(calpoints$x, input$plot_click2$x)
         calpoints$y <- c(calpoints$y, input$plot_click2$y)
-        image_dat <<- details$name[counter$countervalue]
-        clickvec <<- cbind(image_dat, calpoints$x,calpoints$y)
-        readr::write_csv(as.data.frame(clickvec), file = "click_dat.csv")
-      })
-      
+
+        values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
+      }
     })
-    image <- magick::image_read(values$image_file)
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
-      plot(image)
-      if(input$calib_mode == T){
-      points(calpoints$x, calpoints$y, cex=input$cex, pch=19, col = "blue") 
-    }})
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+    #output$metaPlot <- renderPlot({
+      #par(mar=c(0,0,0,0))
+      #plot_values <- reactiveValuesToList(values)
+     # do.call(internal_redraw,plot_values)
+    #})
 
 
     #add click help
-    if (input$calib_mode) {
-      if(input$plot_type == "scatterplot"|input$plot_type == "mean_error"){
+
+      if(input$plot_type == "scatterplot"|input$plot_type == "histogram"){
         output$info <- renderText({
           "   Calibrate ---> Click on known values on axes in this order:
   |
@@ -230,69 +241,86 @@ If figures are wonky, chose rotate."
   "
         })
       }
-    }
-    else {
-      output$info <- renderText({
-        " "
-      })
-    }
-    
-    #add click locationsin text
-    if (input$calib_mode) {
+
+      #add click locationsin text
       output$clickinfo <- renderText({
         paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
       })
-    } else {
+
+    }
+    else {
       output$clickinfo <- renderText({
         " "
       })
+      output$info <- renderText({
+        "**** NEW PLOT ****
+mean_error and boxplots should be vertically orientated.
+If they are not then chose flip to correct this.
+If figures are wonky, chose rotate."
+      })
+
+      output$metaPlot <- renderPlot({
+        par(mar=c(0,0,0,0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw,plot_values)
+      })
     }
+
+
+
   })
-  
-  
+
+
   observeEvent(input$plot_click2, {
-    
+
     if (input$calib_mode) {
       clicktot <- clickcounter$clickcount + 1
-      if(input$plot_type == "scatterplot"|input$plot_type == "mean_error"){
-        if (clicktot == 4) {
+      if(input$plot_type == "scatterplot"|input$plot_type == "histogram"){
+        if (clicktot >= 4) {
           updateSwitchInput(
             session = session,
             inputId = "calib_mode",
             value = FALSE
           )
-          clickcounter$clickcount <- 1
+          clickcounter$clickcount <- 0
         } else {
           clickcounter$clickcount <- clicktot
         }
       }else {
-        if (clicktot == 2) {
+        if (clicktot >= 2) {
         updateSwitchInput(
           session = session,
           inputId = "calib_mode",
           value = FALSE
         )
-        clickcounter$clickcount <- 1
+        clickcounter$clickcount <- 0
       } else {
         clickcounter$clickcount <- clicktot
       }}
     }
   })
-        
-    
-  
+
+
+  ################################################
+  #   Show hide panels
+  ################################################
+
+  observeEvent(input$calib_mode, {
+    shinyjs::toggle(id= "calib_data")
+  })
+
   ################################################
   #   Digitisation
   ################################################
-  
+
   observe( values$cex <<- input$cex )
-  
-  
+
+
   ###############################################
   # Group Table
   ##############################################
   mod_df <- reactiveValues(x = basic)
-  
+
   output$group_table<- DT::renderDT({
     DT::datatable(
       isolate(mod_df$x),
@@ -301,13 +329,13 @@ If figures are wonky, chose rotate."
       formatStyle("Point_Colour", backgroundColor = styleEqual(mod_df$x$Point_Colour, mod_df$x$Point_Colour)) %>%
       formatStyle(columns = c(1:NCOL(mod_df$x)))
   })
-  
+
   observe({
     updatePickerInput(session = session, inputId = "delete_row",
                       choices = 1:nrow(mod_df$x))
   })
-  
-  
+
+
   observeEvent(input$add, {
     mod_df$x <- mod_df$x %>%
       dplyr::bind_rows(
@@ -315,24 +343,24 @@ If figures are wonky, chose rotate."
                       Sample_Size = "Insert sample size",
                       Point_Colour = sample(col, 1, F))
       )
-    
+
   })
-  
-  
+
+
   observeEvent(input$delete, {
-    
+
     mod_df$x <- mod_df$x[-as.integer(input$delete_row), ]
-    
+
   })
-  
+
   proxy <- DT::dataTableProxy('group_table')
-  
+
   observe({
     DT::replaceData(proxy, mod_df$x)
-    
+
   })
-  
-  
+
+
   # output$info <- renderText({
   #   xy_str <- function(e) {
   #     if(is.null(e)) return("NULL\n")
@@ -343,7 +371,7 @@ If figures are wonky, chose rotate."
   #     paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1),
   #            " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
   #   }
-  
+
   #   paste0(
   #     "click: ", xy_str(input$plot_click),
   #     "dblclick: ", xy_str(input$plot_dblclick),
@@ -351,15 +379,15 @@ If figures are wonky, chose rotate."
   #     "brush: ", xy_range_str(input$plot_brush)
   #   )
   # })
-  
-  
+
+
   ################################################
   #   What happens when you quit
   ################################################
-  
+
   session$onSessionEnded(function() {
     stopApp()
   })
-  
-  
+
+
 })

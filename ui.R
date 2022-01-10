@@ -146,7 +146,7 @@ shinyUI(fluidPage(
               ),
         
 
-          wellPanel(
+        wellPanel(id = "calib_data",
             conditionalPanel(
                  condition = "input.plot_type == 'histogram'",
                 textInput(inputId = "xvar",
