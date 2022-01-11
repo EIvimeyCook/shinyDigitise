@@ -15,7 +15,7 @@ library(tidyr)
 library(dplyr)
 library(RColorBrewer)
 library(scales)
-
+library(shinyalert)
 
 
 if(Sys.info()["user"]=="joelpick"){
