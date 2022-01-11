@@ -17,14 +17,14 @@ shinyServer(function(input, output, session) {
       inputId = "calib_mode",
       value = FALSE
     )
-    clickcounter$clickcount <- 0
+    clickcounter$clickcount <- 1
     cv <- counter$countervalue + 1
     if(cv > counter_total) {
       counter$countervalue <- counter_total
     }else{
       counter$countervalue <- cv
     }
-    
+
   })
 
   # when next is pressed up the counter and check that its above 0
@@ -191,14 +191,34 @@ dat
   observeEvent(input$calib_mode, {
 
     if (input$calib_mode) {
+
     calpoints <- reactiveValues(x = NULL, y = NULL)
+    
     clickcounter$clickcount <- 0
     values$calpoints <<- NULL
 
     observeEvent(input$plot_click2,{
       if (input$calib_mode) {
-        calpoints$x <- c(calpoints$x, input$plot_click2$x)
-        calpoints$y <- c(calpoints$y, input$plot_click2$y)
+        clicktot <- clickcounter$clickcount + 1
+        if(input$plot_type %in% c("scatterplot", "histogram")){
+          if (clicktot <= 4) {
+            clickcounter$clickcount <- clicktot
+            calpoints$x <- c(calpoints$x, input$plot_click2$x)
+            calpoints$y <- c(calpoints$y, input$plot_click2$y)
+          } else {
+            clickcounter$clickcount <- 0
+          }
+        }else{
+          if (clicktot <= 2) {
+            clickcounter$clickcount <- clicktot
+            calpoints$x <- c(calpoints$x, input$plot_click2$x)
+            calpoints$y <- c(calpoints$y, input$plot_click2$y)
+          }
+          
+          else {
+            clickcounter$clickcount <- 0
+          }
+        }
 
         values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
       }
@@ -258,48 +278,90 @@ mean_error and boxplots should be vertically orientated.
 If they are not then chose flip to correct this.
 If figures are wonky, chose rotate."
       })
-
-      output$metaPlot <- renderPlot({
-        par(mar=c(0,0,0,0))
-        plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw,plot_values)
-      })
     }
 
 
-
   })
+  
 
+  # observeEvent(input$plot_click2, {
 
-  observeEvent(input$plot_click2, {
+  #   if (input$calib_mode) {
+  #     clicktot <- clickcounter$clickcount + 1
+  #     if(input$plot_type == "scatterplot"|input$plot_type == "histogram"){
+  #       if (clicktot >= 4) {
+  #         # updateSwitchInput(
+  #         #   session = session,
+  #         #   inputId = "calib_mode",
+  #         #   value = FALSE
+  #         # )
+  #         clickcounter$clickcount <- 0
+  #       } else {
+  #         clickcounter$clickcount <- clicktot
+  #       }
+  #     }else {
+  #       if (clicktot >= 2) {
+  #       # updateSwitchInput(
+  #       #   session = session,
+  #       #   inputId = "calib_mode",
+  #       #   value = FALSE
+  #       # )
+  #       clickcounter$clickcount <- 0
+  #     } else {
+  #       clickcounter$clickcount <- clicktot
+  #     }}
+  #   }
+  # })
 
-    if (input$calib_mode) {
-      clicktot <- clickcounter$clickcount + 1
-      if(input$plot_type == "scatterplot"|input$plot_type == "histogram"){
-        if (clicktot >= 4) {
-          updateSwitchInput(
-            session = session,
-            inputId = "calib_mode",
-            value = FALSE
-          )
-          clickcounter$clickcount <- 0
-        } else {
-          clickcounter$clickcount <- clicktot
-        }
-      }else {
-        if (clicktot >= 2) {
-        updateSwitchInput(
-          session = session,
-          inputId = "calib_mode",
-          value = FALSE
-        )
-        clickcounter$clickcount <- 0
-      } else {
-        clickcounter$clickcount <- clicktot
-      }}
-    }
+  ################################################
+  #    calib data
+  ################################################
+
+  observeEvent(input$yvar, {
+    
+    req(input$yvar)
+    
+    var_name <- reactiveValues(yvar = NULL)
+    var_name$yvar <- input$yvar
+    values$variable <<- var_name$yvar
+    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
   })
+  
+  observeEvent(c(input$y1, input$y2, input$x1, input$x2), {
+    
+    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
+    var_num$y1 <- as.numeric(input$y1)
+    var_num$y1 <- as.numeric(input$y2)
+    var_num$x1 <- as.numeric(input$x1)
+    var_num$x2 <- as.numeric(input$x2)
+    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+  })
+  
+  observeEvent(input$xvar, {
+    
+    var_name2 <- reactiveValues(xvar = NULL)
+    var_name2$xvar <- input$xvar
+    values$variable <<- var_name2$xvar
+    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+  })
+  
+  
 
   ################################################
   #   Show hide panels

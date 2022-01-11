@@ -313,6 +313,14 @@ mainPanel(
             # style = "float",
             # color = "primary",
           
+        ),
+        actionButton(
+          inputId = "previous",
+          label = "Previous",
+          style = "padding:4px"
+          # style = "float",
+          # color = "primary",
+          
         )
     )
       )
