@@ -10,29 +10,54 @@ shinyServer(function(input, output, session) {
 
   # when next is pressed up the counter and check that its within total
   observeEvent(input$continue, {
+    
     plot_values <- reactiveValuesToList(values)
     saveRDS(plot_values, paste0(details$cal_dir,details$name[counter$countervalue]))
+    
     updateSwitchInput(
       session = session,
       inputId = "calib_mode",
       value = FALSE
     )
-    clickcounter$clickcount <- 1
-    cv <- counter$countervalue + 1
-    if(cv > counter_total) {
-      counter$countervalue <- counter_total
+    
+    clickcounter$clickcount <- 0
+    
+    cv<-counter$countervalue + 1
+    
+    if(cv >= counter_total) {
+      cv<-counter$countervalue + 1
+
     }else{
-      counter$countervalue <- cv
-    }
+      shinyalert(
+        title = "Congratulations!",
+        text = "You've finished digitising!",
+        size = "s", 
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "success",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+   }
 
   })
 
   # when next is pressed up the counter and check that its above 0
   observeEvent(input$Previous, {
+    
     cv <- counter$countervalue - 1
+    
     if(cv == 0) {
+      
       counter$countervalue <- 1
       clickcounter$clickcount <- 0
+      
     }else{
       counter$countervalue <- cv
     }
@@ -49,35 +74,18 @@ shinyServer(function(input, output, session) {
   #    when counter changes
   ################################################
 
-  ## when counter changes
-  ## values - save if past certain point? some raw_data?
-  ## values - empty
-  ## check caldat
-  ## if no caldat fill in some stuff
-  ##  if caldat load caldat and fill in some stuff
-  # updateRadioButtons(session, "plot_type", selected=)
-  # updateRadioButtons(session, "plot_type", selected=)
-  ## #updateSelectInput
-
 
   observeEvent(counter$countervalue, {
     counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue])
+    
     if(file.exists(counter$caldat)){
       # plot_values <- readRDS(values$caldat)
       values <<- do.call("reactiveValues",readRDS(counter$caldat))
-
       updateSliderInput(session, "cex", value=values$cex)
-
       updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
 
-      #  updateTextInput(session,inputId = "yvar",value=values$variable["y"])
-      #  updateTextInput(session,inputId = "xvar",vvalue=alues$variable["x"])
-      # updateTextInput(session,inputId = "x1",value=values$point_vals["x1"])
-      #  updateTextInput(session,inputId = "x2",value=values$point_vals["x2"])
-      # updateTextInput(session,inputId = "y1",value=values$point_vals["y1"])
-      #  updateTextInput(session,inputId = "y2",value=values$point_vals["y2"])
-
-      if(values$plot_type=="mean_error")       updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
+      if(values$plot_type=="mean_error")       
+        updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
       # update
 
     }else{
@@ -101,11 +109,8 @@ shinyServer(function(input, output, session) {
     updateSwitchInput(session,"flip",value=values$flip)
     updateSwitchInput(session,"rotate_mode",value=FALSE)
     values$rotate_mode <- FALSE
-
     updateSliderInput(session,"rotate",value=FALSE,values$rotate)
-
     output$rotation <- renderText({paste("rotation angle:", values$rotate)})
-
     output$image_name <- renderText({values$image_name})
 
     output$metaPlot <- renderPlot({
@@ -121,9 +126,6 @@ If they are not then chose flip to correct this.
 If figures are wonky, chose rotate."
     })
   })
-
-dat<-readRDS("Image/caldat/Screenshot 2021-12-13 at 11.57.16")
-dat
 
   ################################################
   #   Flip
@@ -282,6 +284,7 @@ If figures are wonky, chose rotate."
 
 
   })
+
   
 
   # observeEvent(input$plot_click2, {
@@ -317,12 +320,11 @@ If figures are wonky, chose rotate."
   #    calib data
   ################################################
 
-  observeEvent(input$yvar, {
-    
-    req(input$yvar)
+  #mean error####
+  observeEvent(input$yvar_me, {
     
     var_name <- reactiveValues(yvar = NULL)
-    var_name$yvar <- input$yvar
+    var_name$yvar <- input$yvar_me
     values$variable <<- var_name$yvar
     
     output$metaPlot <- renderPlot({
@@ -332,13 +334,12 @@ If figures are wonky, chose rotate."
     })
   })
   
-  observeEvent(c(input$y1, input$y2, input$x1, input$x2), {
+  
+  observeEvent(c(input$y1_me, input$y2_me), {
     
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- as.numeric(input$y1)
-    var_num$y1 <- as.numeric(input$y2)
-    var_num$x1 <- as.numeric(input$x1)
-    var_num$x2 <- as.numeric(input$x2)
+    var_num$y1 <- as.numeric(input$y1_me)
+    var_num$y2 <- as.numeric(input$y2_me)
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
     output$metaPlot <- renderPlot({
@@ -348,11 +349,12 @@ If figures are wonky, chose rotate."
     })
   })
   
-  observeEvent(input$xvar, {
+  #boxplot ######
+  observeEvent(input$yvar_bp, {
     
-    var_name2 <- reactiveValues(xvar = NULL)
-    var_name2$xvar <- input$xvar
-    values$variable <<- var_name2$xvar
+    var_name <- reactiveValues(yvar = NULL)
+    var_name$yvar <- input$yvar_bp
+    values$variable <<- var_name$yvar
     
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
@@ -361,6 +363,84 @@ If figures are wonky, chose rotate."
     })
   })
   
+  observeEvent(c(input$y1_bp, input$y2_bp), {
+    
+    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
+    var_num$y1 <- as.numeric(input$y1_bp)
+    var_num$y2 <- as.numeric(input$y2_bp)
+    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+  })
+  
+  
+  #scatterplot ######
+  observeEvent(c(input$yvar_sp, input$xvar_sp), {
+    
+    var_name <- reactiveValues(yvar = NULL, xvar = NULL)
+    var_name$yvar <- input$yvar_sp
+    var_name$xvar <- input$xvar_sp
+    values$variable <<- c(var_name$yvar, var_name$xvar)
+    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+  })
+  
+  observeEvent(c(input$y1_sp, input$y2_sp, input$x1_sp, input$x2_sp), {
+    
+    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
+    var_num$y1 <- as.numeric(input$y1_sp)
+    var_num$y2 <- as.numeric(input$y2_sp)
+    var_num$x1 <- as.numeric(input$x1_sp)
+    var_num$x2 <- as.numeric(input$x2_sp)
+    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+  })
+  
+  
+  #histogram #######
+  observeEvent(input$xvar_hist, {
+    
+    var_name <- reactiveValues(xvar = NULL)
+    var_name$xvar <- input$xvar_hist
+    values$variable <<- var_name$xvar
+    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+  })
+  
+  observeEvent(c(input$y1_hist, input$y2_hist, input$x1_hist, input$x2_hist), {
+    
+    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
+    var_num$y1 <- as.numeric(input$y1_hist)
+    var_num$y2 <- as.numeric(input$y2hist)
+    var_num$x1 <- as.numeric(input$x1_hist)
+    var_num$x2 <- as.numeric(input$x2_hist)
+    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+    
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
+  })
+  
+
   
 
   ################################################

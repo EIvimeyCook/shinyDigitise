@@ -1,6 +1,7 @@
 
 shinyUI(fluidPage(
     useShinyjs(),
+    useShinyalert(),
   theme = bs_theme(
     primary = "#66947A", secondary = "#66947A", 
     info = "#E51C23", font_scale = NULL, bootswatch = "materia",
@@ -153,36 +154,36 @@ shinyUI(fluidPage(
                           label = NULL,
                           placeholder = "X Variable"),
                     splitLayout(
-                textInput(inputId = "y1",
+                textInput(inputId = "y1_hist",
                           label = NULL,
                           placeholder = "Y1 Value" ),
-                textInput(inputId = "y2",
+                textInput(inputId = "y2_hist",
                           label = NULL,
                           placeholder = "Y2 Value" ),
-                textInput(inputId = "x1",
+                textInput(inputId = "x1_hist",
                           label = NULL,
                           placeholder = "X1 Value" ),
-                textInput(inputId = "x2",
+                textInput(inputId = "x2_hist",
                           label = NULL,
                           placeholder = "X2 Value" )
                     ),
-                textInput(inputId = "nsamp",
+                textInput(inputId = "nsamp_hist",
                           placeholder = "Known sample size",
                           label = NULL),
 
                        ),
                conditionalPanel(
                  condition = "input.plot_type == 'mean_error'",
-                 textInput(inputId = "yvar",
+                 textInput(inputId = "yvar_me",
                            label = NULL,
                            placeholder = "Y Variable"),
                  splitLayout(
-                 textInput(inputId = "y1",
+                 textInput(inputId = "y1_me",
                            label = NULL,
-                           placeholder = "Y1 Value" ),
-                 textInput(inputId = "y2",
-                           label = NULL,
-                           placeholder = "Y2 Value" )
+                           placeholder= "Y1 Value"),
+                 textInput(inputId = "y2_me",
+                           label= NULL,
+                           placeholder= "Y2 Value" )
                  ),
                  prettyRadioButtons(
                                inputId = "errortype",
@@ -201,53 +202,53 @@ shinyUI(fluidPage(
                conditionalPanel(
                  condition = "input.plot_type == 'scatterplot'",
                  splitLayout(
-                   textInput(inputId = "yvar",
+                   textInput(inputId = "yvar_sp",
                              label = NULL,
                              placeholder = "Y Variable"),
-                   textInput(inputId = "xvar",
+                   textInput(inputId = "xvar_sp",
                              label = NULL,
                              placeholder = "X Variable")),
 
                  splitLayout(
-                   textInput(inputId = "y1",
+                   textInput(inputId = "y1_sp",
                              label = NULL,
                              placeholder = "Y1 Value" ),
-                   textInput(inputId = "y2",
+                   textInput(inputId = "y2_sp",
                              label = NULL,
                              placeholder = "Y2 Value" ),
-                   textInput(inputId = "x1",
+                   textInput(inputId = "x1_sp",
                              label = NULL,
                              placeholder = "X1 Value" ),
-                   textInput(inputId = "x2",
+                   textInput(inputId = "x2_sp",
                              label = NULL,
                              placeholder = "X2 Value" )
 
                  ),
                  prettyCheckbox(
-                             inputId = "log",
+                             inputId = "log_sp",
                              label = "Logged values?",
                              value = FALSE,
                              status = "info"),
-                 textInput(inputId = "nsamp",
+                 textInput(inputId = "nsamp_sp",
                               placeholder = "Known sample size",
                            label = NULL),
 
                 ),
                conditionalPanel(
                  condition = "input.plot_type == 'boxplot'",
-                 textInput(inputId = "yvar",
+                 textInput(inputId = "yvar_bp",
                            label = NULL,
                            placeholder = "Y Variable"),
                  splitLayout(
-                   textInput(inputId = "y1",
+                   textInput(inputId = "y1_bp",
                              label = NULL,
                              placeholder = "Y1 Value" ),
-                   textInput(inputId = "y2",
+                   textInput(inputId = "y2_bp",
                              label = NULL,
                              placeholder = "Y2 Value" )
                  ),
                  prettyCheckbox(
-                   inputId = "log",
+                   inputId = "log_bp",
                    label = "Logged values?",
                    value = FALSE,
                    status = "info"),
