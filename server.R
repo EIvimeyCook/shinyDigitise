@@ -24,32 +24,34 @@ shinyServer(function(input, output, session) {
     
     cv<-counter$countervalue + 1
     
-    if(cv >= counter_total) {
-      cv<-counter$countervalue + 1
-
+    if(cv > counter_total) {
+     counter$countervalue <- counter_total
+     shinyalert(
+       title = "Congratulations!",
+       text = "You've finished digitising!",
+       size = "s", 
+       closeOnEsc = TRUE,
+       closeOnClickOutside = FALSE,
+       html = FALSE,
+       type = "success",
+       showConfirmButton = TRUE,
+       showCancelButton = FALSE,
+       confirmButtonText = "OK",
+       confirmButtonCol = "#AEDEF4",
+       timer = 0,
+       imageUrl = "",
+       animation = TRUE
+     )
     }else{
-      shinyalert(
-        title = "Congratulations!",
-        text = "You've finished digitising!",
-        size = "s", 
-        closeOnEsc = TRUE,
-        closeOnClickOutside = FALSE,
-        html = FALSE,
-        type = "success",
-        showConfirmButton = TRUE,
-        showCancelButton = FALSE,
-        confirmButtonText = "OK",
-        confirmButtonCol = "#AEDEF4",
-        timer = 0,
-        imageUrl = "",
-        animation = TRUE
-      )
+      
+      counter$countervalue <- cv
+ 
    }
 
   })
 
   # when next is pressed up the counter and check that its above 0
-  observeEvent(input$Previous, {
+  observeEvent(input$previous, {
     
     cv <- counter$countervalue - 1
     
