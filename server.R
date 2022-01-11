@@ -286,6 +286,9 @@ If figures are wonky, chose rotate."
   })
 
   
+  observeEvent(input$calib_mode != T, {
+    shinyjs::reset(id= "calib_data")
+    })
 
   # observeEvent(input$plot_click2, {
 
