@@ -49,9 +49,3 @@ col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_co
 
 col=sample(col_vector, n)
 
-basic <- tibble(
-  Group_Name = "Insert group name",
-  Sample_Size = "Insert sample size",
-  Point_Colour = "#8B0000"
-)  
-

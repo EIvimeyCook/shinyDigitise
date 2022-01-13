@@ -1,7 +1,6 @@
 
 shinyUI(fluidPage(
     useShinyjs(),
-    useShinyalert(),
   theme = bs_theme(
     primary = "#66947A", secondary = "#66947A", 
     info = "#E51C23", font_scale = NULL, bootswatch = "materia",
@@ -142,7 +141,7 @@ shinyUI(fluidPage(
               labelWidth = "60px",
               onLabel = "Yes",
               offLabel = "No",
-              onStatus = "success",
+              onStatus = "primary",
             )
               ),
         
@@ -150,7 +149,7 @@ shinyUI(fluidPage(
         wellPanel(id = "calib_data",
             conditionalPanel(
                  condition = "input.plot_type == 'histogram'",
-                textInput(inputId = "xvar",
+                textInput(inputId = "xvar_hist",
                           label = NULL,
                           placeholder = "X Variable"),
                     splitLayout(
@@ -254,45 +253,51 @@ shinyUI(fluidPage(
                    status = "info"),
             )
           ),
-          wellPanel(
-            splitLayout(
-              div(class = "buttonagency",
-                  actionButton(
-                    inputId = "add",
-                    label = "New Group",
-                    #style = "float",
-                    #color = "primary"
+          wellPanel(switchInput(
+                      inputId = "extract_mode",
+                      label = strong("Extract mode"),
+                      labelWidth = "60px",
+                      onLabel = "Yes",
+                      offLabel = "No",
+                      onStatus = "primary")),
+        wellPanel(id = "point_data",
+                  splitLayout(
+                        switchInput(
+                          inputId = "add_mode",
+                          label = strong("Add mode"),
+                          labelWidth = "60px",
+                          onLabel = "Yes",
+                          offLabel = "No",
+                          onStatus = "success"),
+                    switchInput(
+                      inputId = "del_mode",
+                      label = strong("Delete mode"),
+                      labelWidth = "60px",
+                      onLabel = "Yes",
+                      offLabel = "No",
+                      onStatus = "danger")
+                    )
                   ),
-                  actionButton(
-                    inputId = "delete",
-                    label = "Delete Group",
-                    #style = "float",
-                    #color = "primary"
-                  )
-                  ))),
-        wellPanel(
-          DTOutput("group_table")
-        ),
-        wellPanel(
+        wellPanel(id = "group_data",
           splitLayout(
             div(class = "buttonagency",
                 actionButton(
-                  inputId = "newpoints",
-                  label = "New Points",
+                  inputId = "add_group",
+                  label = "New Group",
                   #style = "float",
                   #color = "primary"
                 ),
                 actionButton(
-                  inputId = "delpoints",
-                  label = "Delete Points",
+                  inputId = "del_group",
+                  label = "Delete Group",
                   #style = "float",
                   #color = "primary"
-                ))),
-          pickerInput(inputId = "delete_row", label = NULL,
-                      choices = NULL)
+                )), 
+            pickerInput(inputId = "delete_row", label = NULL,
+                        choices = NULL)
+          ),
+          DTOutput("group_table")
         )
-
-
         ),
 mainPanel(
         verbatimTextOutput("image_name"),

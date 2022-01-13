@@ -343,8 +343,8 @@ If figures are wonky, chose rotate."
   observeEvent(c(input$y1_me, input$y2_me), {
     
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- as.numeric(input$y1_me)
-    var_num$y2 <- as.numeric(input$y2_me)
+    var_num$y1 <- input$y1_me
+    var_num$y2 <- input$y2_me
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
     output$metaPlot <- renderPlot({
@@ -371,8 +371,8 @@ If figures are wonky, chose rotate."
   observeEvent(c(input$y1_bp, input$y2_bp), {
     
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- as.numeric(input$y1_bp)
-    var_num$y2 <- as.numeric(input$y2_bp)
+    var_num$y1 <- input$y1_bp
+    var_num$y2 <- input$y2_bp
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
     
     output$metaPlot <- renderPlot({
@@ -401,10 +401,10 @@ If figures are wonky, chose rotate."
   observeEvent(c(input$y1_sp, input$y2_sp, input$x1_sp, input$x2_sp), {
     
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- as.numeric(input$y1_sp)
-    var_num$y2 <- as.numeric(input$y2_sp)
-    var_num$x1 <- as.numeric(input$x1_sp)
-    var_num$x2 <- as.numeric(input$x2_sp)
+    var_num$y1 <- input$y1_sp
+    var_num$y2 <- input$y2_sp
+    var_num$x1 <- input$x1_sp
+    var_num$x2 <- input$x2_sp
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
     
     output$metaPlot <- renderPlot({
@@ -432,10 +432,10 @@ If figures are wonky, chose rotate."
   observeEvent(c(input$y1_hist, input$y2_hist, input$x1_hist, input$x2_hist), {
     
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- as.numeric(input$y1_hist)
-    var_num$y2 <- as.numeric(input$y2hist)
-    var_num$x1 <- as.numeric(input$x1_hist)
-    var_num$x2 <- as.numeric(input$x2_hist)
+    var_num$y1 <- input$y1_hist
+    var_num$y2 <- input$y2_hist
+    var_num$x1 <- input$x1_hist
+    var_num$x2 <- input$x2_hist
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
     
     output$metaPlot <- renderPlot({
@@ -455,6 +455,17 @@ If figures are wonky, chose rotate."
   observeEvent(input$calib_mode, {
     shinyjs::toggle(id= "calib_data")
   })
+  
+  observeEvent(input$extract_mode, {
+    shinyjs::toggle(id= "group_data")
+  })
+    
+    observeEvent(input$extract_mode, {
+      shinyjs::toggle(id= "point_data")
+    })
+
+    
+      
 
   ################################################
   #   Digitisation
@@ -466,6 +477,13 @@ If figures are wonky, chose rotate."
   ###############################################
   # Group Table
   ##############################################
+  basic <- tibble(
+  Group_Name = "Insert group name",
+  Sample_Size = "Insert sample size",
+  Point_Colour = "#FF0000",
+  Point_Shape = 19)
+    
+    
   mod_df <- reactiveValues(x = basic)
 
   output$group_table<- DT::renderDT({
@@ -482,19 +500,38 @@ If figures are wonky, chose rotate."
                       choices = 1:nrow(mod_df$x))
   })
 
-
-  observeEvent(input$add, {
+  
+  observeEvent(input$add_mode, {
+    if( input$add_mode== T){
     mod_df$x <- mod_df$x %>%
       dplyr::bind_rows(
         dplyr::tibble(Group_Name = "Insert group name",
                       Sample_Size = "Insert sample size",
-                      Point_Colour = sample(col, 1, F))
+                      Point_Colour = sample(col, 1, F),
+                      Point_Shape = 19)
       )
-
+      
+      }
+    
   })
+  
+  observeEvent(input$add_group, {
+    if( input$add_mode== T){
+      mod_df$x <- mod_df$x %>%
+        dplyr::bind_rows(
+          dplyr::tibble(Group_Name = "Insert group name",
+                        Sample_Size = "Insert sample size",
+                        Point_Colour = sample(col, 1, F),
+                        Point_Shape = 19)
+        )
+      
+    }
+    
+  })
+  
 
 
-  observeEvent(input$delete, {
+  observeEvent(input$del_group, {
 
     mod_df$x <- mod_df$x[-as.integer(input$delete_row), ]
 
@@ -526,6 +563,26 @@ If figures are wonky, chose rotate."
   #     "brush: ", xy_range_str(input$plot_brush)
   #   )
   # })
+  
+  ################################################
+  #   Add/delete points
+  ################################################
+  #create mepty click counter
+  plotcounter <- reactiveValues(plotcount = 0)
+  
+  #add to plot_dat and scrtore click locations
+  observeEvent(input$extract_mode, {
+    if(input$extract_mode){
+            
+      plotcounter$plotcount <- 0
+      
+      observeEvent(input$plot_dblclick,{
+          
+        plotcounter$plotcount<-plotcounter$plotcount + 1
+        print("done")
+      })
+    }
+    })
 
 
   ################################################
