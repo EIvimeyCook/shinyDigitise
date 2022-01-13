@@ -579,7 +579,14 @@ If figures are wonky, chose rotate."
       observeEvent(input$plot_dblclick,{
           
         plotcounter$plotcount<-plotcounter$plotcount + 1
-        print("done")
+        
+        if (plotcounter$plotcount == 2) {
+         updateSwitchInput(
+          session = session,
+          inputId = "add_mode",
+          value = FALSE
+          )
+        } 
       })
     }
     })
