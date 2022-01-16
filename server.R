@@ -518,12 +518,17 @@ Group names and sample size should be entered into the table on the sidebar befo
   observeEvent(input$del_group, {
     if(input$del_group){
     row_count$x <- row_count$x - 1
-    mod_df$x <- mod_df$x[-selected_row$x, ]
-    dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
-    rem_group<-dat_mod[selected_row$x]
-    print(rem_group)
+    print(which(mod_df$x == selected_cell$x, arr.ind = TRUE))
+    remove_dat <- which(mod_df$x == selected_cell$x)[1]
+    print(remove_dat)
     values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-    values$raw_data <<- values$raw_data[!selected_row$x]
+    values$raw_data <<- values$raw_data[!remove_dat]
+    
+    valpoints$x <- values$raw_data$x
+    valpoints$y<- values$raw_data$y
+    valpoints$id<- values$raw_data$id
+    valpoints$n<- values$raw_data$n
+    
     }
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
@@ -556,6 +561,15 @@ Group names and sample size should be entered into the table on the sidebar befo
                       Sample_Size = "Insert sample size")
       )
 })
+  
+  selected_cell <- reactiveValues(x=NULL)
+  
+  observeEvent(input$group_table_cell_clicked, {
+    selected_cell$x <- input$group_table_cell_clicked$value
+    print(selected_cell$x)
+    #https://stackoverflow.com/questions/37985461/shiny-dt-row-last-clicked
+  })
+  
 
 selected_row <- reactiveValues(x=NULL)
 
@@ -582,6 +596,12 @@ observeEvent(input$click_group, {
           valpoints$y <- c(valpoints$y, input$plot_click2$y)
           valpoints$id <- c(valpoints$id, dat_mod[selected_row$x,1])
           valpoints$n <- c(valpoints$n, dat_mod[selected_row$x,2])
+          
+          print(valpoints$x)
+          print(valpoints$id)
+          print(valpoints$y)
+          print(valpoints$n)
+          
         } else {
           add_mode$add<-FALSE
 
@@ -593,8 +613,8 @@ observeEvent(input$click_group, {
           dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
           valpoints$x <- c(valpoints$x, input$plot_click2$x)
           valpoints$y <- c(valpoints$y, input$plot_click2$y)
-          valpoints$id <- c(valpoints$id,dat_mod[selected_row$x,"Group_Name"])
-          valpoints$n <- c(valpoints$n, dat_mod[selected_row$x,"Sample_Size"])
+          valpoints$id <- c(valpoints$id, dat_mod[selected_row$x,1])
+          valpoints$n <- c(valpoints$n, dat_mod[selected_row$x,2])
         } else {
           plotcounter$plotclicks <- 0
           add_mode$add<-FALSE
