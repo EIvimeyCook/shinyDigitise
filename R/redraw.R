@@ -62,7 +62,7 @@ redraw_points <- function(plot_type, raw_data, image_details, cex){
 	text_cex <- 1*cex
 	line_width <- 2*cex
 	point_cex <- 1*cex
-	point_col="red"
+	point_col <- "red"
 
 	## legend
 	if(plot_type == "mean_error"){

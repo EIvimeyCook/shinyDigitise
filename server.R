@@ -10,26 +10,26 @@ shinyServer(function(input, output, session) {
 
   # when next is pressed up the counter and check that its within total
   observeEvent(input$continue, {
-    
+
     plot_values <- reactiveValuesToList(values)
     saveRDS(plot_values, paste0(details$cal_dir,details$name[counter$countervalue]))
-    
+
     updateSwitchInput(
       session = session,
       inputId = "calib_mode",
       value = FALSE
     )
-    
+
     clickcounter$clickcount <- 0
-    
+
     cv<-counter$countervalue + 1
-    
+
     if(cv > counter_total) {
      counter$countervalue <- counter_total
      shinyalert(
        title = "Congratulations!",
        text = "You've finished digitising!",
-       size = "s", 
+       size = "s",
        closeOnEsc = TRUE,
        closeOnClickOutside = FALSE,
        html = FALSE,
@@ -43,23 +43,23 @@ shinyServer(function(input, output, session) {
        animation = TRUE
      )
     }else{
-      
+
       counter$countervalue <- cv
- 
+
    }
 
   })
 
   # when next is pressed up the counter and check that its above 0
   observeEvent(input$previous, {
-    
+
     cv <- counter$countervalue - 1
-    
+
     if(cv == 0) {
-      
+
       counter$countervalue <- 1
       clickcounter$clickcount <- 0
-      
+
     }else{
       counter$countervalue <- cv
     }
@@ -79,14 +79,14 @@ shinyServer(function(input, output, session) {
 
   observeEvent(counter$countervalue, {
     counter$caldat <- paste0(details$cal_dir,details$name[counter$countervalue])
-    
+
     if(file.exists(counter$caldat)){
       # plot_values <- readRDS(values$caldat)
       values <<- do.call("reactiveValues",readRDS(counter$caldat))
       updateSliderInput(session, "cex", value=values$cex)
       updatePrettyRadioButtons(session, "plot_type", selected=values$plot_type)
 
-      if(values$plot_type=="mean_error")       
+      if(values$plot_type=="mean_error")
         updatePrettyRadioButtons(session, "errortype", selected=values$error_type)
       # update
 
@@ -101,7 +101,8 @@ shinyServer(function(input, output, session) {
         rotate=0,
         calpoints=NULL,
         variable=NULL,
-        point_vals=NULL
+        point_vals=NULL,
+        raw_data=NULL
         # rotate_mode=FALSE,
         # cex = input$cex,
         # plot_type = input$plot_type
@@ -196,51 +197,51 @@ If figures are wonky, chose rotate."
 
     if (input$calib_mode) {
 
-    calpoints <- reactiveValues(x = NULL, y = NULL)
-    
-    clickcounter$clickcount <- 0
-    values$calpoints <<- NULL
+      calpoints <- reactiveValues(x = NULL, y = NULL)
 
-    observeEvent(input$plot_click2,{
-      if (input$calib_mode) {
-        clicktot <- clickcounter$clickcount + 1
-        if(input$plot_type %in% c("scatterplot", "histogram")){
-          if (clicktot <= 4) {
-            clickcounter$clickcount <- clicktot
-            calpoints$x <- c(calpoints$x, input$plot_click2$x)
-            calpoints$y <- c(calpoints$y, input$plot_click2$y)
-          } else {
-            clickcounter$clickcount <- 0
+      clickcounter$clickcount <- 0
+      values$calpoints <<- NULL
+
+      observeEvent(input$plot_click2,{
+        if (input$calib_mode) {
+          clicktot <- clickcounter$clickcount + 1
+          if(input$plot_type %in% c("scatterplot", "histogram")){
+            if (clicktot <= 4) {
+              clickcounter$clickcount <- clicktot
+              calpoints$x <- c(calpoints$x, input$plot_click2$x)
+              calpoints$y <- c(calpoints$y, input$plot_click2$y)
+            } else {
+              clickcounter$clickcount <- 0
+            }
+          }else{
+            if (clicktot <= 2) {
+              clickcounter$clickcount <- clicktot
+              calpoints$x <- c(calpoints$x, input$plot_click2$x)
+              calpoints$y <- c(calpoints$y, input$plot_click2$y)
+            }
+
+            else {
+              clickcounter$clickcount <- 0
+            }
           }
-        }else{
-          if (clicktot <= 2) {
-            clickcounter$clickcount <- clicktot
-            calpoints$x <- c(calpoints$x, input$plot_click2$x)
-            calpoints$y <- c(calpoints$y, input$plot_click2$y)
-          }
-          
-          else {
-            clickcounter$clickcount <- 0
-          }
+
+          values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
         }
+      })
 
-        values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
-      }
-    })
-
-    output$metaPlot <- renderPlot({
-      par(mar=c(0,0,0,0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw,plot_values)
-    })
-    #output$metaPlot <- renderPlot({
+      output$metaPlot <- renderPlot({
+        par(mar=c(0,0,0,0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw,plot_values)
+      })
+      #output$metaPlot <- renderPlot({
       #par(mar=c(0,0,0,0))
       #plot_values <- reactiveValuesToList(values)
-     # do.call(internal_redraw,plot_values)
-    #})
+      # do.call(internal_redraw,plot_values)
+      #})
 
 
-    #add click help
+      #add click help
 
       if(input$plot_type == "scatterplot"|input$plot_type == "histogram"){
         output$info <- renderText({
@@ -255,7 +256,7 @@ If figures are wonky, chose rotate."
         })
       }
       else{ output$info <- renderText({
-          "   Calibrate ---> Click on known values on axes in this order:
+        "   Calibrate ---> Click on known values on axes in this order:
   |
   2
   |
@@ -263,7 +264,7 @@ If figures are wonky, chose rotate."
   1
   |_____________________
   "
-        })
+      })
       }
 
       #add click locationsin text
@@ -287,61 +288,27 @@ If figures are wonky, chose rotate."
 
   })
 
-  
-  observeEvent(input$calib_mode != T, {
-    shinyjs::reset(id= "calib_data")
-    })
-
-  # observeEvent(input$plot_click2, {
-
-  #   if (input$calib_mode) {
-  #     clicktot <- clickcounter$clickcount + 1
-  #     if(input$plot_type == "scatterplot"|input$plot_type == "histogram"){
-  #       if (clicktot >= 4) {
-  #         # updateSwitchInput(
-  #         #   session = session,
-  #         #   inputId = "calib_mode",
-  #         #   value = FALSE
-  #         # )
-  #         clickcounter$clickcount <- 0
-  #       } else {
-  #         clickcounter$clickcount <- clicktot
-  #       }
-  #     }else {
-  #       if (clicktot >= 2) {
-  #       # updateSwitchInput(
-  #       #   session = session,
-  #       #   inputId = "calib_mode",
-  #       #   value = FALSE
-  #       # )
-  #       clickcounter$clickcount <- 0
-  #     } else {
-  #       clickcounter$clickcount <- clicktot
-  #     }}
-  #   }
-  # })
-
   ################################################
   #    calib data
   ################################################
 
   #mean error####
   observeEvent(input$yvar_me, {
-    
+
     var_name <- reactiveValues(yvar = NULL)
     var_name$yvar <- input$yvar_me
     values$variable <<- var_name$yvar
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
   })
-  
-  
+
+
   observeEvent(c(input$y1_me, input$y2_me), {
-    
+
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
     var_num$y1 <- input$y1_me
     var_num$y2 <- input$y2_me
@@ -353,119 +320,146 @@ If figures are wonky, chose rotate."
       do.call(internal_redraw,plot_values)
     })
   })
-  
+
   #boxplot ######
   observeEvent(input$yvar_bp, {
-    
+
     var_name <- reactiveValues(yvar = NULL)
     var_name$yvar <- input$yvar_bp
     values$variable <<- var_name$yvar
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
   })
-  
+
   observeEvent(c(input$y1_bp, input$y2_bp), {
-    
+
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
     var_num$y1 <- input$y1_bp
     var_num$y2 <- input$y2_bp
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
   })
-  
-  
+
+
   #scatterplot ######
   observeEvent(c(input$yvar_sp, input$xvar_sp), {
-    
+
     var_name <- reactiveValues(yvar = NULL, xvar = NULL)
     var_name$yvar <- input$yvar_sp
     var_name$xvar <- input$xvar_sp
     values$variable <<- c(var_name$yvar, var_name$xvar)
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
   })
-  
+
   observeEvent(c(input$y1_sp, input$y2_sp, input$x1_sp, input$x2_sp), {
-    
+
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
     var_num$y1 <- input$y1_sp
     var_num$y2 <- input$y2_sp
     var_num$x1 <- input$x1_sp
     var_num$x2 <- input$x2_sp
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
   })
-  
-  
+
+
   #histogram #######
   observeEvent(input$xvar_hist, {
-    
+
     var_name <- reactiveValues(xvar = NULL)
     var_name$xvar <- input$xvar_hist
     values$variable <<- var_name$xvar
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
   })
-  
+
   observeEvent(c(input$y1_hist, input$y2_hist, input$x1_hist, input$x2_hist), {
-    
+
     var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
     var_num$y1 <- input$y1_hist
     var_num$y2 <- input$y2_hist
     var_num$x1 <- input$x1_hist
     var_num$x2 <- input$x2_hist
     values$point_vals <<- as.vector(reactiveValuesToList(var_num))
-    
+
     output$metaPlot <- renderPlot({
       par(mar=c(0,0,0,0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw,plot_values)
     })
   })
-  
 
-  
+
+
 
   ################################################
   #   Show hide panels
   ################################################
+#need to only do one thing at a time
+observeEvent(input$calib_mode, {
+  if(input$calib_mode){
+  updateSwitchInput(
+  session = session,
+  inputId = "extract_mode",
+  value = FALSE)
+  updateSwitchInput(
+  session = session,
+  inputId = "rotate_mode",
+  value = FALSE)}
+})
+
+observeEvent(input$extract_mode, {
+  if(input$extract_mode){
+  updateSwitchInput(
+  session = session,
+  inputId = "calib_mode",
+  value = FALSE)
+  updateSwitchInput(
+  session = session,
+  inputId = "rotate_mode",
+  value = FALSE)}
+})
+
+observeEvent(input$rotate_mode, {
+  if(input$rotate_mode){
+  updateSwitchInput(
+  session = session,
+  inputId = "calib_mode",
+  value = FALSE)
+  updateSwitchInput(
+  session = session,
+  inputId = "extract_mode",
+  value = FALSE)}
+})
+
 
   observeEvent(input$calib_mode, {
     shinyjs::toggle(id= "calib_data")
   })
-  
-  observeEvent(input$extract_mode, {
-    shinyjs::toggle(id= "group_data")
-  })
-    
-    observeEvent(input$extract_mode, {
-      shinyjs::toggle(id= "point_data")
-    })
 
-    
-      
 
   ################################################
   #   Digitisation
@@ -477,119 +471,150 @@ If figures are wonky, chose rotate."
   ###############################################
   # Group Table
   ##############################################
-  basic <- tibble(
-  Group_Name = "Insert group name",
-  Sample_Size = "Insert sample size",
-  Point_Colour = "#FF0000",
-  Point_Shape = 19)
-    
-    
-  mod_df <- reactiveValues(x = basic)
+observeEvent(input$extract_mode, {
+  if(input$plot_type == "mean_error"){
+  shinyjs::toggle(id= "error_type_select")
+}
+})
 
-  output$group_table<- DT::renderDT({
-    DT::datatable(
-      isolate(mod_df$x),
-      editable = list(target = 'column', disable = list(columns = 3)),
-      options = list(lengthChange = TRUE, dom = 't')) %>%
-      formatStyle("Point_Colour", backgroundColor = styleEqual(mod_df$x$Point_Colour, mod_df$x$Point_Colour)) %>%
-      formatStyle(columns = c(1:NCOL(mod_df$x)))
-  })
+row_count <- reactiveValues(x = NULL)
+mod_df <- reactiveValues(x = NULL)
+valpoints<-reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
 
-  observe({
-    updatePickerInput(session = session, inputId = "delete_row",
-                      choices = 1:nrow(mod_df$x))
-  })
-
-  
-  observeEvent(input$add_mode, {
-    if( input$add_mode== T){
-    mod_df$x <- mod_df$x %>%
-      dplyr::bind_rows(
-        dplyr::tibble(Group_Name = "Insert group name",
-                      Sample_Size = "Insert sample size",
-                      Point_Colour = sample(col, 1, F),
-                      Point_Shape = 19)
-      )
-      
-      }
+  observeEvent(input$extract_mode, {
+    shinyjs::toggle(id= "group_data")
     
-  })
-  
-  observeEvent(input$add_group, {
-    if( input$add_mode== T){
-      mod_df$x <- mod_df$x %>%
-        dplyr::bind_rows(
-          dplyr::tibble(Group_Name = "Insert group name",
-                        Sample_Size = "Insert sample size",
-                        Point_Colour = sample(col, 1, F),
-                        Point_Shape = 19)
-        )
-      
+    output$info <- renderText({
+      "**** EXTRACTING DATA ****
+Group names and sample size should be entered into the table on the sidebar before points are added."
+    })
+
+
+    if(is.null(values$raw_data)){
+      basic <- tibble(
+      Group_Name = "Insert group name",
+      Sample_Size = "Insert sample size")
+
+      row_count$x <- 1
+      mod_df$x <-  basic
+
+    }else{
+      raw_dat<- readRDS(counter$caldat)$raw_data
+      raw_dat_sum <- aggregate(n~id,raw_dat,unique)
+      names(raw_dat_sum) <- c("Group_Name","Sample_Size")
+      mod_df$x <- raw_dat_sum
+      row_count$x <- nrow(raw_dat_sum)
+      valpoints <- values$raw_data
     }
-    
-  })
-  
+    output$group_table<- DT::renderDT({
+      DT::datatable(
+        mod_df$x,
+        editable = list(target = 'cell'),
+        options = list(lengthChange = TRUE, dom = 't'))
 
+  })
+})
 
   observeEvent(input$del_group, {
-
-    mod_df$x <- mod_df$x[-as.integer(input$delete_row), ]
-
+    if(input$del_group){
+    row_count$x <- row_count$x - 1
+    mod_df$x <- mod_df$x[-selected_row$x, ]
+    dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
+    rem_group<-dat_mod[selected_row$x]
+    print(rem_group)
+    values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+    values$raw_data <<- values$raw_data[!selected_row$x]
+    }
+    output$metaPlot <- renderPlot({
+      par(mar=c(0,0,0,0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw,plot_values)
+    })
   })
 
   proxy <- DT::dataTableProxy('group_table')
 
-  observe({
-    DT::replaceData(proxy, mod_df$x)
 
-  })
-
-
-  # output$info <- renderText({
-  #   xy_str <- function(e) {
-  #     if(is.null(e)) return("NULL\n")
-  #     paste0("x=", round(e$x, 1), " y=", round(e$y, 1), "\n")
-  #   }
-  #   xy_range_str <- function(e) {
-  #     if(is.null(e)) return("NULL\n")
-  #     paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1),
-  #            " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
-  #   }
-
-  #   paste0(
-  #     "click: ", xy_str(input$plot_click),
-  #     "dblclick: ", xy_str(input$plot_dblclick),
-  #     "hover: ", xy_str(input$plot_hover),
-  #     "brush: ", xy_range_str(input$plot_brush)
-  #   )
-  # })
-  
   ################################################
   #   Add/delete points
   ################################################
   #create mepty click counter
-  plotcounter <- reactiveValues(plotcount = 0)
-  
-  #add to plot_dat and scrtore click locations
-  observeEvent(input$extract_mode, {
-    if(input$extract_mode){
-            
-      plotcounter$plotcount <- 0
-      
-      observeEvent(input$plot_dblclick,{
-          
-        plotcounter$plotcount<-plotcounter$plotcount + 1
-        
-        if (plotcounter$plotcount == 2) {
-         updateSwitchInput(
-          session = session,
-          inputId = "add_mode",
-          value = FALSE
-          )
-        } 
-      })
+  plotcounter <- reactiveValues(plotclicks = 0)
+
+## updates with names/sample sizes
+  observeEvent(input$group_table_cell_edit, {
+    mod_df$x <-  editData(mod_df$x, input$group_table_cell_edit)
+  })
+
+
+  #add to valpoints and scrtore click locations
+  observeEvent(input$add_group, {
+    row_count$x <- row_count$x + 1
+    mod_df$x <- mod_df$x %>%
+      dplyr::bind_rows(
+        dplyr::tibble(Group_Name = "Insert group name",
+                      Sample_Size = "Insert sample size")
+      )
+})
+
+selected_row <- reactiveValues(x=NULL)
+
+observeEvent(input$group_table_rows_selected, {
+  selected_row$x <- input$group_table_rows_selected
+  print(selected_row$x)
+  #https://stackoverflow.com/questions/37985461/shiny-dt-row-last-clicked
+})
+
+observeEvent(input$click_group, {
+
+  plotcounter$plotclicks <- 0
+  add_mode<-reactiveValues(add=TRUE)
+
+  observeEvent(input$plot_click2,{
+    if (add_mode$add) {
+      plotcounter$plotclicks<-plotcounter$plotclicks + 1
+
+    if(input$plot_type == "mean_error"){
+      if (add_mode$add) {
+        if (plotcounter$plotclicks <= 2) {
+          dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
+          valpoints$x <- c(valpoints$x, input$plot_click2$x)
+          valpoints$y <- c(valpoints$y, input$plot_click2$y)
+          valpoints$id <- c(valpoints$id, dat_mod[selected_row$x,1])
+          valpoints$n <- c(valpoints$n, dat_mod[selected_row$x,2])
+        } else {
+          add_mode$add<-FALSE
+
+          plotcounter$plotclicks <- 0
+        }}}
+    if(input$plot_type == "boxplot"){
+      if (add_mode$add) {
+        if (plotcounter$plotclicks <= 5) {
+          dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
+          valpoints$x <- c(valpoints$x, input$plot_click2$x)
+          valpoints$y <- c(valpoints$y, input$plot_click2$y)
+          valpoints$id <- c(valpoints$id,dat_mod[selected_row$x,"Group_Name"])
+          valpoints$n <- c(valpoints$n, dat_mod[selected_row$x,"Sample_Size"])
+        } else {
+          plotcounter$plotclicks <- 0
+          add_mode$add<-FALSE
+        }}}
+
+  print(values$raw_data)
+  print(plotcounter$plotclicks)
+  values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+
     }
     })
+  output$metaPlot <- renderPlot({
+    par(mar=c(0,0,0,0))
+    plot_values <- reactiveValuesToList(values)
+    do.call(internal_redraw,plot_values)
+  })
+  output$clickinfo <- renderText({
+    paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
+  })
+})
 
 
   ################################################

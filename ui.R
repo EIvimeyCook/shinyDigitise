@@ -1,6 +1,7 @@
 
 shinyUI(fluidPage(
     useShinyjs(),
+    useShinyalert(),
   theme = bs_theme(
     primary = "#66947A", secondary = "#66947A", 
     info = "#E51C23", font_scale = NULL, bootswatch = "materia",
@@ -184,18 +185,6 @@ shinyUI(fluidPage(
                            label= NULL,
                            placeholder= "Y2 Value" )
                  ),
-                 prettyRadioButtons(
-                               inputId = "errortype",
-                               label = h6(strong("Type of error:")),
-                               choiceNames = c("SE", "95%CI", "SD"),
-                               choiceValues = c("se","CI95","sd"),
-                               inline = T,
-                               icon = icon("check"),
-                               bigger = TRUE,
-                               status = "danger",
-                               animation = "jelly"
-                           )
-
 
                        ),
                conditionalPanel(
@@ -260,30 +249,30 @@ shinyUI(fluidPage(
                       onLabel = "Yes",
                       offLabel = "No",
                       onStatus = "primary")),
-        wellPanel(id = "point_data",
-                  splitLayout(
-                        switchInput(
-                          inputId = "add_mode",
-                          label = strong("Add mode"),
-                          labelWidth = "60px",
-                          onLabel = "Yes",
-                          offLabel = "No",
-                          onStatus = "success"),
-                    switchInput(
-                      inputId = "del_mode",
-                      label = strong("Delete mode"),
-                      labelWidth = "60px",
-                      onLabel = "Yes",
-                      offLabel = "No",
-                      onStatus = "danger")
-                    )
-                  ),
+                  wellPanel(id = "error_type_select",
+                  prettyRadioButtons(
+                    inputId = "errortype",
+                    label = h6(strong("Type of error:")),
+                    choiceNames = c("SE", "95%CI", "SD"),
+                    choiceValues = c("se","CI95","sd"),
+                    inline = T,
+                    icon = icon("check"),
+                    bigger = TRUE,
+                    status = "danger",
+                    animation = "jelly"
+                  )),
         wellPanel(id = "group_data",
           splitLayout(
             div(class = "buttonagency",
                 actionButton(
                   inputId = "add_group",
-                  label = "New Group",
+                  label = "Add Group",
+                  #style = "float",
+                  #color = "primary"
+                ),
+                actionButton(
+                  inputId = "click_group",
+                  label = "Click Points",
                   #style = "float",
                   #color = "primary"
                 ),
@@ -292,10 +281,7 @@ shinyUI(fluidPage(
                   label = "Delete Group",
                   #style = "float",
                   #color = "primary"
-                )), 
-            pickerInput(inputId = "delete_row", label = NULL,
-                        choices = NULL)
-          ),
+                ))),
           DTOutput("group_table")
         )
         ),
