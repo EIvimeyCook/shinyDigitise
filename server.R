@@ -486,7 +486,8 @@ valpoints<-reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
     
     output$info <- renderText({
       "**** EXTRACTING DATA ****
-Group names and sample size should be entered into the table on the sidebar before points are added."
+Group names and sample size should be entered into the table on the sidebar before points are added.
+      To delete a group, click on the desired group in the table on the sidebar then press delete"
     })
 
 
@@ -520,9 +521,11 @@ Group names and sample size should be entered into the table on the sidebar befo
     row_count$x <- row_count$x - 1
     print(which(mod_df$x == selected_cell$x, arr.ind = TRUE))
     remove_dat <- which(mod_df$x == selected_cell$x)[1]
-    print(remove_dat)
+    mod_df$x <- mod_df$x[-remove_dat,]
+    print(paste("Remove this - ", remove_dat))
     values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-    values$raw_data <<- values$raw_data[!remove_dat]
+    values$raw_data <<- values$raw_data %>%
+      filter(!stringr::str_detect(id, as.character(selected_cell$x)))
     
     valpoints$x <- values$raw_data$x
     valpoints$y<- values$raw_data$y
