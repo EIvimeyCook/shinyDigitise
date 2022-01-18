@@ -9,13 +9,19 @@ shinyServer(function(input, output, session) {
 
 
   # when next is pressed up the counter and check that its within total
-  observeEvent(input$continue, {
+  observeEvent(input$continue, {2
     plot_values <- reactiveValuesToList(values)
     saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
 
     updateSwitchInput(
       session = session,
       inputId = "calib_mode",
+      value = FALSE
+    )
+
+    updateSwitchInput(
+      session = session,
+      inputId = "extract_mode",
       value = FALSE
     )
 
