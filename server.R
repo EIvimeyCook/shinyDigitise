@@ -9,7 +9,7 @@ shinyServer(function(input, output, session) {
 
 
   # when next is pressed up the counter and check that its within total
-  observeEvent(input$continue, {2
+  observeEvent(input$continue, {
     plot_values <- reactiveValuesToList(values)
     saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
 
@@ -25,7 +25,7 @@ shinyServer(function(input, output, session) {
       value = FALSE
     )
 
-    clickcounter$clickcount <- 0
+    # clickcounter$clickcount <- 0
 
     cv <- counter$countervalue + 1
 
@@ -58,7 +58,7 @@ shinyServer(function(input, output, session) {
 
     if (cv == 0) {
       counter$countervalue <- 1
-      clickcounter$clickcount <- 0
+      # clickcounter$clickcount <- 0
     } else {
       counter$countervalue <- cv
     }
@@ -117,6 +117,21 @@ shinyServer(function(input, output, session) {
     output$image_name <- renderText({
       values$image_name
     })
+
+    updateSwitchInput(
+      session = session,
+      inputId = "calib_mode",
+      value = FALSE
+    )
+
+    updateSwitchInput(
+      session = session,
+      inputId = "extract_mode",
+      value = FALSE
+    )
+
+## add mode?
+
 
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
@@ -212,7 +227,7 @@ If figures are wonky, chose rotate."
               calpoints$x <- c(calpoints$x, input$plot_click2$x)
               calpoints$y <- c(calpoints$y, input$plot_click2$y)
             } else {
-              clickcounter$clickcount <- 0
+              # clickcounter$clickcount <- 0
             }
           } else {
             if (clicktot <= 2) {
@@ -220,7 +235,7 @@ If figures are wonky, chose rotate."
               calpoints$x <- c(calpoints$x, input$plot_click2$x)
               calpoints$y <- c(calpoints$y, input$plot_click2$y)
             } else {
-              clickcounter$clickcount <- 0
+              # clickcounter$clickcount <- 0
             }
           }
 
@@ -287,117 +302,119 @@ If figures are wonky, chose rotate."
   #    calib data
   ################################################
 
+
+    # var_name <- reactiveValues(yvar = NULL, xvar = NULL)
+    # var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
+
   # mean error####
   observeEvent(input$yvar_me, {
-    var_name <- reactiveValues(yvar = NULL)
-    var_name$yvar <- input$yvar_me
-    values$variable <<- var_name$yvar
+    if (input$calib_mode) {    
+      # var_name$yvar <- input$yvar_me
+      # values$variable <<- var_name$yvar
+      values$variable <<- input$yvar_me
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
+      output$metaPlot <- renderPlot({
+        par(mar = c(0, 0, 0, 0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw, plot_values)
+      })
+    }
   })
 
 
   observeEvent(c(input$y1_me, input$y2_me), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_me
-    var_num$y2 <- input$y2_me
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+    if (input$calib_mode) {    
+      # var_num$y1 <- input$y1_me
+      # var_num$y2 <- input$y2_me
+      # values$point_vals <<- c(var_num$y1,var_num$y2)
+    values$point_vals <<- c(input$y1_me,input$y2_me)
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
+      output$metaPlot <- renderPlot({
+        par(mar = c(0, 0, 0, 0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw, plot_values)
+      })
+    }
   })
 
   # boxplot ######
-  observeEvent(input$yvar_bp, {
-    var_name <- reactiveValues(yvar = NULL)
-    var_name$yvar <- input$yvar_bp
-    values$variable <<- var_name$yvar
+  # observeEvent(input$yvar_bp, {
+  #   var_name$yvar <- input$yvar_bp
+  #   values$variable <<- var_name$yvar
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
-  observeEvent(c(input$y1_bp, input$y2_bp), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_bp
-    var_num$y2 <- input$y2_bp
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+  # observeEvent(c(input$y1_bp, input$y2_bp), {
+  #   var_num$y1 <- input$y1_bp
+  #   var_num$y2 <- input$y2_bp
+  #   values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
 
-  # scatterplot ######
-  observeEvent(c(input$yvar_sp, input$xvar_sp), {
-    var_name <- reactiveValues(yvar = NULL, xvar = NULL)
-    var_name$yvar <- input$yvar_sp
-    var_name$xvar <- input$xvar_sp
-    values$variable <<- c(var_name$yvar, var_name$xvar)
+  # # scatterplot ######
+  # observeEvent(c(input$yvar_sp, input$xvar_sp), {
+  #   var_name$yvar <- input$yvar_sp
+  #   var_name$xvar <- input$xvar_sp
+  #   values$variable <<- c(var_name$yvar, var_name$xvar)
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
-  observeEvent(c(input$y1_sp, input$y2_sp, input$x1_sp, input$x2_sp), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_sp
-    var_num$y2 <- input$y2_sp
-    var_num$x1 <- input$x1_sp
-    var_num$x2 <- input$x2_sp
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+  # observeEvent(c(input$y1_sp, input$y2_sp, input$x1_sp, input$x2_sp), {
+  #   var_num$y1 <- input$y1_sp
+  #   var_num$y2 <- input$y2_sp
+  #   var_num$x1 <- input$x1_sp
+  #   var_num$x2 <- input$x2_sp
+  #   values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
 
-  # histogram #######
-  observeEvent(input$xvar_hist, {
-    var_name <- reactiveValues(xvar = NULL)
-    var_name$xvar <- input$xvar_hist
-    values$variable <<- var_name$xvar
+  # # histogram #######
+  # observeEvent(input$xvar_hist, {
+  #   var_name$xvar <- input$xvar_hist
+  #   values$variable <<- var_name$xvar
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
-  observeEvent(c(input$y1_hist, input$y2_hist, input$x1_hist, input$x2_hist), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_hist
-    var_num$y2 <- input$y2_hist
-    var_num$x1 <- input$x1_hist
-    var_num$x2 <- input$x2_hist
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+  # observeEvent(c(input$y1_hist, input$y2_hist, input$x1_hist, input$x2_hist), {
+  #   var_num$y1 <- input$y1_hist
+  #   var_num$y2 <- input$y2_hist
+  #   var_num$x1 <- input$x1_hist
+  #   var_num$x2 <- input$x2_hist
+  #   values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
 
 
@@ -500,8 +517,8 @@ If figures are wonky, chose rotate."
 
     if (is.null(values$raw_data)) {
       basic <- tibble(
-        Group_Name = "Insert group name",
-        Sample_Size = "Insert sample size"
+        Group_Name = NA,
+        Sample_Size = NA
       )
 
       row_count$x <- 1
@@ -567,8 +584,8 @@ If figures are wonky, chose rotate."
     mod_df$x <- mod_df$x %>%
       dplyr::bind_rows(
         dplyr::tibble(
-          Group_Name = "Insert group name",
-          Sample_Size = "Insert sample size"
+          Group_Name = NA,
+          Sample_Size = NA
         )
       )
   })
