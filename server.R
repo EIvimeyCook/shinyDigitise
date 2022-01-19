@@ -625,7 +625,7 @@ If figures are wonky, chose rotate."
   plotcounter <<- reactiveValues(plotclicks = NULL)
   selected_cell <<- reactiveValues(x = NULL)
   selected_row <<- reactiveValues(x = NULL)
-  valpoints <<- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, plot_n)
+  valpoints <<- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
   add_mode <<- reactiveValues(add = NULL)
   
   # what happens when you click a cell on the group table. 
@@ -683,18 +683,17 @@ If figures are wonky, chose rotate."
               dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
               valpoints$x <- c(valpoints$x, input$plot_click2$x)
               valpoints$y <- c(valpoints$y, input$plot_click2$y)
-              
-              if(valpoints$x)
               valpoints$id <- c(valpoints$id, dat_mod[selected_row$x, 1])
               valpoints$n <- c(valpoints$n, dat_mod[selected_row$x, 2])
-              valpoints$plot_n <- c(valpoints$plot_n, plotcounter$plotclicks)
+              
+              
               })
               
               print(valpoints$x)
               print(valpoints$y)
-              print(valpoints$plot_n)
             } else {
               add_mode$add <- FALSE
+              shinyjs::disable("plot_click2")
               
             }
           }
@@ -715,7 +714,18 @@ If figures are wonky, chose rotate."
             }
           }
         }
+        if(any(duplicated(valpoints$x))){
+          dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
+          valpoints$x <- valpoints$x[-1]
+          valpoints$y <- valpoints$y[-1]
+          valpoints$id <- valpoints$id[-1]
+          valpoints$n <- valpoints$n[-1]
+          
+          plotcounter$plotclicks <- plotcounter$plotclicks - 1
+          
+        } else{ 
         values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+        }
       }
     })
     output$metaPlot <- renderPlot({
@@ -724,7 +734,8 @@ If figures are wonky, chose rotate."
       do.call(internal_redraw, plot_values)
     })
     output$clickinfo <- renderText({
-      paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
+      print(any(duplicated(valpoints$x)))
+      #paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
     })
     }
       }
@@ -732,7 +743,28 @@ If figures are wonky, chose rotate."
   
   # similar to above, if you click add points and add mode is T and there is data present for that selected cell.
   # then remove this selected group from the plot and plotcounter becomes zero after replotting.
-
+  observeEvent(input$click_group, {
+    
+    add_mode$add=TRUE
+    
+    if (add_mode$add) {
+      if(length(stringr::str_detect(values$raw_data$id, as.character(selected_cell$x))) != 0){
+        values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+        values$raw_data <<- values$raw_data %>%
+          filter(!stringr::str_detect(id, as.character(selected_cell$x)))
+        valpoints$x <- values$raw_data$x
+        valpoints$y <- values$raw_data$y
+        valpoints$id <- values$raw_data$id
+        valpoints$n <- values$raw_data$n
+      }}
+    values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+    
+    output$metaPlot <- renderPlot({
+      par(mar = c(0, 0, 0, 0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw, plot_values)
+    })
+  }) 
   
 
 ################################################
