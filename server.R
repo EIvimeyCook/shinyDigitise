@@ -1,85 +1,15 @@
 shinyServer(function(input, output, session) {
-################################################
-  # Counter and previous/next buttons
-################################################
-  
-  # start counter at 1.
-  counter <<- reactiveValues(countervalue = 1)
-  
-  #create reactive container for plotting and data.
-  values <<- reactiveValues()
-
-  # when next is pressed up the counter and check that its within total.
-  # if data exists - convert that data right into plot values.
-  # save all calibrated and extracted data.
-  # switch calib and etxract mode to false.
-  # modal box pops up when you've finished.
-  
-  observeEvent(input$continue, {
-    plot_values <- reactiveValuesToList(values)
-    saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
-
-    updateSwitchInput(
-      session = session,
-      inputId = "calib_mode",
-      value = FALSE
-    )
-
-    updateSwitchInput(
-      session = session,
-      inputId = "extract_mode",
-      value = FALSE
-    )
-
-    # clickcounter$clickcount <- 0
-
-    cv <- counter$countervalue + 1
-
-    if (cv > counter_total) {
-      counter$countervalue <- counter_total
-      shinyalert(
-        title = "Congratulations!",
-        text = "You've finished digitising!",
-        size = "s",
-        closeOnEsc = TRUE,
-        closeOnClickOutside = FALSE,
-        html = FALSE,
-        type = "success",
-        showConfirmButton = TRUE,
-        showCancelButton = FALSE,
-        confirmButtonText = "OK",
-        confirmButtonCol = "#AEDEF4",
-        timer = 0,
-        imageUrl = "",
-        animation = TRUE
-      )
-    } else {
-      counter$countervalue <- cv
-    }
-  })
-
-  # when next is pressed up the counter and check that its above 0
-  observeEvent(input$previous, {
-    cv <- counter$countervalue - 1
-
-    if (cv == 0) {
-      counter$countervalue <- 1
-      # clickcounter$clickcount <- 0
-    } else {
-      counter$countervalue <- cv
-    }
-  })
-
-  #output the progress text
-  output$progress <- renderText({
-    paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
-  })
-
-
 
 ################################################
   # Counter and initial plots
 ################################################
+
+  # start counter at 1.
+  counter <<- reactiveValues(countervalue = 1)
+  
+  #create reactive container for plotting and data.
+  ## ?? this is also created inside next code block ??
+  values <<- reactiveValues()
 
  # when counter value is changed (either conitnue or previous is pressed) then read in new data.
  # if extracted/calibrated data already exists then plot/read in that data.
@@ -145,6 +75,19 @@ If figures are wonky, chose rotate."
   })
 
 ################################################
+  # Plot type and cex
+################################################
+
+  # record the plot type for the data file - influences clicking etc.
+  observe(values$plot_type <<- input$plot_type)
+  
+  #record cex used (adjusted with slider)
+  observe(values$cex <<- input$cex)
+
+
+
+
+################################################
   # Flip
 ################################################
   
@@ -167,6 +110,19 @@ If figures are wonky, chose rotate."
 
   observeEvent(input$rotate_mode, {
     if (input$rotate_mode) {
+
+      # if we are in rotate mode - toggle extract mode and calib mode off.
+      updateSwitchInput(
+        session = session,
+        inputId = "calib_mode",
+        value = FALSE
+      )
+      updateSwitchInput(
+        session = session,
+        inputId = "extract_mode",
+        value = FALSE
+      )
+
       output$info <- renderText({
         "**** ROTATE ****\nUse the slider to change the rotation angle\n"
       })
@@ -195,42 +151,52 @@ If figures are wonky, chose rotate."
     }
   })
 
-################################################
-  # Plot type and cex
-################################################
-
-  # record the plot type for the data file - influences clicking etc.
-  observe(values$plot_type <<- input$plot_type)
-  
-  #record cex used (adjusted with slider)
-  observe(values$cex <<- input$cex)
-
 
 ################################################
-  # Calibrate plotting
+  # Calibrate
 ################################################
 
   # create empty clikc counter for plotclicks.
   clickcounter <<- reactiveValues(clickcount = 0)
+  
+  observeEvent(input$calib_mode, {
+    
+
+    updateNumericInput(session = session, inputId = "y1_me", value =  NA)
+    updateNumericInput(session = session, inputId = "y2_me", value = NA)
+    
+    calpoints <- reactiveValues(x = NULL, y = NULL)
+    clickcounter$clickcount <- 0
+
+
+    # if we are in calib mode - show the calib_data object (where we enter names and values for axis).
+    shinyjs::toggle(id = "calib_data")
+
+    if (input$calib_mode) {
+
+  # if we are in calib mode - toggle extract mode and rotate mode off.
+      updateSwitchInput(
+        session = session,
+        inputId = "extract_mode",
+        value = FALSE
+      )
+      updateSwitchInput(
+        session = session,
+        inputId = "rotate_mode",
+        value = FALSE
+      )
 
   # when in calibrate mode - create a container for calibration points.
   # the clickcounter is creater which starts at 0.
   # values$calpoints starts as NULL.
   
+      values$calpoints <<- NULL
+
   # when the plot is clicked - increase clickcounter (becomes clicktot object).
   # if the plot type is sp or hist and the clicktotal is four or less then store the calibration points.
   # if it is 2 or less (and therefore bp/me) also store the calibration points.
   # Lastly, convert these to a dataframe for plotting.
   
-  # Also shows click locations (probably don't need this in future).
-  # and gives calibration placement help.
-  observeEvent(input$calib_mode, {
-    if (input$calib_mode) {
-      calpoints <- reactiveValues(x = NULL, y = NULL)
-
-      clickcounter$clickcount <- 0
-      values$calpoints <<- NULL
-
       observeEvent(input$plot_click2, {
         if (input$calib_mode) {
           clicktot <- clickcounter$clickcount + 1
@@ -253,6 +219,39 @@ If figures are wonky, chose rotate."
           }
 
           values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
+        }
+      })
+
+
+################################################
+  # Calibrate labeling
+################################################
+
+  # take the inputs from the y axis/y1 and y2 and add to the values object
+  # other plots to be finished
+  
+      observeEvent(input$yvar_me, {
+        if (input$calib_mode) {
+          values$variable <<- input$yvar_me
+
+          output$metaPlot <- renderPlot({
+            par(mar = c(0, 0, 0, 0))
+            plot_values <- reactiveValuesToList(values)
+            do.call(internal_redraw, plot_values)
+          })
+        }
+      })
+
+
+      observeEvent(c(input$y1_me, input$y2_me), {
+        if (input$calib_mode & !is.na(input$y1_me)) {
+          values$point_vals <<- c(input$y1_me,input$y2_me)
+
+          output$metaPlot <- renderPlot({
+            par(mar = c(0, 0, 0, 0))
+            plot_values <- reactiveValuesToList(values)
+            do.call(internal_redraw, plot_values)
+          })
         }
       })
 
@@ -288,10 +287,20 @@ If figures are wonky, chose rotate."
         })
       }
       
+  # Also shows click locations (probably don't need this in future).
+  # and gives calibration placement help.  
+    
       output$clickinfo <- renderText({
         paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
       })
     } else {
+
+  ## when calib mode is switched off, input boxes are cleared
+      ## ??? doesnt seem to work???
+      # updateNumericInput(session = session, inputId = "y1_me", value = NA)
+      # updateNumericInput(session = session, inputId = "y2_me", value = NA)
+
+
       output$clickinfo <- renderText({
         " "
       })
@@ -304,37 +313,6 @@ If figures are wonky, chose rotate."
     }
   })
 
-################################################
-  # Calibrate labeling
-################################################
-
-  # take the inputs from the y axis/y1 and y2 and add to the values object
-  # other plots to be finished
-  
-  observeEvent(input$yvar_me, {
-    if (input$calib_mode) {
-      values$variable <<- input$yvar_me
-
-      output$metaPlot <- renderPlot({
-        par(mar = c(0, 0, 0, 0))
-        plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
-      })
-    }
-  })
-
-
-  observeEvent(c(input$y1_me, input$y2_me), {
-    if (input$calib_mode) {
-      values$point_vals <<- c(input$y1_me,input$y2_me)
-
-      output$metaPlot <- renderPlot({
-        par(mar = c(0, 0, 0, 0))
-        plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
-      })
-    }
-  })
 
   # boxplot
   # observeEvent(input$yvar_bp, {
@@ -420,21 +398,7 @@ If figures are wonky, chose rotate."
   # Show/hide panels/swtitches
 ################################################
   
-  # if we are in calib mode - toggle extract mode and rotate mode off.
-  observeEvent(input$calib_mode, {
-    if (input$calib_mode) {
-      updateSwitchInput(
-        session = session,
-        inputId = "extract_mode",
-        value = FALSE
-      )
-      updateSwitchInput(
-        session = session,
-        inputId = "rotate_mode",
-        value = FALSE
-      )
-    }
-  })
+
 
   # if we are in extract mode - toggle calibrate mode and rotate mode off.
   observeEvent(input$extract_mode, {
@@ -452,26 +416,8 @@ If figures are wonky, chose rotate."
     }
   })
 
-  # if we are in rotate mode - toggle extract mode and calib mode off.
-  observeEvent(input$rotate_mode, {
-    if (input$rotate_mode) {
-      updateSwitchInput(
-        session = session,
-        inputId = "calib_mode",
-        value = FALSE
-      )
-      updateSwitchInput(
-        session = session,
-        inputId = "extract_mode",
-        value = FALSE
-      )
-    }
-  })
 
-  # if we are in calib mode - show the calib_data object (where we enter names and values for axis).
-  observeEvent(input$calib_mode, {
-    shinyjs::toggle(id = "calib_data")
-  })
+
   
   # if we are in extract mode - show the error type select input (ofr mean_error).
   observeEvent(input$extract_mode, {
@@ -764,6 +710,83 @@ If figures are wonky, chose rotate."
     })
   }) 
   
+
+
+
+
+
+################################################
+  # Previous/next buttons
+################################################
+  
+  # when next is pressed up the counter and check that its within total.
+  # if data exists - convert that data right into plot values.
+  # save all calibrated and extracted data.
+  # switch calib and etxract mode to false.
+  # modal box pops up when you've finished.
+  
+  observeEvent(input$continue, {
+    plot_values <- reactiveValuesToList(values)
+    saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
+
+    updateSwitchInput(
+      session = session,
+      inputId = "calib_mode",
+      value = FALSE
+    )
+
+    updateSwitchInput(
+      session = session,
+      inputId = "extract_mode",
+      value = FALSE
+    )
+
+    # clickcounter$clickcount <- 0
+
+    cv <- counter$countervalue + 1
+
+    if (cv > counter_total) {
+      counter$countervalue <- counter_total
+      shinyalert(
+        title = "Congratulations!",
+        text = "You've finished digitising!",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "success",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+    } else {
+      counter$countervalue <- cv
+    }
+  })
+
+  # when next is pressed up the counter and check that its above 0
+  observeEvent(input$previous, {
+    cv <- counter$countervalue - 1
+
+    if (cv == 0) {
+      counter$countervalue <- 1
+      # clickcounter$clickcount <- 0
+    } else {
+      counter$countervalue <- cv
+    }
+  })
+
+  #output the progress text
+  output$progress <- renderText({
+    paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
+  })
+
+
+
 
 ################################################
   # What happens when you quit

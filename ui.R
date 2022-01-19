@@ -178,12 +178,12 @@ shinyUI(fluidPage(
                            label = NULL,
                            placeholder = "Y Variable"),
                  splitLayout(
-                 textInput(inputId = "y1_me",
+                 numericInput(inputId = "y1_me",
                            label = NULL,
-                           placeholder= "Y1 Value"),
-                 textInput(inputId = "y2_me",
+                           value= NA),
+                 numericInput(inputId = "y2_me",
                            label= NULL,
-                           placeholder= "Y2 Value" )
+                           value= NA )
                  ),
 
                        ),
