@@ -55,6 +55,18 @@ shinyServer(function(input, output, session) {
       values$image_name
     })
     
+    updateSwitchInput(
+      session = session,
+      inputId = "calib_mode",
+      value = FALSE
+    )
+    
+    updateSwitchInput(
+      session = session,
+      inputId = "extract_mode",
+      value = FALSE
+    )
+
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
@@ -150,100 +162,49 @@ If figures are wonky, chose rotate."
   # create empty clikc counter for plotclicks.
   clickcounter <- reactiveValues(clickcount = 0)
   
+  # create a container for calibration points.
+  calpoints <- reactiveValues(x = NULL, y = NULL)
+
+
   observeEvent(input$calib_mode, {
-    
-    calpoints <- reactiveValues(x = NULL, y = NULL)
+    # if calib mode button pressed
+
+    # resent click counter
     clickcounter$clickcount <- 0
-    # if we are in calib mode - show the calib_data object (where we enter names and values for axis).
+    
+    # show the calib_data object (where we enter names and values for axis).
     shinyjs::toggle(id = "calib_data")
     
+    # clears any previously entered text
+    shinyjs::reset("calib_data")
+
+    # toggle extract mode and rotate mode off.
+    updateSwitchInput(
+      session = session,
+      inputId = "extract_mode",
+      value = FALSE
+    )
+    updateSwitchInput(
+      session = session,
+      inputId = "rotate_mode",
+      value = FALSE
+    )
+
     if (input$calib_mode) {
+     # if in calib mode 
+
+      values$calpoints <<- NULL
+      values$variable <<- NULL
+      values$point_vals <<- NULL
+      calpoints$x <- NULL
+      calpoints$y <- NULL
       
-      # if we are in calib mode - toggle extract mode and rotate mode off.
-      updateSwitchInput(
-        session = session,
-        inputId = "extract_mode",
-        value = FALSE
-      )
-      updateSwitchInput(
-        session = session,
-        inputId = "rotate_mode",
-        value = FALSE
-      )
-      
-      #clears any left over text
-      shinyjs::reset("calib_data")
-      
-      # when in calibrate mode - create a container for calibration points.
       # the clickcounter is creater which starts at 0.
       # values$calpoints starts as NULL.
-      values$calpoints <<- NULL
-      
-      # when the plot is clicked - increase clickcounter (becomes clicktot object).
-      # if the plot type is sp or hist and the clicktotal is four or less then store the calibration points.
-      # if it is 2 or less (and therefore bp/me) also store the calibration points.
-      # Lastly, convert these to a dataframe for plotting.
-      observeEvent(input$plot_click2, {
-        if (input$calib_mode) {
-          clicktot <- clickcounter$clickcount + 1
-          if (input$plot_type %in% c("scatterplot", "histogram")) {
-            if (clicktot <= 4) {
-              clickcounter$clickcount <- clicktot
-              calpoints$x <- c(calpoints$x, input$plot_click2$x)
-              calpoints$y <- c(calpoints$y, input$plot_click2$y)
-            } else {
-              # clickcounter$clickcount <- 0
-            }
-          } else {
-            if (clicktot <= 2) {
-              clickcounter$clickcount <- clicktot
-              calpoints$x <- c(calpoints$x, input$plot_click2$x)
-              calpoints$y <- c(calpoints$y, input$plot_click2$y)
-            } else {
-              # clickcounter$clickcount <- 0
-            }
-          }
-          
-          values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
-        }
-      })
+
       
       
-      ################################################
-      # Calibrate labeling
-      ################################################
-      
-      # take the inputs from the y axis/y1 and y2 and add to the values object
-      # other plots to be finished
-      observeEvent(input$yvar_me, {
-        if (input$calib_mode) {
-          values$variable <<- input$yvar_me
-          
-          output$metaPlot <- renderPlot({
-            par(mar = c(0, 0, 0, 0))
-            plot_values <- reactiveValuesToList(values)
-            do.call(internal_redraw, plot_values)
-          })
-        }
-      })
-      
-      observeEvent(c(input$y1_me, input$y2_me), {
-        if (input$calib_mode & !is.na(input$y1_me)) {
-          values$point_vals <<- c(input$y1_me,input$y2_me)
-          
-          output$metaPlot <- renderPlot({
-            par(mar = c(0, 0, 0, 0))
-            plot_values <- reactiveValuesToList(values)
-            do.call(internal_redraw, plot_values)
-          })
-        }
-      })
-      
-      output$metaPlot <- renderPlot({
-        par(mar = c(0, 0, 0, 0))
-        plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
-      })
+
       
       
       # plot-specific calibration help
@@ -294,6 +255,77 @@ If figures are wonky, chose rotate."
     }
   })
   
+      # when the plot is clicked - increase clickcounter (becomes clicktot object).
+      # if the plot type is sp or hist and the clicktotal is four or less then store the calibration points.
+      # if it is 2 or less (and therefore bp/me) also store the calibration points.
+      # Lastly, convert these to a dataframe for plotting.
+      observeEvent(input$plot_click2, {
+        if (input$calib_mode) {
+          clicktot <- clickcounter$clickcount + 1
+          if (input$plot_type %in% c("scatterplot", "histogram")) {
+            if (clicktot <= 4) {
+              clickcounter$clickcount <- clicktot
+              calpoints$x <- c(calpoints$x, input$plot_click2$x)
+              calpoints$y <- c(calpoints$y, input$plot_click2$y)
+            } else {
+              # clickcounter$clickcount <- 0
+              # calpoints$x <- NULL
+              # calpoints$y <- NULL
+
+            }
+          } else {
+            if (clicktot <= 2) {
+              clickcounter$clickcount <- clicktot
+              calpoints$x <- c(calpoints$x, input$plot_click2$x)
+              calpoints$y <- c(calpoints$y, input$plot_click2$y)
+            } else {
+              # clickcounter$clickcount <- 0
+              # calpoints$x <- NULL
+              # calpoints$y <- NULL
+            }
+          }
+          
+          values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
+          output$metaPlot <- renderPlot({
+          par(mar = c(0, 0, 0, 0))
+          plot_values <- reactiveValuesToList(values)
+          do.call(internal_redraw, plot_values)
+      })
+        }
+      })
+
+      ################################################
+      # Calibrate labeling
+      ################################################
+      
+      # take the inputs from the y axis/y1 and y2 and add to the values object
+      # other plots to be finished
+
+      observeEvent(input$yvar_me, {
+        if (input$calib_mode) {
+          values$variable <<- input$yvar_me
+          
+          output$metaPlot <- renderPlot({
+            par(mar = c(0, 0, 0, 0))
+            plot_values <- reactiveValuesToList(values)
+            do.call(internal_redraw, plot_values)
+          })
+        }
+      })
+      
+      observeEvent(c(input$y1_me, input$y2_me), {
+        if (input$calib_mode) {
+          values$point_vals <<- c(input$y1_me,input$y2_me)
+          
+          output$metaPlot <- renderPlot({
+            par(mar = c(0, 0, 0, 0))
+            plot_values <- reactiveValuesToList(values)
+            do.call(internal_redraw, plot_values)
+          })
+        }
+      })
+
+
   
   # boxplot
   # observeEvent(input$yvar_bp, {
@@ -704,20 +736,6 @@ If figures are wonky, chose rotate."
   observeEvent(input$continue, {
     plot_values <- reactiveValuesToList(values)
     saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
-    
-    updateSwitchInput(
-      session = session,
-      inputId = "calib_mode",
-      value = FALSE
-    )
-    
-    updateSwitchInput(
-      session = session,
-      inputId = "extract_mode",
-      value = FALSE
-    )
-    
-    # clickcounter$clickcount <- 0
     
     cv <- counter$countervalue + 1
     
