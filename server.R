@@ -1,14 +1,21 @@
 
 shinyServer(function(input, output, session) {
-  ################################################
-  #    Counter and previous/next buttons
-  ################################################
-  # start counter at 1
-  counter <- reactiveValues(countervalue = 1)
-  values <- reactiveValues()
+################################################
+  # Counter and previous/next buttons
+################################################
+  
+  # start counter at 1.
+  counter <<- reactiveValues(countervalue = 1)
+  
+  #create reactive container for plotting and data.
+  values <<- reactiveValues()
 
-
-  # when next is pressed up the counter and check that its within total
+  # when next is pressed up the counter and check that its within total.
+  # if data exists - convert that data right into plot values.
+  # save all calibrated and extracted data.
+  # switch calib and etxract mode to false.
+  # modal box pops up when you've finished.
+  
   observeEvent(input$continue, {
     plot_values <- reactiveValuesToList(values)
     saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
@@ -19,7 +26,13 @@ shinyServer(function(input, output, session) {
       value = FALSE
     )
 
-    clickcounter$clickcount <- 0
+    updateSwitchInput(
+      session = session,
+      inputId = "extract_mode",
+      value = FALSE
+    )
+
+    # clickcounter$clickcount <- 0
 
     cv <- counter$countervalue + 1
 
@@ -52,23 +65,29 @@ shinyServer(function(input, output, session) {
 
     if (cv == 0) {
       counter$countervalue <- 1
-      clickcounter$clickcount <- 0
+      # clickcounter$clickcount <- 0
     } else {
       counter$countervalue <- cv
     }
   })
 
+  #output the progress text
   output$progress <- renderText({
     paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
   })
 
 
 
-  ################################################
-  #    when counter changes
-  ################################################
+################################################
+  # Counter and initial plots
+################################################
 
-
+ # when counter value is changed (either conitnue or previous is pressed) then read in new data.
+ # if extracted/calibrated data already exists then plot/read in that data.
+ # if not then create a new values object that we can store data in.
+ # also keeps flip/rotate and image details.
+ # Provides info for new plotting as text.
+  
   observeEvent(counter$countervalue, {
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
 
@@ -126,9 +145,11 @@ If figures are wonky, chose rotate."
     })
   })
 
-  ################################################
-  #   Flip
-  ################################################
+################################################
+  # Flip
+################################################
+  
+  # record whether we flip the image or not
   observeEvent(input$flip, {
     values$flip <<- input$flip
 
@@ -139,11 +160,11 @@ If figures are wonky, chose rotate."
     })
   })
 
-  ################################################
-  #   Rotate
-  ################################################
-
-  # plot_click_slow <- debounce(reactive(input$plot_click), 300)
+################################################
+  # Rotate
+################################################
+  
+  # rotate the image using a slider. Text + slider gets displayed as you click rotate mode.
 
   observeEvent(input$rotate_mode, {
     if (input$rotate_mode) {
@@ -175,21 +196,35 @@ If figures are wonky, chose rotate."
     }
   })
 
-  ################################################
-  #   Plot type
-  ################################################
+################################################
+  # Plot type and cex
+################################################
 
+  # record the plot type for the data file - influences clicking etc.
   observe(values$plot_type <<- input$plot_type)
+  
+  #record cex used (adjusted with slider)
+  observe(values$cex <<- input$cex)
 
 
-  ################################################
-  #   Calibrate
-  ################################################
+################################################
+  # Calibrate plotting
+################################################
 
-  # create mepty click counter
-  clickcounter <- reactiveValues(clickcount = 0)
+  # create empty clikc counter for plotclicks.
+  clickcounter <<- reactiveValues(clickcount = 0)
 
-  # add to calpoints and scrtore click locations
+  # when in calibrate mode - create a container for calibration points.
+  # the clickcounter is creater which starts at 0.
+  # values$calpoints starts as NULL.
+  
+  # when the plot is clicked - increase clickcounter (becomes clicktot object).
+  # if the plot type is sp or hist and the clicktotal is four or less then store the calibration points.
+  # if it is 2 or less (and therefore bp/me) also store the calibration points.
+  # Lastly, convert these to a dataframe for plotting.
+  
+  # Also shows click locations (probably don't need this in future).
+  # and gives calibration placement help.
   observeEvent(input$calib_mode, {
     if (input$calib_mode) {
       calpoints <- reactiveValues(x = NULL, y = NULL)
@@ -206,7 +241,7 @@ If figures are wonky, chose rotate."
               calpoints$x <- c(calpoints$x, input$plot_click2$x)
               calpoints$y <- c(calpoints$y, input$plot_click2$y)
             } else {
-              clickcounter$clickcount <- 0
+              # clickcounter$clickcount <- 0
             }
           } else {
             if (clicktot <= 2) {
@@ -214,7 +249,7 @@ If figures are wonky, chose rotate."
               calpoints$x <- c(calpoints$x, input$plot_click2$x)
               calpoints$y <- c(calpoints$y, input$plot_click2$y)
             } else {
-              clickcounter$clickcount <- 0
+              # clickcounter$clickcount <- 0
             }
           }
 
@@ -227,15 +262,9 @@ If figures are wonky, chose rotate."
         plot_values <- reactiveValuesToList(values)
         do.call(internal_redraw, plot_values)
       })
-      # output$metaPlot <- renderPlot({
-      # par(mar=c(0,0,0,0))
-      # plot_values <- reactiveValuesToList(values)
-      # do.call(internal_redraw,plot_values)
-      # })
 
 
-      # add click help
-
+      # plot-specific calibration help
       if (input$plot_type == "scatterplot" | input$plot_type == "histogram") {
         output$info <- renderText({
           "   Calibrate ---> Click on known values on axes in this order:
@@ -259,8 +288,7 @@ If figures are wonky, chose rotate."
   "
         })
       }
-
-      # add click locationsin text
+      
       output$clickinfo <- renderText({
         paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
       })
@@ -277,129 +305,123 @@ If figures are wonky, chose rotate."
     }
   })
 
-  ################################################
-  #    calib data
-  ################################################
+################################################
+  # Calibrate labeling
+################################################
 
-  # mean error####
+  # take the inputs from the y axis/y1 and y2 and add to the values object
+  # other plots to be finished
+  
   observeEvent(input$yvar_me, {
-    var_name <- reactiveValues(yvar = NULL)
-    var_name$yvar <- input$yvar_me
-    values$variable <<- var_name$yvar
+    if (input$calib_mode) {
+      values$variable <<- input$yvar_me
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
+      output$metaPlot <- renderPlot({
+        par(mar = c(0, 0, 0, 0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw, plot_values)
+      })
+    }
   })
 
 
   observeEvent(c(input$y1_me, input$y2_me), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_me
-    var_num$y2 <- input$y2_me
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+    if (input$calib_mode) {
+      values$point_vals <<- c(input$y1_me,input$y2_me)
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
+      output$metaPlot <- renderPlot({
+        par(mar = c(0, 0, 0, 0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw, plot_values)
+      })
+    }
   })
 
-  # boxplot ######
-  observeEvent(input$yvar_bp, {
-    var_name <- reactiveValues(yvar = NULL)
-    var_name$yvar <- input$yvar_bp
-    values$variable <<- var_name$yvar
+  # boxplot
+  # observeEvent(input$yvar_bp, {
+  #   var_name$yvar <- input$yvar_bp
+  #   values$variable <<- var_name$yvar
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
-  observeEvent(c(input$y1_bp, input$y2_bp), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_bp
-    var_num$y2 <- input$y2_bp
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+  # observeEvent(c(input$y1_bp, input$y2_bp), {
+  #   var_num$y1 <- input$y1_bp
+  #   var_num$y2 <- input$y2_bp
+  #   values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
 
-  # scatterplot ######
-  observeEvent(c(input$yvar_sp, input$xvar_sp), {
-    var_name <- reactiveValues(yvar = NULL, xvar = NULL)
-    var_name$yvar <- input$yvar_sp
-    var_name$xvar <- input$xvar_sp
-    values$variable <<- c(var_name$yvar, var_name$xvar)
+  # # scatterplot
+  # observeEvent(c(input$yvar_sp, input$xvar_sp), {
+  #   var_name$yvar <- input$yvar_sp
+  #   var_name$xvar <- input$xvar_sp
+  #   values$variable <<- c(var_name$yvar, var_name$xvar)
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
-  observeEvent(c(input$y1_sp, input$y2_sp, input$x1_sp, input$x2_sp), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_sp
-    var_num$y2 <- input$y2_sp
-    var_num$x1 <- input$x1_sp
-    var_num$x2 <- input$x2_sp
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+  # observeEvent(c(input$y1_sp, input$y2_sp, input$x1_sp, input$x2_sp), {
+  #   var_num$y1 <- input$y1_sp
+  #   var_num$y2 <- input$y2_sp
+  #   var_num$x1 <- input$x1_sp
+  #   var_num$x2 <- input$x2_sp
+  #   values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
 
-  # histogram #######
-  observeEvent(input$xvar_hist, {
-    var_name <- reactiveValues(xvar = NULL)
-    var_name$xvar <- input$xvar_hist
-    values$variable <<- var_name$xvar
+  # # histogram
+  # observeEvent(input$xvar_hist, {
+  #   var_name$xvar <- input$xvar_hist
+  #   values$variable <<- var_name$xvar
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
-  observeEvent(c(input$y1_hist, input$y2_hist, input$x1_hist, input$x2_hist), {
-    var_num <- reactiveValues(y1 = NULL, y2 = NULL, x1 = NULL, x2 = NULL)
-    var_num$y1 <- input$y1_hist
-    var_num$y2 <- input$y2_hist
-    var_num$x1 <- input$x1_hist
-    var_num$x2 <- input$x2_hist
-    values$point_vals <<- as.vector(reactiveValuesToList(var_num))
+  # observeEvent(c(input$y1_hist, input$y2_hist, input$x1_hist, input$x2_hist), {
+  #   var_num$y1 <- input$y1_hist
+  #   var_num$y2 <- input$y2_hist
+  #   var_num$x1 <- input$x1_hist
+  #   var_num$x2 <- input$x2_hist
+  #   values$point_vals <<- as.vector(reactiveValuesToList(var_num))
 
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
-    })
-  })
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, plot_values)
+  #   })
+  # })
 
 
-
-
-  ################################################
-  #   Show hide panels
-  ################################################
-  # need to only do one thing at a time
+################################################
+  # Show/hide panels/swtitches
+################################################
+  
+  # if we are in calib mode - toggle extract mode and rotate mode off.
   observeEvent(input$calib_mode, {
     if (input$calib_mode) {
       updateSwitchInput(
@@ -415,6 +437,7 @@ If figures are wonky, chose rotate."
     }
   })
 
+  # if we are in extract mode - toggle calibrate mode and rotate mode off.
   observeEvent(input$extract_mode, {
     if (input$extract_mode) {
       updateSwitchInput(
@@ -430,6 +453,7 @@ If figures are wonky, chose rotate."
     }
   })
 
+  # if we are in rotate mode - toggle extract mode and calib mode off.
   observeEvent(input$rotate_mode, {
     if (input$rotate_mode) {
       updateSwitchInput(
@@ -445,35 +469,32 @@ If figures are wonky, chose rotate."
     }
   })
 
-
+  # if we are in calib mode - show the calib_data object (where we enter names and values for axis).
   observeEvent(input$calib_mode, {
     shinyjs::toggle(id = "calib_data")
   })
-
-
-  ################################################
-  #   Digitisation
-  ################################################
-
-  observe(values$cex <<- input$cex)
-
-
-  ###############################################
-  # Group Table
-  ##############################################
+  
+  # if we are in extract mode - show the error type select input (ofr mean_error).
   observeEvent(input$extract_mode, {
     if (input$plot_type == "mean_error") {
       shinyjs::toggle(id = "error_type_select")
     }
   })
-
-  row_count <- reactiveValues(x = NULL)
-  mod_df <- reactiveValues(x = NULL)
-  valpoints <- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
-
+  
+  # if we are in extract mode - show the group_data ovject (the table for clicking/groups and sample sizes)
   observeEvent(input$extract_mode, {
     shinyjs::toggle(id = "group_data")
 
+################################################
+    # Group Name and Sample Size Table
+################################################
+
+  # create multiple reactive objects.
+  # for row count, for the dataframe.
+  row_count <<- reactiveValues(x = NULL)
+  mod_df <<- reactiveValues(x = NULL)
+
+  # help text to show when extract mode is on.
     if (input$extract_mode) {
       output$info <- renderText({
         "**** EXTRACTING DATA ****
@@ -482,7 +503,8 @@ If figures are wonky, chose rotate."
 3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
       })
     }
-
+  
+  # help text to show when extract mode is false.
     if (input$extract_mode == F) {
       output$info <- renderText({
         "**** NEW PLOT ****
@@ -492,16 +514,19 @@ If figures are wonky, chose rotate."
       })
     }
 
+  # if values raw data is null/empty then create new data to show in the table.
+  # otherwise read in the data that already exists from the raw data.
+  # this is then rendered in a DT table.
     if (is.null(values$raw_data)) {
       basic <- tibble(
-        Group_Name = "Insert group name",
-        Sample_Size = "Insert sample size"
+        Group_Name = NA,
+        Sample_Size = NA
       )
 
-      row_count$x <- 1
-      mod_df$x <- basic
+      row_count$x <- 0
+      mod_df$x <- basic[-nrow(basic),]
     } else {
-      raw_dat <- readRDS(counter$caldat)$raw_data
+      raw_dat <- as.data.frame(values$raw_data)
       raw_dat_sum <- aggregate(n ~ id, raw_dat, unique)
       names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
       mod_df$x <- raw_dat_sum
@@ -517,10 +542,31 @@ If figures are wonky, chose rotate."
     })
   })
 
+  # what happens when you press the delete group.
+  # if no cell is selected to delete, then show a modal alert.
+  # however if one is, then search the data fro that cell and remove it from the df.
+  # this will also cause the plot and raw data to update and remove anything with this group.
   observeEvent(input$del_group, {
     if (input$del_group) {
+      if(is.null(selected_cell$x)){
+        shinyalert(
+          title = "Select a group to delete",
+          text = "No group has been selected",
+          size = "s",
+          closeOnEsc = TRUE,
+          closeOnClickOutside = FALSE,
+          html = FALSE,
+          type = "warning",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#AEDEF4",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
+        )
+      } else{
       row_count$x <- row_count$x - 1
-      print(which(mod_df$x == selected_cell$x, arr.ind = TRUE))
       remove_dat <- which(mod_df$x == selected_cell$x)[1]
       mod_df$x <- mod_df$x[-remove_dat, ]
       print(paste("Remove this - ", remove_dat))
@@ -532,7 +578,7 @@ If figures are wonky, chose rotate."
       valpoints$y <- values$raw_data$y
       valpoints$id <- values$raw_data$id
       valpoints$n <- values$raw_data$n
-    }
+    }}
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
@@ -540,54 +586,78 @@ If figures are wonky, chose rotate."
     })
   })
 
+  # this is necessary for DT to work.
   proxy <- DT::dataTableProxy("group_table")
 
-
-  ################################################
-  #   Add/delete points
-  ################################################
-  # create mepty click counter
-  plotcounter <- reactiveValues(plotclicks = 0)
-
-  ## updates with names/sample sizes
-  observeEvent(input$group_table_cell_edit, {
-    mod_df$x <- editData(mod_df$x, input$group_table_cell_edit)
+  # edit the data table with data from the modal poopup.
+  observeEvent(input$group, {
+    mod_df$x[row_count$x,1] <<- input$group
   })
-
-
-  # add to valpoints and scrtore click locations
+  
+  # edit the data table with data from the modal popup.
+  observeEvent(input$sample_size, {
+    mod_df$x[row_count$x,2] <<- input$sample_size
+  })
+  
+  # when you click add group a popup appears which asks you to add group and sample size.
+  # this is then added onto the raw data.
+  # the row count increases and another row is then added after.
   observeEvent(input$add_group, {
+    shinyalert(html = TRUE, text = tagList(
+      textInput("group", "Group Name", ""),
+      numericInput("sample_size", "Sample Size", ""),
+    ))
+    
     row_count$x <- row_count$x + 1
     mod_df$x <- mod_df$x %>%
       dplyr::bind_rows(
         dplyr::tibble(
-          Group_Name = "Insert group name",
-          Sample_Size = "Insert sample size"
+          Group_Name = NA, 
+          Sample_Size = NA
         )
       )
   })
-
-  selected_cell <- reactiveValues(x = NULL)
-
+  
+################################################
+  #  Adding points
+################################################
+  
+  # create empty click counter and which cell/row is selected.
+  # for plotting values and for add T/F.
+  plotcounter <<- reactiveValues(plotclicks = NULL)
+  selected_cell <<- reactiveValues(x = NULL)
+  selected_row <<- reactiveValues(x = NULL)
+  valpoints <<- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+  add_mode <<- reactiveValues(add = NULL)
+  
+  # what happens when you click a cell on the group table. 
+  # Useful for deleting groups and labeling points. Highlights the cell.
   observeEvent(input$group_table_cell_clicked, {
     selected_cell$x <- input$group_table_cell_clicked$value
-    print(selected_cell$x)
-    # https://stackoverflow.com/questions/37985461/shiny-dt-row-last-clicked
+    print(paste("Selected cell = ", selected_cell$x))
   })
 
-
-  selected_row <- reactiveValues(x = NULL)
-
+  # what happens when you click on a cell/row on the group table. 
+  # Useful for deleting groups and labeling points. Highlights the row.
   observeEvent(input$group_table_rows_selected, {
     selected_row$x <- input$group_table_rows_selected
-    print(selected_row$x)
-    # https://stackoverflow.com/questions/37985461/shiny-dt-row-last-clicked
+    print(paste("Selected row = ",selected_row$x))
   })
 
+
+  # what happens when you click to add points.
+  # plotcounter becomes 0.
+  # add mode becomes T, which means we can add points.
+  # when you click on the plot and if add mode is true, increase plotcount by 1.
+  # if the graph is mean_error and the plotcount is 2 or less then add data to valpoints object.
+  # if its boxplot and five or less, then do the same.
+  # otherwise add mode becomes false and it switches off.
+  # valpoints is then converted to a dataframe and plotted.
+  # location of x and y valpoints are given in text.
   observeEvent(input$click_group, {
     plotcounter$plotclicks <- 0
-    add_mode <- reactiveValues(add = TRUE)
-
+    add_mode$add=TRUE
+    
     observeEvent(input$plot_click2, {
       if (add_mode$add) {
         plotcounter$plotclicks <- plotcounter$plotclicks + 1
@@ -600,15 +670,8 @@ If figures are wonky, chose rotate."
               valpoints$y <- c(valpoints$y, input$plot_click2$y)
               valpoints$id <- c(valpoints$id, dat_mod[selected_row$x, 1])
               valpoints$n <- c(valpoints$n, dat_mod[selected_row$x, 2])
-
-              print(valpoints$x)
-              print(valpoints$id)
-              print(valpoints$y)
-              print(valpoints$n)
             } else {
               add_mode$add <- FALSE
-
-              plotcounter$plotclicks <- 0
             }
           }
         }
@@ -621,14 +684,13 @@ If figures are wonky, chose rotate."
               valpoints$id <- c(valpoints$id, dat_mod[selected_row$x, 1])
               valpoints$n <- c(valpoints$n, dat_mod[selected_row$x, 2])
             } else {
-              plotcounter$plotclicks <- 0
               add_mode$add <- FALSE
             }
           }
         }
 
-        print(values$raw_data)
-        print(plotcounter$plotclicks)
+        print(paste("Plotting data = ",values$raw_data))
+        print(paste("Plot Clicks = ",plotcounter$plotclicks))
         values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
       }
     })
@@ -638,15 +700,41 @@ If figures are wonky, chose rotate."
       do.call(internal_redraw, plot_values)
     })
     output$clickinfo <- renderText({
-      paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
+      paste0(plotcounter$plotclicks)
+      #paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
     })
   })
+  
+  # similar to above, if you click add points and add mode is T and there is data present for that selected cell.
+  # then remove this selected group from the plot and plotcounter becomes zero after replotting.
+  observeEvent(input$click_group, {
+    add_mode$add=TRUE
+  if (add_mode$add) {
+    if(length(stringr::str_detect(values$raw_data$id, as.character(selected_cell$x))) != 0){
+      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+      values$raw_data <<- values$raw_data %>%
+        filter(!stringr::str_detect(id, as.character(selected_cell$x)))
+      valpoints$x <- values$raw_data$x
+      valpoints$y <- values$raw_data$y
+      valpoints$id <- values$raw_data$id
+      valpoints$n <- values$raw_data$n
+    }}
+  values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+  
+  output$metaPlot <- renderPlot({
+    par(mar = c(0, 0, 0, 0))
+    plot_values <- reactiveValuesToList(values)
+    do.call(internal_redraw, plot_values)
+    
+    plotcounter$plotclicks <- 0
+  })
+  }) 
 
+################################################
+  # What happens when you quit
+################################################
 
-  ################################################
-  #   What happens when you quit
-  ################################################
-
+  #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
     stopApp()
   })
