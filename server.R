@@ -1,4 +1,3 @@
-
 shinyServer(function(input, output, session) {
 ################################################
   # Counter and previous/next buttons
@@ -569,7 +568,6 @@ If figures are wonky, chose rotate."
       row_count$x <- row_count$x - 1
       remove_dat <- which(mod_df$x == selected_cell$x)[1]
       mod_df$x <- mod_df$x[-remove_dat, ]
-      print(paste("Remove this - ", remove_dat))
       values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
       values$raw_data <<- values$raw_data %>%
         filter(!stringr::str_detect(id, as.character(selected_cell$x)))
@@ -627,27 +625,25 @@ If figures are wonky, chose rotate."
   plotcounter <<- reactiveValues(plotclicks = NULL)
   selected_cell <<- reactiveValues(x = NULL)
   selected_row <<- reactiveValues(x = NULL)
-  valpoints <<- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+  valpoints <<- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, plot_n)
   add_mode <<- reactiveValues(add = NULL)
   
   # what happens when you click a cell on the group table. 
   # Useful for deleting groups and labeling points. Highlights the cell.
   observeEvent(input$group_table_cell_clicked, {
     selected_cell$x <- input$group_table_cell_clicked$value
-    print(paste("Selected cell = ", selected_cell$x))
   })
 
   # what happens when you click on a cell/row on the group table. 
   # Useful for deleting groups and labeling points. Highlights the row.
   observeEvent(input$group_table_rows_selected, {
     selected_row$x <- input$group_table_rows_selected
-    print(paste("Selected row = ",selected_row$x))
   })
-
 
   # what happens when you click to add points.
   # plotcounter becomes 0.
   # add mode becomes T, which means we can add points.
+  # if you click group without any row selected - return an error.
   # when you click on the plot and if add mode is true, increase plotcount by 1.
   # if the graph is mean_error and the plotcount is 2 or less then add data to valpoints object.
   # if its boxplot and five or less, then do the same.
@@ -658,6 +654,24 @@ If figures are wonky, chose rotate."
     plotcounter$plotclicks <- 0
     add_mode$add=TRUE
     
+    if(is.null(selected_cell$x)){
+      shinyalert(
+        title = "Select a group to plot",
+        text = "No group has been selected",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "warning",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+    } else {if(is.null(selected_cell$x) == F){
     observeEvent(input$plot_click2, {
       if (add_mode$add) {
         plotcounter$plotclicks <- plotcounter$plotclicks + 1
@@ -665,32 +679,42 @@ If figures are wonky, chose rotate."
         if (input$plot_type == "mean_error") {
           if (add_mode$add) {
             if (plotcounter$plotclicks <= 2) {
+              isolate({
               dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
               valpoints$x <- c(valpoints$x, input$plot_click2$x)
               valpoints$y <- c(valpoints$y, input$plot_click2$y)
+              
+              if(valpoints$x)
               valpoints$id <- c(valpoints$id, dat_mod[selected_row$x, 1])
               valpoints$n <- c(valpoints$n, dat_mod[selected_row$x, 2])
+              valpoints$plot_n <- c(valpoints$plot_n, plotcounter$plotclicks)
+              })
+              
+              print(valpoints$x)
+              print(valpoints$y)
+              print(valpoints$plot_n)
             } else {
               add_mode$add <- FALSE
+              
             }
           }
         }
         if (input$plot_type == "boxplot") {
           if (add_mode$add) {
             if (plotcounter$plotclicks <= 5) {
+              isolate({
               dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
               valpoints$x <- c(valpoints$x, input$plot_click2$x)
               valpoints$y <- c(valpoints$y, input$plot_click2$y)
               valpoints$id <- c(valpoints$id, dat_mod[selected_row$x, 1])
               valpoints$n <- c(valpoints$n, dat_mod[selected_row$x, 2])
+              })
             } else {
               add_mode$add <- FALSE
+
             }
           }
         }
-
-        print(paste("Plotting data = ",values$raw_data))
-        print(paste("Plot Clicks = ",plotcounter$plotclicks))
         values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
       }
     })
@@ -700,35 +724,16 @@ If figures are wonky, chose rotate."
       do.call(internal_redraw, plot_values)
     })
     output$clickinfo <- renderText({
-      paste0(plotcounter$plotclicks)
-      #paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
+      paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
     })
+    }
+      }
   })
   
   # similar to above, if you click add points and add mode is T and there is data present for that selected cell.
   # then remove this selected group from the plot and plotcounter becomes zero after replotting.
-  observeEvent(input$click_group, {
-    add_mode$add=TRUE
-  if (add_mode$add) {
-    if(length(stringr::str_detect(values$raw_data$id, as.character(selected_cell$x))) != 0){
-      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-      values$raw_data <<- values$raw_data %>%
-        filter(!stringr::str_detect(id, as.character(selected_cell$x)))
-      valpoints$x <- values$raw_data$x
-      valpoints$y <- values$raw_data$y
-      valpoints$id <- values$raw_data$id
-      valpoints$n <- values$raw_data$n
-    }}
-  values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+
   
-  output$metaPlot <- renderPlot({
-    par(mar = c(0, 0, 0, 0))
-    plot_values <- reactiveValuesToList(values)
-    do.call(internal_redraw, plot_values)
-    
-    plotcounter$plotclicks <- 0
-  })
-  }) 
 
 ################################################
   # What happens when you quit

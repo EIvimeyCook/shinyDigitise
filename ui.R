@@ -1,7 +1,7 @@
-
 shinyUI(fluidPage(
     useShinyjs(),
     useShinyalert(),
+    shinyjs::extendShinyjs(text = "shinyjs.disablePlotClick = function(ID){ $('#'+ID).unbind(); console.log(ID);}", functions=c("disablePlotClick")),
   theme = bs_theme(
     primary = "#66947A", secondary = "#66947A", 
     info = "#E51C23", font_scale = NULL, bootswatch = "materia",
