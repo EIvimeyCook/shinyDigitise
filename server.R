@@ -693,8 +693,6 @@ If figures are wonky, chose rotate."
               print(valpoints$y)
             } else {
               add_mode$add <- FALSE
-              shinyjs::disable("plot_click2")
-              
             }
           }
         }
@@ -716,10 +714,10 @@ If figures are wonky, chose rotate."
         }
         if(any(duplicated(valpoints$x))){
           dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
-          valpoints$x <- valpoints$x[-1]
-          valpoints$y <- valpoints$y[-1]
-          valpoints$id <- valpoints$id[-1]
-          valpoints$n <- valpoints$n[-1]
+          valpoints$x <- valpoints$x[-2]
+          valpoints$y <- valpoints$y[-2]
+          valpoints$id <- valpoints$id[-2]
+          valpoints$n <- valpoints$n[-2]
           
           plotcounter$plotclicks <- plotcounter$plotclicks - 1
           
