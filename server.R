@@ -68,7 +68,7 @@ shinyServer(function(input, output, session) {
       inputId = "extract_mode",
       value = FALSE
     )
-
+    
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
@@ -78,15 +78,15 @@ shinyServer(function(input, output, session) {
     output$orientation_check <- renderImage({
       list(src ="www/tick.jpg", height = 30)
     },deleteFile=FALSE)
-
+    
     output$calibrate_check <- renderImage({
       list(src ="www/cross.jpg", height = 30)
     },deleteFile=FALSE)
-
+    
     output$extract_check <- renderImage({
       list(src ="www/cross.jpg", height = 30)
     },deleteFile=FALSE)
-
+    
     output$info <- renderText({
       "**** NEW PLOT ****
 mean_error and boxplots should be vertically orientated.
@@ -104,7 +104,7 @@ If figures are wonky, chose rotate."
   
   #record cex used (adjusted with slider)
   observe(values$cex <<- input$cex)
-
+  
   observe(values$pos <<- input$pos)
   
   ################################################
@@ -180,10 +180,10 @@ If figures are wonky, chose rotate."
   
   # create a container for calibration points.
   calpoints <- reactiveValues(x = NULL, y = NULL)
-
+  
   # if calib mode button pressed
   observeEvent(input$calib_mode, {
-
+    
     # resent click counter
     clickcounter$clickcount <- 0
     
@@ -195,22 +195,23 @@ If figures are wonky, chose rotate."
     shinyjs::reset("x_var_input")
     shinyjs::reset("y_coord_input")
     shinyjs::reset("y_coord_input")
-
-    # toggle extract mode and rotate mode off.
-    updateSwitchInput(
-      session = session,
-      inputId = "extract_mode",
-      value = FALSE
-    )
-    updateSwitchInput(
-      session = session,
-      inputId = "rotate_mode",
-      value = FALSE
-    )
-
+    
     if (input$calib_mode) {
-     # if in calib mode 
-
+      
+      # toggle extract mode and rotate mode off.
+      updateSwitchInput(
+        session = session,
+        inputId = "extract_mode",
+        value = FALSE
+      )
+      updateSwitchInput(
+        session = session,
+        inputId = "rotate_mode",
+        value = FALSE
+      )
+      
+      # if in calib mode 
+      
       ### show relevant input boxes
       if(input$plot_type %in% c("mean_error","boxplot","scatterplot")){
         show("y_var_input")
@@ -229,7 +230,7 @@ If figures are wonky, chose rotate."
       values$point_vals <<- NULL
       calpoints$x <- NULL
       calpoints$y <- NULL
-
+      
       # plot-specific calibration help
       if (input$plot_type == "scatterplot" | input$plot_type == "histogram") {
         output$info <- renderText({
@@ -261,14 +262,14 @@ If figures are wonky, chose rotate."
         paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
       })
     } else {
-    ## what happens when calibrate mode is switched off
-
+      ## what happens when calibrate mode is switched off
+      
       # hide variable and coord inputs      
       hide("y_var_input")
       hide("x_var_input")
       hide("y_coord_input")
       hide("x_coord_input")
-
+      
       if( is.null(values$calpoints) || is.null(values$variable) || is.null(values$point_vals) ){
         output$calibrate_check <- renderImage({
           list(src ="www/cross.jpg", height = 30)
@@ -278,7 +279,7 @@ If figures are wonky, chose rotate."
           list(src ="www/tick.jpg", height = 30)
         },deleteFile=FALSE)
       }
-
+      
       output$clickinfo <- renderText({
         " "
       })
@@ -290,15 +291,15 @@ If figures are wonky, chose rotate."
       })
     }
   })
-    
+  
   # when the plot is clicked in calibrate mode
   observeEvent(input$plot_click2, {
     if (input$calib_mode) {
-
+      
       # increase clickcounter (becomes clicktot object).
       clicktot <- clickcounter$clickcount + 1
-
-       # if the plot type is sp or hist and the clicktotal is four or less, then store the calibration points and update the clickcounter. 
+      
+      # if the plot type is sp or hist and the clicktotal is four or less, then store the calibration points and update the clickcounter. 
       if (input$plot_type %in% c("scatterplot", "histogram")) {
         if (clicktot <= 4) {
           clickcounter$clickcount <- clicktot
@@ -306,7 +307,7 @@ If figures are wonky, chose rotate."
           calpoints$y <- c(calpoints$y, input$plot_click2$y)
         } 
       } else {
-      # if the plot type is me or bp and the clicktotal is 2 or less, store the calibration points and update the clickcounter.
+        # if the plot type is me or bp and the clicktotal is 2 or less, store the calibration points and update the clickcounter.
         if (clicktot <= 2) {
           clickcounter$clickcount <- clicktot
           calpoints$x <- c(calpoints$x, input$plot_click2$x)
@@ -323,14 +324,14 @@ If figures are wonky, chose rotate."
       })
     }
   })
-
+  
   ################################################
   # Calibrate labeling
   ################################################
   
   # take the inputs from the y axis/y1 and y2 and add to the values object
   # other plots to be finished
-
+  
   observeEvent(c(input$y_var,input$x_var), {
     if (input$calib_mode) {
       if(input$plot_type %in% c("mean_error","boxplot")){
@@ -364,24 +365,19 @@ If figures are wonky, chose rotate."
       })
     }
   })
-
-
-
-
-
-
   
+
   ################################################
   # Extraction
   ################################################
-
-    
+  
+  
   # for row count, 
   row_count <- reactiveValues(x = NULL)
   
   # dataframe containing group name etc
   mod_df <- reactiveValues(x = NULL)
-
+  
   # create empty click counter
   plotcounter <- reactiveValues(plotclicks = NULL)
   
@@ -394,12 +390,12 @@ If figures are wonky, chose rotate."
   # container for add T/F.
   add_mode <- reactiveValues(add = FALSE)
   
-
-  observeEvent(input$extract_mode, {
   
+  observeEvent(input$extract_mode, {
+    
     # if we are in extract mode
     if (input$extract_mode) {
-  
+      
       #toggle calibrate mode and rotate mode off.
       updateSwitchInput(
         session = session,
@@ -411,29 +407,28 @@ If figures are wonky, chose rotate."
         inputId = "rotate_mode",
         value = FALSE
       )
-      
       #show the group_data ovject (the table for clicking/groups and sample sizes)
       show("group_data")
-
+      
       # show the error type select input (ofr mean_error).
       if (input$plot_type == "mean_error") {
         show("error_type_select")
       }
-    # show help text
+      # show help text
       output$info <- renderText({
         "**** EXTRACTING DATA ****
 1. Group names and sample size should be entered into the table on the sidebar before points are added.
 2. To add points to a group, first click the group on the sidebar then click 'Add Points'.
 3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
       })
-
-
+      
+      
       ################################################
       # Group Name and Sample Size Table
       ################################################
       
       if (is.null(values$raw_data)) {
-      # if values raw data is null/empty then create new data to show in the table.
+        # if values raw data is null/empty then create new data to show in the table.
         basic <- tibble(
           Group_Name = NA,
           Sample_Size = NA
@@ -441,11 +436,11 @@ If figures are wonky, chose rotate."
         ## ??? what does this do
         mod_df$x <- basic[-nrow(basic),]
         ## ???
-
+        
         row_count$x <- 0
-
+        
       } else {
-      # otherwise read in the data that already exists from the raw data.
+        # otherwise read in the data that already exists from the raw data.
         raw_dat <- as.data.frame(values$raw_data)
         raw_dat_sum <- aggregate(n ~ id, raw_dat, unique)
         names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
@@ -453,7 +448,7 @@ If figures are wonky, chose rotate."
         row_count$x <- nrow(raw_dat_sum)
         valpoints <- values$raw_data
       }
-
+      
       # this is then rendered in a DT table.
       output$group_table <- DT::renderDT({
         DT::datatable(
@@ -462,10 +457,10 @@ If figures are wonky, chose rotate."
           options = list(lengthChange = TRUE, dom = "t")
         )
       })
-
+      
     }else{
-    
-    ## hide 
+      
+      ## hide 
       hide("group_data")
       hide("error_type_select")
       
@@ -478,13 +473,13 @@ If figures are wonky, chose rotate."
           list(src ="www/tick.jpg", height = 30)
         },deleteFile=FALSE)
       }
-
-    # help text to show when extract mode is false.
+      
+      # help text to show when extract mode is false.
       output$info <- renderText({
         ""
       })
     }
-  
+    
   })
   
   
@@ -511,7 +506,7 @@ If figures are wonky, chose rotate."
         )
       )
   })
-
+  
   # what happens when you click a cell on the group table. 
   # Useful for deleting groups and labeling points. Highlights the cell.
   observeEvent(input$group_table_cell_clicked, {
@@ -525,7 +520,7 @@ If figures are wonky, chose rotate."
     # print(selected$row)
   })
   
-
+  
   observeEvent(input$click_group, {
     # plotcounter becomes 0.
     plotcounter$plotclicks <- 0
@@ -555,7 +550,7 @@ If figures are wonky, chose rotate."
       
       if (add_mode$add) {
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
-
+        
         # if(as.data.frame(reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
         if(length(stringr::str_detect(values$raw_data$id, as.character(selected$cell))) != 0){
           values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
@@ -571,7 +566,7 @@ If figures are wonky, chose rotate."
       values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
     }
   })
-    
+  
   # when you click on the plot and if add mode is true, increase plotcount by 1.
   # if the graph is mean_error and the plotcount is 2 or less then add data to valpoints object.
   # if its boxplot and five or less, then do the same.
@@ -579,21 +574,21 @@ If figures are wonky, chose rotate."
   # valpoints is then converted to a dataframe and plotted.
   # location of x and y valpoints are given in text.
   #  when you click to add points
-
+  
   observeEvent(input$plot_click2, {
     if (add_mode$add) {
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
       
       dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
       print(dat_mod)
-
+      
       if (input$plot_type == "mean_error") {
         if (plotcounter$plotclicks <= 2) {
           # isolate({
-            valpoints$x <- c(valpoints$x, input$plot_click2$x)
-            valpoints$y <- c(valpoints$y, input$plot_click2$y)
-            valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
-            valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
+          valpoints$x <- c(valpoints$x, input$plot_click2$x)
+          valpoints$y <- c(valpoints$y, input$plot_click2$y)
+          valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
+          valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
           # })
           print(valpoints$x)
           print(valpoints$y)
@@ -604,10 +599,10 @@ If figures are wonky, chose rotate."
       if (input$plot_type == "boxplot") {
         if (plotcounter$plotclicks <= 5) {
           # isolate({
-            valpoints$x <- c(valpoints$x, input$plot_click2$x)
-            valpoints$y <- c(valpoints$y, input$plot_click2$y)
-            valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
-            valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
+          valpoints$x <- c(valpoints$x, input$plot_click2$x)
+          valpoints$y <- c(valpoints$y, input$plot_click2$y)
+          valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
+          valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
           # })
         } else {
           add_mode$add <- FALSE 
@@ -619,19 +614,19 @@ If figures are wonky, chose rotate."
       #   valpoints$y <- valpoints$y[-2]
       #   valpoints$id <- valpoints$id[-2]
       #   valpoints$n <- valpoints$n[-2]
-        
+      
       #   plotcounter$plotclicks <- plotcounter$plotclicks - 1
-        
+      
       # } else{ 
-        values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
       # }
-
+      
       output$clickinfo <- renderText({
         # print(any(duplicated(valpoints$x)))
         paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
       })
-
-       output$metaPlot <- renderPlot({
+      
+      output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
         print(plot_values$raw_data)
@@ -639,13 +634,13 @@ If figures are wonky, chose rotate."
       })   
     }
   })
-
-
+  
+  
   ################################################
   # Deleting extracted points
   ################################################
   
-    # what happens when you press the delete group.
+  # what happens when you press the delete group.
   # if no cell is selected to delete, then show a modal alert.
   # however if one is, then search the data fro that cell and remove it from the df.
   # this will also cause the plot and raw data to update and remove anything with this group.
