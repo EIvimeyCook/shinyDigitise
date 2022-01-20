@@ -165,18 +165,20 @@ If figures are wonky, chose rotate."
   # create a container for calibration points.
   calpoints <- reactiveValues(x = NULL, y = NULL)
 
-
+  # if calib mode button pressed
   observeEvent(input$calib_mode, {
-    # if calib mode button pressed
 
     # resent click counter
     clickcounter$clickcount <- 0
     
     # show the calib_data object (where we enter names and values for axis).
-    shinyjs::toggle(id = "calib_data")
+    # shinyjs::toggle(id = "calib_data")
     
     # clears any previously entered text
-    shinyjs::reset("calib_data")
+    shinyjs::reset("y_var_input")
+    shinyjs::reset("x_var_input")
+    shinyjs::reset("y_coord_input")
+    shinyjs::reset("y_coord_input")
 
     # toggle extract mode and rotate mode off.
     updateSwitchInput(
@@ -193,20 +195,25 @@ If figures are wonky, chose rotate."
     if (input$calib_mode) {
      # if in calib mode 
 
+      ### show relevant input boxes
+      if(input$plot_type %in% c("mean_error","boxplot","scatterplot")){
+        show("y_var_input")
+      }
+      
+      if(input$plot_type %in% c("histogram","scatterplot")){
+        show("x_var_input")
+        show("x_coord_input")
+      }
+      
+      show("y_coord_input")
+      
+      # delete all previous data
       values$calpoints <<- NULL
       values$variable <<- NULL
       values$point_vals <<- NULL
       calpoints$x <- NULL
       calpoints$y <- NULL
-      
-      # the clickcounter is creater which starts at 0.
-      # values$calpoints starts as NULL.
 
-      
-      
-
-      
-      
       # plot-specific calibration help
       if (input$plot_type == "scatterplot" | input$plot_type == "histogram") {
         output$info <- renderText({
@@ -238,11 +245,14 @@ If figures are wonky, chose rotate."
         paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
       })
     } else {
-      
-      ## when calib mode is switched off, input boxes are cleared
-      ## ??? doesnt seem to work???
-      # updateNumericInput(session = session, inputId = "y1_me", value = NA)
-      # updateNumericInput(session = session, inputId = "y2_me", value = NA)
+    ## what happens when calibrate mode is switched off
+
+      # hide variable and coord inputs      
+      hide("y_var_input")
+      hide("x_var_input")
+      hide("y_coord_input")
+      hide("x_coord_input")
+
       output$clickinfo <- renderText({
         " "
       })
@@ -254,76 +264,80 @@ If figures are wonky, chose rotate."
       })
     }
   })
+    
+  # when the plot is clicked in calibrate mode
+  observeEvent(input$plot_click2, {
+    if (input$calib_mode) {
+
+      # increase clickcounter (becomes clicktot object).
+      clicktot <- clickcounter$clickcount + 1
+
+       # if the plot type is sp or hist and the clicktotal is four or less, then store the calibration points and update the clickcounter. 
+      if (input$plot_type %in% c("scatterplot", "histogram")) {
+        if (clicktot <= 4) {
+          clickcounter$clickcount <- clicktot
+          calpoints$x <- c(calpoints$x, input$plot_click2$x)
+          calpoints$y <- c(calpoints$y, input$plot_click2$y)
+        } 
+      } else {
+      # if the plot type is me or bp and the clicktotal is 2 or less, store the calibration points and update the clickcounter.
+        if (clicktot <= 2) {
+          clickcounter$clickcount <- clicktot
+          calpoints$x <- c(calpoints$x, input$plot_click2$x)
+          calpoints$y <- c(calpoints$y, input$plot_click2$y)
+        } 
+      }
+      
+      # Then convert these to a dataframe and plot
+      values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
+      output$metaPlot <- renderPlot({
+        par(mar = c(0, 0, 0, 0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw, plot_values)
+      })
+    }
+  })
+
+  ################################################
+  # Calibrate labeling
+  ################################################
   
-      # when the plot is clicked - increase clickcounter (becomes clicktot object).
-      # if the plot type is sp or hist and the clicktotal is four or less then store the calibration points.
-      # if it is 2 or less (and therefore bp/me) also store the calibration points.
-      # Lastly, convert these to a dataframe for plotting.
-      observeEvent(input$plot_click2, {
-        if (input$calib_mode) {
-          clicktot <- clickcounter$clickcount + 1
-          if (input$plot_type %in% c("scatterplot", "histogram")) {
-            if (clicktot <= 4) {
-              clickcounter$clickcount <- clicktot
-              calpoints$x <- c(calpoints$x, input$plot_click2$x)
-              calpoints$y <- c(calpoints$y, input$plot_click2$y)
-            } else {
-              # clickcounter$clickcount <- 0
-              # calpoints$x <- NULL
-              # calpoints$y <- NULL
+  # take the inputs from the y axis/y1 and y2 and add to the values object
+  # other plots to be finished
 
-            }
-          } else {
-            if (clicktot <= 2) {
-              clickcounter$clickcount <- clicktot
-              calpoints$x <- c(calpoints$x, input$plot_click2$x)
-              calpoints$y <- c(calpoints$y, input$plot_click2$y)
-            } else {
-              # clickcounter$clickcount <- 0
-              # calpoints$x <- NULL
-              # calpoints$y <- NULL
-            }
-          }
-          
-          values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
-          output$metaPlot <- renderPlot({
-          par(mar = c(0, 0, 0, 0))
-          plot_values <- reactiveValuesToList(values)
-          do.call(internal_redraw, plot_values)
-      })
-        }
-      })
-
-      ################################################
-      # Calibrate labeling
-      ################################################
+  observeEvent(c(input$y_var,input$x_var), {
+    if (input$calib_mode) {
+      if(input$plot_type %in% c("mean_error","boxplot")){
+        values$variable <<- input$y_var
+      }else if(input$plot_type %in% c("histogram")){
+        values$variable <<- input$x_var
+      }else{
+        values$variable <<- c(y=input$y_var,y=input$x_var)
+      }
       
-      # take the inputs from the y axis/y1 and y2 and add to the values object
-      # other plots to be finished
-
-      observeEvent(input$yvar_me, {
-        if (input$calib_mode) {
-          values$variable <<- input$yvar_me
-          
-          output$metaPlot <- renderPlot({
-            par(mar = c(0, 0, 0, 0))
-            plot_values <- reactiveValuesToList(values)
-            do.call(internal_redraw, plot_values)
-          })
-        }
+      output$metaPlot <- renderPlot({
+        par(mar = c(0, 0, 0, 0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw, plot_values)
       })
+    }
+  })
+  
+  observeEvent(c(input$y1, input$y2,input$x1, input$x2), {
+    if (input$calib_mode) {
+      if(input$plot_type %in% c("mean_error","boxplot")){
+        values$point_vals <<- c(input$y1,input$y2)
+      }else{
+        values$point_vals <<- c(input$y1,input$y2,input$x1, input$x2)
+      }
       
-      observeEvent(c(input$y1_me, input$y2_me), {
-        if (input$calib_mode) {
-          values$point_vals <<- c(input$y1_me,input$y2_me)
-          
-          output$metaPlot <- renderPlot({
-            par(mar = c(0, 0, 0, 0))
-            plot_values <- reactiveValuesToList(values)
-            do.call(internal_redraw, plot_values)
-          })
-        }
+      output$metaPlot <- renderPlot({
+        par(mar = c(0, 0, 0, 0))
+        plot_values <- reactiveValuesToList(values)
+        do.call(internal_redraw, plot_values)
       })
+    }
+  })
 
 
   
