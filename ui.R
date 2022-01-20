@@ -72,7 +72,7 @@ shinyUI(fluidPage(
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel( width = 4,
-                  id = "tPanel",style = "overflow-y:scroll; max-height: 600px; position:relative;",
+                  id = "tPanel",style = "overflow-y:scroll; max-height: 800px; position:relative;",
 
 ####------------------ 
 ### Plot Type Panel
@@ -199,6 +199,19 @@ shinyUI(fluidPage(
                            value= NA )
             )
           )
+        ),
+        hidden(
+          div(id="log_input",
+          prettyCheckbox(
+            inputId = "log_sp",
+            label = "Logged values?",
+            value = FALSE,
+            status = "info"),
+          textInput(
+            inputId = "nsamp_sp",
+            placeholder = "Known sample size",
+            label = NULL),
+          )
         )
       ),
 
@@ -214,47 +227,74 @@ shinyUI(fluidPage(
           onLabel = "Yes",
           offLabel = "No",
           onStatus = "primary"
-        )
-      ),
-      wellPanel(id = "error_type_select",
-        prettyRadioButtons(
-          inputId = "errortype",
-          label = h6(strong("Type of error:")),
-          choiceNames = c("SE", "95%CI", "SD"),
-          choiceValues = c("se","CI95","sd"),
-          inline = T,
-          icon = icon("check"),
-          bigger = TRUE,
-          status = "danger",
-          animation = "jelly"
-        )
-      ),
-      wellPanel(id = "group_data",
-        splitLayout(
-          div(class = "buttonagency",
-            actionButton(
-              inputId = "add_group",
-              label = "Add Group",
-              #style = "float",
-              #color = "primary"
+        ),
+        hidden(
+          div(id = "group_data",
+            splitLayout(
+              div(class = "buttonagency",
+                actionButton(
+                  inputId = "add_group",
+                  label = "Add Group",
+                  #style = "float",
+                  #color = "primary"
+                ),
+                actionButton(
+                  inputId = "click_group",
+                  label = "Click Points",
+                  #style = "float",
+                  #color = "primary"
+                ),
+                actionButton(
+                  inputId = "del_group",
+                  label = "Delete Group",
+                  #style = "float",
+                  #color = "primary"
+                )
+              )
             ),
-            actionButton(
-              inputId = "click_group",
-              label = "Click Points",
-              #style = "float",
-              #color = "primary"
-            ),
-            actionButton(
-              inputId = "del_group",
-              label = "Delete Group",
-              #style = "float",
-              #color = "primary"
-            )
+            DTOutput("group_table")
           )
         ),
-        DTOutput("group_table")
+        hidden(
+          div(id = "error_type_select",
+            prettyRadioButtons(
+              inputId = "errortype",
+              label = h6(strong("Type of error:")),
+              choiceNames = c("SE", "95%CI", "SD"),
+              choiceValues = c("se","CI95","sd"),
+              inline = T,
+              icon = icon("check"),
+              bigger = TRUE,
+              status = "danger",
+              animation = "jelly"
+            )
+          )
+        )
+      ),
+      wellPanel(
+        actionButton(
+          inputId = "previous",
+          label = "Previous",
+          style = "padding:4px"
+          # style = "float",
+          # color = "primary",
+          
+        ),
+        actionButton(
+          inputId = "continue",
+          label = "Continue",
+          style = "padding:4px"
+          # style = "float",
+          # color = "primary",
+          
+        )
+        
       )
     ),
+
+####------------------ 
+### Plot panel
+####------------------
     mainPanel(
       verbatimTextOutput("image_name"),
       plotOutput(
@@ -269,23 +309,8 @@ shinyUI(fluidPage(
       verbatimTextOutput("info"),
       verbatimTextOutput("clickinfo"),
       br(),
-      br(),
-      actionButton(
-        inputId = "continue",
-        label = "Continue",
-        style = "padding:4px"
-        # style = "float",
-        # color = "primary",
-        
-      ),
-      actionButton(
-        inputId = "previous",
-        label = "Previous",
-        style = "padding:4px"
-        # style = "float",
-        # color = "primary",
-        
-      )
+      br()
+      
     )
   )
 )
