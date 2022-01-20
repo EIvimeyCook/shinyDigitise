@@ -37,10 +37,10 @@ shinyServer(function(input, output, session) {
         calpoints = NULL,
         variable = NULL,
         point_vals = NULL,
-        raw_data = NULL
+        raw_data = NULL,
         # rotate_mode=FALSE,
-        # cex = input$cex,
-        # plot_type = input$plot_type
+        cex = input$cex,
+        plot_type = input$plot_type
       )
     }
     
