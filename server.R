@@ -73,6 +73,18 @@ shinyServer(function(input, output, session) {
       do.call(internal_redraw, plot_values)
     })
     
+    output$orientation_check <- renderImage({
+      list(src ="www/tick.jpg", height = 30)
+    },deleteFile=FALSE)
+
+    output$calibrate_check <- renderImage({
+      list(src ="www/cross.jpg", height = 30)
+    },deleteFile=FALSE)
+
+    output$extract_check <- renderImage({
+      list(src ="www/cross.jpg", height = 30)
+    },deleteFile=FALSE)
+
     output$info <- renderText({
       "**** NEW PLOT ****
 mean_error and boxplots should be vertically orientated.
@@ -252,6 +264,16 @@ If figures are wonky, chose rotate."
       hide("x_var_input")
       hide("y_coord_input")
       hide("x_coord_input")
+
+      if( is.null(values$calpoints) || is.null(values$variable) || is.null(values$point_vals) ){
+        output$calibrate_check <- renderImage({
+          list(src ="www/cross.jpg", height = 30)
+        },deleteFile=FALSE)
+      }else{
+        output$calibrate_check <- renderImage({
+          list(src ="www/tick.jpg", height = 30)
+        },deleteFile=FALSE)
+      }
 
       output$clickinfo <- renderText({
         " "
@@ -442,6 +464,16 @@ If figures are wonky, chose rotate."
     ## hide 
       hide("group_data")
       hide("error_type_select")
+      
+      if( is.null(values$raw_data) ){
+        output$extract_check <- renderImage({
+          list(src ="www/cross.jpg", height = 30)
+        },deleteFile=FALSE)
+      }else{
+        output$extract_check <- renderImage({
+          list(src ="www/tick.jpg", height = 30)
+        },deleteFile=FALSE)
+      }
 
     # help text to show when extract mode is false.
       output$info <- renderText({

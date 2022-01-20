@@ -82,8 +82,10 @@ shinyUI(fluidPage(
         prettyRadioButtons(
           inputId = "plot_type",
           label = NULL,
-          choiceNames = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
-          choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
+          choiceNames = c("Mean/error", "Boxplot"),
+          choiceValues = c("mean_error", "boxplot"),
+          # choiceNames = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
+          # choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
           inline = T,
           icon = icon("check"),
           bigger = TRUE,
@@ -105,21 +107,28 @@ shinyUI(fluidPage(
 
         div(class = "buttonagency",
             # splitLayout(cellWidths = c(150, 200, 200),
-          switchInput(
-            inputId = "flip",
-            label = strong("Flip"),
-            labelWidth = "60px",
-            onLabel = "Yes",
-            offLabel = "No"
-            #style = "float",
-            #color = "primary"
-          ),
+          splitLayout(
+            cellWidths = c("80%","20%"),
+            switchInput(
+              inputId = "flip",
+              label = strong("Flip"),
+              labelWidth = "100px",
+              onLabel = "Yes",
+              offLabel = "No"
+              #style = "float",
+              #color = "primary"
+            ),
+            imageOutput(
+              "orientation_check",
+              height = "30px"
+          )
+          ),  
           # cellArgs = list(style = "padding: 1px"),
           textOutput("rotation", inline=TRUE),
           switchInput(
             inputId = "rotate_mode",
             label = strong("Rotate mode"),
-            labelWidth = "60px",
+            labelWidth = "100px",
             onLabel = "Yes",
             offLabel = "No"
             #style = "float",
@@ -146,13 +155,20 @@ shinyUI(fluidPage(
 ####------------------
       wellPanel(
         "Calibrate Axes:",
-        switchInput(
-          inputId = "calib_mode",
-          label = strong("Calibrate mode"),
-          labelWidth = "60px",
-          onLabel = "Yes",
-          offLabel = "No",
-          onStatus = "primary",
+        splitLayout(
+          cellWidths = c("80%","20%"),
+          switchInput(
+            inputId = "calib_mode",
+            label = strong("Calibrate mode"),
+            labelWidth = "100px",
+            onLabel = "Yes",
+            offLabel = "No",
+            onStatus = "primary",
+          ),
+          imageOutput(
+            "calibrate_check",
+            height = "30px"
+          )
         ),
         hidden(
           div(id="y_var_input",
@@ -220,13 +236,20 @@ shinyUI(fluidPage(
 ####------------------
       wellPanel(
         "Extract Data:",
-        switchInput(
-          inputId = "extract_mode",
-          label = strong("Extract mode"),
-          labelWidth = "60px",
-          onLabel = "Yes",
-          offLabel = "No",
-          onStatus = "primary"
+        splitLayout(
+          cellWidths = c("80%","20%"),
+          switchInput(
+            inputId = "extract_mode",
+            label = strong("Extract mode"),
+            labelWidth = "60px",
+            onLabel = "Yes",
+            offLabel = "No",
+            onStatus = "primary"
+          ),
+          imageOutput(
+            "extract_check",
+            height = "30px"
+          )
         ),
         hidden(
           div(id = "group_data",
