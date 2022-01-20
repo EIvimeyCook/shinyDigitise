@@ -40,7 +40,9 @@ shinyServer(function(input, output, session) {
         raw_data = NULL,
         # rotate_mode=FALSE,
         cex = input$cex,
-        plot_type = input$plot_type
+        plot_type = input$plot_type,
+        pos="right",
+        comment=NULL
       )
     }
     
@@ -102,6 +104,8 @@ If figures are wonky, chose rotate."
   
   #record cex used (adjusted with slider)
   observe(values$cex <<- input$cex)
+
+  observe(values$pos <<- input$pos)
   
   ################################################
   # Flip
@@ -698,7 +702,14 @@ If figures are wonky, chose rotate."
   })
   
   
+  ################################################
+  # Comments
+  ################################################
   
+  # record comments
+  observeEvent(input$comment, {
+    values$comment <<- input$comment
+  }) 
   
   ################################################
   # Previous/next buttons

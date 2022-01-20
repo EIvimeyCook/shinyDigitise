@@ -59,7 +59,26 @@ shinyUI(fluidPage(
                  value = 1,
                  min = 0.1,
                  max = 3,
-                 ticks  = FALSE))
+                 ticks  = FALSE)),
+             div(style="display: inline-block;vertical-align:top; width: 10% "),
+           div(style="display: inline-block;vertical-align:top;  width: 15%;",
+              prettyRadioButtons(
+                inputId = "pos",
+                label = "Group Name Position",
+                choiceNames = c("right", "top"),
+                choiceValues = c("right", "top"),
+                inline = T,
+                icon = icon("check"),
+                bigger = TRUE,
+                status = "info",
+                animation = "jelly"
+                #checkIcon = list(
+                #yes = tags$i(class = "fa fa-check-square",
+                #            style = "color: white"),
+                #no = tags$i(class = "fa fa-square-o",
+                #style = "color: white"))
+              )
+            )
     )
     # column(2,
     #   br(),
@@ -226,7 +245,7 @@ shinyUI(fluidPage(
           textInput(
             inputId = "nsamp_sp",
             placeholder = "Known sample size",
-            label = NULL),
+            label = NULL)
           )
         )
       ),
@@ -241,7 +260,7 @@ shinyUI(fluidPage(
           switchInput(
             inputId = "extract_mode",
             label = strong("Extract mode"),
-            labelWidth = "60px",
+            labelWidth = "100px",
             onLabel = "Yes",
             offLabel = "No",
             onStatus = "primary"
@@ -294,6 +313,21 @@ shinyUI(fluidPage(
           )
         )
       ),
+
+####------------------ 
+### Plot panel
+####------------------
+      wellPanel(
+        "Comments:",
+        textInput(
+          inputId = "comment",
+          label = NULL
+        )
+      ),
+
+####------------------ 
+### next previous panel
+####------------------
       wellPanel(
         actionButton(
           inputId = "previous",
