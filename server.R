@@ -454,6 +454,7 @@ If figures are wonky, chose rotate."
         DT::datatable(
           mod_df$x,
           editable = list(target = "cell"),
+          selection = "single",
           options = list(lengthChange = TRUE, dom = "t")
         )
       })
@@ -552,10 +553,10 @@ If figures are wonky, chose rotate."
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         
         # if(as.data.frame(reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
-        if(length(stringr::str_detect(values$raw_data$id, as.character(selected$cell))) != 0){
+        if(length(stringr::str_detect(values$raw_data$id, as.character(mod_df$x[selected$row,1]))) != 0){
           values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
           values$raw_data <<- values$raw_data %>%
-            filter(!stringr::str_detect(id, as.character(selected$cell)))
+            filter(!stringr::str_detect(id, as.character(mod_df$x[selected$row,1])))
           valpoints$x <- values$raw_data$x
           valpoints$y <- values$raw_data$y
           valpoints$id <- values$raw_data$id
@@ -665,17 +666,15 @@ If figures are wonky, chose rotate."
         )
       } else{
         row_count$x <- row_count$x - 1
-        remove_dat <- which(mod_df$x == selected$cell)[1]
-        mod_df$x <- mod_df$x[-remove_dat, ]
         values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
         values$raw_data <<- values$raw_data %>%
-          filter(!stringr::str_detect(id, as.character(selected$cell)))
-        
+          filter(!stringr::str_detect(id, as.character(mod_df$x[selected$row,1])))
         valpoints$x <- values$raw_data$x
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
       }}
+    mod_df$x <- mod_df$x[-selected$row, ]
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
