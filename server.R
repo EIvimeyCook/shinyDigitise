@@ -24,7 +24,7 @@ shinyServer(function(input, output, session) {
       updateSliderInput(session, "cex", value = values$cex)
       updatePrettyRadioButtons(session, "pos", selected = values$pos)
       updatePrettyRadioButtons(session, "plot_type", selected = values$plot_type)
-
+      updateTextInput(session, "comment", value = paste(values$comment))
       
       if (values$plot_type == "mean_error") {
         updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
@@ -69,7 +69,7 @@ shinyServer(function(input, output, session) {
       inputId = "rotate_mode", 
       value = FALSE
     )
-    
+
     values$rotate_mode <- FALSE
     
     updateSliderInput(
@@ -648,16 +648,6 @@ If figures are wonky, chose rotate."
           add_mode$add <- FALSE 
         }
       }
-      # if(any(duplicated(valpoints$x))){
-      #   dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
-      #   valpoints$x <- valpoints$x[-2]
-      #   valpoints$y <- valpoints$y[-2]
-      #   valpoints$id <- valpoints$id[-2]
-      #   valpoints$n <- valpoints$n[-2]
-      
-      #   plotcounter$plotclicks <- plotcounter$plotclicks - 1
-      
-      # } else{ 
       values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
       # }
       
@@ -740,7 +730,10 @@ If figures are wonky, chose rotate."
   ################################################
   
   # record comments
-  observe(values$comment <<- input$comment) 
+  observeEvent(input$comment,{
+    values$comment <<- input$comment
+  })
+
   
   ################################################
   # Previous/next buttons
