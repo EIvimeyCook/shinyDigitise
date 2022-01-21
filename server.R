@@ -7,25 +7,36 @@ shinyServer(function(input, output, session) {
   # start counter at 1.
   counter <<- reactiveValues(countervalue = 1)
   
-  # when counter value is changed (either conitnue or previous is pressed) then read in new data.
-  # if extracted/calibrated data already exists then plot/read in that data.
-  # if not then create a new values object that we can store data in.
-  # also keeps flip/rotate and image details.
-  # Provides info for new plotting as text.
+  # when counter value is changed (either conitnue or previous is pressed):
   observeEvent(counter$countervalue, {
+    
+    # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
     
+    # if extracted/calibrated data already exists:
     if (file.exists(counter$caldat)) {
       # plot_values <- readRDS(values$caldat)
+      
+      #read in that data.
       values <<- do.call("reactiveValues", readRDS(counter$caldat))
+
+      # update 
       updateSliderInput(session, "cex", value = values$cex)
+      updatePrettyRadioButtons(session, "pos", selected = values$pos)
       updatePrettyRadioButtons(session, "plot_type", selected = values$plot_type)
+
       
       if (values$plot_type == "mean_error") {
         updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
       }
       # update
+
+
     } else {
+        # if not then create a new values object that we can store data in.
+  #  keeps flip/rotate and image details.
+  
+
       # plot_values <- reactiveValuesToList(values)
       # updateRadioButtons(session, "plot_type", selected=)
       
@@ -37,6 +48,7 @@ shinyServer(function(input, output, session) {
         calpoints = NULL,
         variable = NULL,
         point_vals = NULL,
+        log_axes=c(axes="n"),
         raw_data = NULL,
         # rotate_mode=FALSE,
         cex = input$cex,
@@ -46,10 +58,26 @@ shinyServer(function(input, output, session) {
       )
     }
     
-    updateSwitchInput(session, "flip", value = values$flip)
-    updateSwitchInput(session, "rotate_mode", value = FALSE)
+    updateSwitchInput(
+      session = session, 
+      inputId = "flip", 
+      value = values$flip
+    )
+    
+    updateSwitchInput(
+      session = session, 
+      inputId = "rotate_mode", 
+      value = FALSE
+    )
+    
     values$rotate_mode <- FALSE
-    updateSliderInput(session, "rotate", value = FALSE, values$rotate)
+    
+    updateSliderInput(
+      session = session, 
+      inputId = "rotate", 
+      value = FALSE, 
+      values$rotate
+      )
     output$rotation <- renderText({
       paste("rotation angle:", values$rotate)
     })
@@ -69,10 +97,16 @@ shinyServer(function(input, output, session) {
       value = FALSE
     )
     
+    # updateTextInput(
+    #   session = session, 
+    #   inputId = "comment", 
+    #   value = values$comment
+    # )
+
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
     
     output$orientation_check <- renderImage({
@@ -87,6 +121,7 @@ shinyServer(function(input, output, session) {
       list(src ="www/cross.jpg", height = 30)
     },deleteFile=FALSE)
     
+    # Provides for new plotting as text.
     output$info <- renderText({
       "**** NEW PLOT ****
 mean_error and boxplots should be vertically orientated.
@@ -107,6 +142,9 @@ If figures are wonky, chose rotate."
   
   observe(values$pos <<- input$pos)
   
+  observe(values$error_type <<- input$error_type_select)
+
+
   ################################################
   # Flip
   ################################################
@@ -118,7 +156,7 @@ If figures are wonky, chose rotate."
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
   
@@ -157,7 +195,7 @@ If figures are wonky, chose rotate."
       par(mar = c(0, 0, 0, 0))
       values$rotate_mode <- input$rotate_mode
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
   
@@ -320,7 +358,7 @@ If figures are wonky, chose rotate."
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
   })
@@ -345,7 +383,7 @@ If figures are wonky, chose rotate."
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
   })
@@ -361,7 +399,7 @@ If figures are wonky, chose rotate."
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
   })
@@ -530,7 +568,7 @@ If figures are wonky, chose rotate."
     add_mode$add <- TRUE
     
     # if you click group without any row selected - return an error.
-    if(is.null(selected$cell)){
+    if(is.null(selected$row)){
       shinyalert(
         title = "Select a group to plot",
         text = "No group has been selected",
@@ -550,13 +588,14 @@ If figures are wonky, chose rotate."
     } else {
       
       if (add_mode$add) {
-        # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         
+        print(values$raw_data)
+        # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         # if(as.data.frame(reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
         if(length(stringr::str_detect(values$raw_data$id, as.character(mod_df$x[selected$row,1]))) != 0){
           values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-          values$raw_data <<- values$raw_data %>%
-            filter(!stringr::str_detect(id, as.character(mod_df$x[selected$row,1])))
+          remove_string <-  as.character(mod_df$x[selected$row,1])
+          values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
           valpoints$x <- values$raw_data$x
           valpoints$y <- values$raw_data$y
           valpoints$id <- values$raw_data$id
@@ -631,7 +670,7 @@ If figures are wonky, chose rotate."
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
         print(plot_values$raw_data)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })   
     }
   })
@@ -647,7 +686,7 @@ If figures are wonky, chose rotate."
   # this will also cause the plot and raw data to update and remove anything with this group.
   observeEvent(input$del_group, {
     if (input$del_group) {
-      if(is.null(selected$cell)){
+      if(is.null(selected$row)){
         shinyalert(
           title = "Select a group to delete",
           text = "No group has been selected",
@@ -667,8 +706,8 @@ If figures are wonky, chose rotate."
       } else{
         row_count$x <- row_count$x - 1
         values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-        values$raw_data <<- values$raw_data %>%
-          filter(!stringr::str_detect(id, as.character(mod_df$x[selected$row,1])))
+        remove_string <-  as.character(mod_df$x[selected$row,1])
+        values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
         valpoints$x <- values$raw_data$x
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
@@ -678,7 +717,7 @@ If figures are wonky, chose rotate."
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
   
@@ -701,9 +740,7 @@ If figures are wonky, chose rotate."
   ################################################
   
   # record comments
-  observeEvent(input$comment, {
-    values$comment <<- input$comment
-  }) 
+  observe(values$comment <<- input$comment) 
   
   ################################################
   # Previous/next buttons
@@ -717,6 +754,10 @@ If figures are wonky, chose rotate."
   
   observeEvent(input$continue, {
     plot_values <- reactiveValuesToList(values)
+    if(check_calibrate(plot_values) & check_extract(plot_values)){
+      plot_values$processed_data <- process_data(plot_values)
+      class(plot_values) <- 'metaDigitise'
+    }
     saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
     
     cv <- counter$countervalue + 1
