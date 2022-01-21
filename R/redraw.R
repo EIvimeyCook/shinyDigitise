@@ -52,9 +52,10 @@ redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_d
 #' @param raw_data The raw data
 #' @param image_details image_details
 #' @param cex relative size of points and text
+#' @param pos position of group labels
 
 
-redraw_points <- function(plot_type, raw_data, image_details, cex){
+redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	image_width <- image_details["width"]
 	image_height <- image_details["height"]
 	legend_pos <- image_height/40
@@ -62,7 +63,8 @@ redraw_points <- function(plot_type, raw_data, image_details, cex){
 	text_cex <- 1*cex
 	line_width <- 2*cex
 	point_cex <- 1*cex
-	point_col <- "red"
+	point_col="red"
+
 
 	## legend
 	if(plot_type == "mean_error"){
@@ -70,14 +72,35 @@ redraw_points <- function(plot_type, raw_data, image_details, cex){
 		graphics::text((image_width/4)*c(1,3), rep(-legend_pos*2,2), c("mean","error"), cex=text_cex, xpd=TRUE)
 	}
 
-	if(plot_type %in% c("mean_error","boxplot") & nrow(raw_data)>0){
+	if(plot_type == "xy_mean_error"){
+		graphics::points((image_width/4)*c(1,2,2,3,3), rep(-legend_pos,5), 
+			pch=c(19,19,20,19,20), 
+			col=c(point_col,point_col,"yellow",point_col,"purple"), 
+			cex=point_cex, 
+			xpd=TRUE)
+		graphics::text((image_width/4)*c(1,2,3), rep(-legend_pos*2,3), c("mean","y error","x error"), cex=text_cex, xpd=TRUE)
+	}
+
+	if(plot_type %in% c("mean_error","xy_mean_error","boxplot") & nrow(raw_data)>0){
 		for(i in unique(raw_data$id)){
 			group_data <- subset(raw_data,raw_data$id==i)
 			graphics::points(y~x,group_data, pch=19, col=point_col, cex=point_cex)
 			graphics::lines(y~x, group_data, lwd=line_width, col=point_col)
-			graphics::text(mean(group_data$x)+image_width/30,mean(group_data$y),paste0(group_data$id[1]," (",group_data$n[1],")"),srt=90, cex=text_cex, col=point_col)
-			if(plot_type == "mean_error"){
+				
+			if(pos=="right"){
+				text_x <- max(group_data$x)+image_width/30
+				text_y <- mean(group_data$y)
+			}else if(pos=="top"){
+				text_x <- max(group_data$x)
+				text_y <- max(group_data$y) + image_height/30
+			}
+					
+			graphics::text(text_x,text_y,paste0(group_data$id[1]," (",group_data$n[1],")"),srt=90, cex=text_cex, col=point_col, adj=if(pos=="right"){0.5}else{0})
+			if(plot_type %in% c("xy_mean_error","mean_error")){
 				graphics::points(group_data$x[1],group_data$y[1], pch=20, col="yellow", cex=point_cex)
+			}
+			if(plot_type == "xy_mean_error"){
+				graphics::points(group_data$x[3],group_data$y[3], pch=20, col="purple", cex=point_cex)
 			}
 		}
 	}
@@ -121,17 +144,20 @@ redraw_points <- function(plot_type, raw_data, image_details, cex){
 #' @param point_vals The point values
 #' @param raw_data The raw data
 #' @param rotation logical, should figure be rotated
+#' @param rotate_mode logical, is plotting in rotation mode
 #' @param calibration logical, should calibration be redrawn
+#' @param pos where group names should be plotted (either "right" or "top")
 #' @param points logical, should points be redrawn
+#' @param shiny logical, is plotting occuring in shiny app?
 #' @param ... further arguments passed to or from other methods.
+#' @export
 
-#image_file, flip, rotate, image_details, plot_type, calpoints, point_vals, raw_data
+internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE,  ...){
 
-internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, ... 
-	){
-
-	# op <- graphics::par(mar=c(3,0,2,0), mfrow=c(1,1))
-	# on.exit(graphics::par(op))
+	if(!shiny){
+		op <- graphics::par(mar=c(3,0,2,0), mfrow=c(1,1))
+		on.exit(graphics::par(op))
+	}
 
 	image <- magick::image_read(image_file)
 	if(rotation) image <- redraw_rotation(image=image, flip=flip, rotate=rotate)
@@ -141,14 +167,16 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 	text_cex <- 1*cex
 
 	graphics::plot(image)
-	# graphics::mtext(filename(image_file),3, 1, cex=text_cex)
+	if(!shiny){
+		graphics::mtext(filename(image_file),3, 1, cex=text_cex)
+	}
 	if(!is.null(plot_type)) graphics::mtext(plot_type,3, 0, cex=text_cex)
 
 	if(is.null(calpoints)) calibration=FALSE
 	if(calibration) redraw_calibration(plot_type=plot_type, variable=variable, calpoints=calpoints,point_vals=point_vals,image_details=image_details, cex=cex)
  
 	if(is.null(raw_data)) points=FALSE
-	if(points) redraw_points(plot_type=plot_type,raw_data=raw_data,image_details=image_details,  cex=cex)
+	if(points) redraw_points(plot_type=plot_type,raw_data=raw_data,image_details=image_details,  cex=cex, pos=pos)
 
 	if(rotate_mode) {
 		abline(

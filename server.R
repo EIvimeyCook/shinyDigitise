@@ -37,6 +37,7 @@ shinyServer(function(input, output, session) {
         calpoints = NULL,
         variable = NULL,
         point_vals = NULL,
+        log_axes=c(axes="n"),
         raw_data = NULL,
         # rotate_mode=FALSE,
         cex = input$cex,
@@ -72,7 +73,7 @@ shinyServer(function(input, output, session) {
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
     
     output$orientation_check <- renderImage({
@@ -107,6 +108,9 @@ If figures are wonky, chose rotate."
   
   observe(values$pos <<- input$pos)
   
+  observe(values$error_type <<- input$error_type_select)
+
+
   ################################################
   # Flip
   ################################################
@@ -118,7 +122,7 @@ If figures are wonky, chose rotate."
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
   
@@ -157,7 +161,7 @@ If figures are wonky, chose rotate."
       par(mar = c(0, 0, 0, 0))
       values$rotate_mode <- input$rotate_mode
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
   
@@ -320,7 +324,7 @@ If figures are wonky, chose rotate."
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
   })
@@ -345,7 +349,7 @@ If figures are wonky, chose rotate."
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
   })
@@ -361,7 +365,7 @@ If figures are wonky, chose rotate."
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
   })
@@ -631,7 +635,7 @@ If figures are wonky, chose rotate."
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
         print(plot_values$raw_data)
-        do.call(internal_redraw, plot_values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })   
     }
   })
@@ -678,7 +682,7 @@ If figures are wonky, chose rotate."
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, plot_values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
   
@@ -717,6 +721,10 @@ If figures are wonky, chose rotate."
   
   observeEvent(input$continue, {
     plot_values <- reactiveValuesToList(values)
+    if(check_calibrate(plot_values) & check_extract(plot_values)){
+      plot_values$processed_data <- process_data(plot_values)
+      class(plot_values) <- 'metaDigitise'
+    }
     saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
     
     cv <- counter$countervalue + 1
