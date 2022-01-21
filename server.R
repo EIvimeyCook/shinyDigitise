@@ -568,7 +568,7 @@ If figures are wonky, chose rotate."
     add_mode$add <- TRUE
     
     # if you click group without any row selected - return an error.
-    if(is.null(selected$cell)){
+    if(is.null(selected$row)){
       shinyalert(
         title = "Select a group to plot",
         text = "No group has been selected",
@@ -588,13 +588,14 @@ If figures are wonky, chose rotate."
     } else {
       
       if (add_mode$add) {
-        # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         
+        print(values$raw_data)
+        # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         # if(as.data.frame(reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
         if(length(stringr::str_detect(values$raw_data$id, as.character(mod_df$x[selected$row,1]))) != 0){
           values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-          values$raw_data <<- values$raw_data %>%
-            filter(!stringr::str_detect(id, as.character(mod_df$x[selected$row,1])))
+          remove_string <-  as.character(mod_df$x[selected$row,1])
+          values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
           valpoints$x <- values$raw_data$x
           valpoints$y <- values$raw_data$y
           valpoints$id <- values$raw_data$id
@@ -685,7 +686,7 @@ If figures are wonky, chose rotate."
   # this will also cause the plot and raw data to update and remove anything with this group.
   observeEvent(input$del_group, {
     if (input$del_group) {
-      if(is.null(selected$cell)){
+      if(is.null(selected$row)){
         shinyalert(
           title = "Select a group to delete",
           text = "No group has been selected",
@@ -705,8 +706,8 @@ If figures are wonky, chose rotate."
       } else{
         row_count$x <- row_count$x - 1
         values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-        values$raw_data <<- values$raw_data %>%
-          filter(!stringr::str_detect(id, as.character(mod_df$x[selected$row,1])))
+        remove_string <-  as.character(mod_df$x[selected$row,1])
+        values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
         valpoints$x <- values$raw_data$x
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
