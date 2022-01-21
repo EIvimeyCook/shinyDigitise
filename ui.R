@@ -315,13 +315,14 @@ shinyUI(fluidPage(
       ),
 
 ####------------------ 
-### Plot panel
+### comment panel
 ####------------------
       wellPanel(
         "Comments:",
         textInput(
           inputId = "comment",
-          label = NULL
+          label = NULL,
+          value=NULL
         )
       ),
 

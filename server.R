@@ -7,25 +7,36 @@ shinyServer(function(input, output, session) {
   # start counter at 1.
   counter <<- reactiveValues(countervalue = 1)
   
-  # when counter value is changed (either conitnue or previous is pressed) then read in new data.
-  # if extracted/calibrated data already exists then plot/read in that data.
-  # if not then create a new values object that we can store data in.
-  # also keeps flip/rotate and image details.
-  # Provides info for new plotting as text.
+  # when counter value is changed (either conitnue or previous is pressed):
   observeEvent(counter$countervalue, {
+    
+    # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
     
+    # if extracted/calibrated data already exists:
     if (file.exists(counter$caldat)) {
       # plot_values <- readRDS(values$caldat)
+      
+      #read in that data.
       values <<- do.call("reactiveValues", readRDS(counter$caldat))
+
+      # update 
       updateSliderInput(session, "cex", value = values$cex)
+      updatePrettyRadioButtons(session, "pos", selected = values$pos)
       updatePrettyRadioButtons(session, "plot_type", selected = values$plot_type)
+
       
       if (values$plot_type == "mean_error") {
         updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
       }
       # update
+
+
     } else {
+        # if not then create a new values object that we can store data in.
+  #  keeps flip/rotate and image details.
+  
+
       # plot_values <- reactiveValuesToList(values)
       # updateRadioButtons(session, "plot_type", selected=)
       
@@ -47,10 +58,26 @@ shinyServer(function(input, output, session) {
       )
     }
     
-    updateSwitchInput(session, "flip", value = values$flip)
-    updateSwitchInput(session, "rotate_mode", value = FALSE)
+    updateSwitchInput(
+      session = session, 
+      inputId = "flip", 
+      value = values$flip
+    )
+    
+    updateSwitchInput(
+      session = session, 
+      inputId = "rotate_mode", 
+      value = FALSE
+    )
+    
     values$rotate_mode <- FALSE
-    updateSliderInput(session, "rotate", value = FALSE, values$rotate)
+    
+    updateSliderInput(
+      session = session, 
+      inputId = "rotate", 
+      value = FALSE, 
+      values$rotate
+      )
     output$rotation <- renderText({
       paste("rotation angle:", values$rotate)
     })
@@ -70,6 +97,12 @@ shinyServer(function(input, output, session) {
       value = FALSE
     )
     
+    # updateTextInput(
+    #   session = session, 
+    #   inputId = "comment", 
+    #   value = values$comment
+    # )
+
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
@@ -88,6 +121,7 @@ shinyServer(function(input, output, session) {
       list(src ="www/cross.jpg", height = 30)
     },deleteFile=FALSE)
     
+    # Provides for new plotting as text.
     output$info <- renderText({
       "**** NEW PLOT ****
 mean_error and boxplots should be vertically orientated.
@@ -705,9 +739,7 @@ If figures are wonky, chose rotate."
   ################################################
   
   # record comments
-  observeEvent(input$comment, {
-    values$comment <<- input$comment
-  }) 
+  observe(values$comment <<- input$comment) 
   
   ################################################
   # Previous/next buttons
