@@ -491,7 +491,7 @@ If figures are wonky, chose rotate."
       output$group_table <- DT::renderDT({
         DT::datatable(
           mod_df$x,
-          editable = list(target = "cell"),
+          #editable = list(target = "cell"),
           selection = "single",
           options = list(lengthChange = TRUE, dom = "t")
         )
@@ -525,26 +525,45 @@ If figures are wonky, chose rotate."
   ################################################
   #  Adding points
   ################################################
-  
+  # Create modal
+  popupModal <- function(failed = FALSE) {
+    modalDialog(
+      textInput("group", "Group Name", ""),
+      numericInput("sample_size", "Sample Size", ""),
+      if (failed)
+        div(tags$b("You did not input a group name or sample size", style = "color: red;")),
+      
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("ok", "OK")
+      )
+    )
+  }
   
   # when you click add group a popup appears which asks you to add group and sample size.
   # this is then added onto the raw data.
   # the row count increases and another row is then added after.
   observeEvent(input$add_group, {
-    shinyalert(html = TRUE, text = tagList(
-      textInput("group", "Group Name", ""),
-      numericInput("sample_size", "Sample Size", ""),
-    ))
-    
+    showModal(popupModal())
     row_count$x <- row_count$x + 1
-    mod_df$x <- mod_df$x %>%
-      dplyr::bind_rows(
-        dplyr::tibble(
-          Group_Name = NA, 
-          Sample_Size = NA
-        )
-      )
+        mod_df$x <- mod_df$x %>%
+          dplyr::bind_rows(
+            dplyr::tibble(
+              Group_Name = NA, 
+              Sample_Size = NA
+            )
+          )
   })
+  
+  observeEvent(input$ok, {
+    
+    if (!is.null(input$group) && nzchar(input$group) && !is.null(input$sample_size)) {
+      removeModal()
+    } else {
+      showModal(popupModal(failed = TRUE))
+    }
+  })
+  
   
   # what happens when you click a cell on the group table. 
   # Useful for deleting groups and labeling points. Highlights the cell.
@@ -558,6 +577,49 @@ If figures are wonky, chose rotate."
     selected$row <- input$group_table_rows_selected
     # print(selected$row)
   })
+  
+  observeEvent(input$click_group, {
+    if(is.na(mod_df$x[selected$row,1])){
+      shinyalert(
+        title = "Add a group to begin extracting",
+        text = "No group has been created",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "warning",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+    }
+    })
+  
+  observeEvent(input$del_group, {
+    if(is.na(mod_df$x[selected$row,1])){
+      shinyalert(
+        title = "Can't delete group",
+        text = "No group has been created",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "warning",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+    }
+  })
+      
   
   
   observeEvent(input$click_group, {
