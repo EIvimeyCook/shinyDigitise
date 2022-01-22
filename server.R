@@ -750,9 +750,25 @@ If figures are wonky, chose rotate."
     if(check_calibrate(plot_values) & check_extract(plot_values)){
       plot_values$processed_data <- process_data(plot_values)
       class(plot_values) <- 'metaDigitise'
+      saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
+    }else{
+      shinyalert(
+        title = "Warning!",
+        text = "You haven't completed this image. Without completing, the digitisation will not be saved",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "success",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
     }
-    saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
-    
     cv <- counter$countervalue + 1
     
     if (cv > counter_total) {
