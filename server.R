@@ -484,7 +484,10 @@ If figures are wonky, chose rotate."
         names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
-        valpoints <- values$raw_data
+        valpoints$x <<- values$raw_data$x
+        valpoints$y <<- values$raw_data$y
+        valpoints$id <<- values$raw_data$id
+        valpoints$n <<- values$raw_data$n
       }
       
       # this is then rendered in a DT table.
@@ -534,7 +537,6 @@ If figures are wonky, chose rotate."
         div(tags$b("You did not input a group name or sample size", style = "color: red;")),
       
       footer = tagList(
-        modalButton("Cancel"),
         actionButton("ok", "OK")
       )
     )
@@ -575,7 +577,8 @@ If figures are wonky, chose rotate."
   # Useful for deleting groups and labeling points. Highlights the row.
   observeEvent(input$group_table_rows_selected, {
     selected$row <- input$group_table_rows_selected
-    # print(selected$row)
+    print(selected$row)
+    print(mod_df$x[selected$row,1])
   })
   
   observeEvent(input$click_group, {
@@ -599,6 +602,27 @@ If figures are wonky, chose rotate."
     }
     })
   
+  observeEvent(input$click_group, {
+    if(length(input$group_table_rows_selected) != 1){
+      shinyalert(
+        title = "No group has been selected",
+        text = "Select a group from the table",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "warning",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+    }
+  })
+  
   observeEvent(input$del_group, {
     if(is.na(mod_df$x[selected$row,1])){
       shinyalert(
@@ -619,44 +643,45 @@ If figures are wonky, chose rotate."
       )
     }
   })
+  
+  
+  observeEvent(counter$countervalue,{
+    if(is.null(input$group_table_rows_selected)){
+      disable("del_group")
+    }
+  })
+  
+  
+  observeEvent(counter$countervalue,{
+    print(values$raw_data)
+    
+    
+    if(is.null(input$group_table_rows_selected)){
+      disable("click_group")
+    }
+  })
+  
+  observeEvent(input$group_table_rows_selected,{
+      enable("click_group")
+      enable("del_group")
+  })
       
-  
-  
+
   observeEvent(input$click_group, {
+    
     # plotcounter becomes 0.
     plotcounter$plotclicks <- 0
     
     # add mode becomes T
     add_mode$add <- TRUE
-    
-    # if you click group without any row selected - return an error.
-    if(is.null(selected$row)){
-      shinyalert(
-        title = "Select a group to plot",
-        text = "No group has been selected",
-        size = "s",
-        closeOnEsc = TRUE,
-        closeOnClickOutside = FALSE,
-        html = FALSE,
-        type = "warning",
-        showConfirmButton = TRUE,
-        showCancelButton = FALSE,
-        confirmButtonText = "OK",
-        confirmButtonCol = "#AEDEF4",
-        timer = 0,
-        imageUrl = "",
-        animation = TRUE
-      )
-    } else {
-      
+
       if (add_mode$add) {
-        
-        print(values$raw_data)
+  
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         # if(as.data.frame(reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
         if(length(stringr::str_detect(values$raw_data$id, as.character(mod_df$x[selected$row,1]))) != 0){
-          values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
           remove_string <-  as.character(mod_df$x[selected$row,1])
+          values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
           values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
           valpoints$x <- values$raw_data$x
           valpoints$y <- values$raw_data$y
@@ -664,9 +689,6 @@ If figures are wonky, chose rotate."
           valpoints$n <- values$raw_data$n
         }
       }
-      ## ?? this seems problematic
-      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-    }
   })
   
   # when you click on the plot and if add mode is true, increase plotcount by 1.
@@ -682,7 +704,6 @@ If figures are wonky, chose rotate."
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
       
       dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
-      print(dat_mod)
       
       if (input$plot_type == "mean_error") {
         if (plotcounter$plotclicks <= 2) {
@@ -692,8 +713,6 @@ If figures are wonky, chose rotate."
           valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
           valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
           # })
-          print(valpoints$x)
-          print(valpoints$y)
         } else {
           add_mode$add <- FALSE
         }
@@ -714,14 +733,12 @@ If figures are wonky, chose rotate."
       # }
       
       output$clickinfo <- renderText({
-        # print(any(duplicated(valpoints$x)))
         paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
       })
       
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        print(plot_values$raw_data)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })   
     }
@@ -738,7 +755,7 @@ If figures are wonky, chose rotate."
   # this will also cause the plot and raw data to update and remove anything with this group.
   observeEvent(input$del_group, {
     if (input$del_group) {
-      if(is.null(selected$row)){
+      if(is.null(input$group_table_rows_selected)){
         shinyalert(
           title = "Select a group to delete",
           text = "No group has been selected",
@@ -821,7 +838,7 @@ If figures are wonky, chose rotate."
         closeOnEsc = TRUE,
         closeOnClickOutside = FALSE,
         html = FALSE,
-        type = "success",
+        type = "warning",
         showConfirmButton = TRUE,
         showCancelButton = FALSE,
         confirmButtonText = "OK",
