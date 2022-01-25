@@ -1,4 +1,5 @@
-shinyUI(fluidPage(
+shinyDigitise_UI <- function(){
+fluidPage(
   useShinyjs(),
   useShinyalert(),
   theme = bs_theme(
@@ -372,4 +373,4 @@ shinyUI(fluidPage(
     )
   )
 )
-)
+}
