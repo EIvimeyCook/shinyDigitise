@@ -28,7 +28,7 @@ shinyDigitise <- function(dir){
 	counter_total <- length(details$paths)
 	# filename(details$paths[1])
 
-
+#https://bryer.org/post/2021-02-12-shiny_apps_in_r_packages/
     shiny_env <- new.env()
     assign('details', details, shiny_env)
     assign('counter_total', counter_total, shiny_env)

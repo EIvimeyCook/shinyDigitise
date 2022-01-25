@@ -476,6 +476,11 @@ If figures are wonky, chose rotate."
         
         row_count$x <- 0
         
+        valpoints$x <- NULL
+        valpoints$y <- NULL
+        valpoints$id <- NULL
+        valpoints$n <- NULL
+
       } else {
         # otherwise read in the data that already exists from the raw data.
         raw_dat <- as.data.frame(values$raw_data)
