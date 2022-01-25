@@ -471,9 +471,8 @@ If figures are wonky, chose rotate."
           Group_Name = NA,
           Sample_Size = NA
         )
-        ## ??? what does this do
+        #this is so it doesnt immediately plot a new row.
         mod_df$x <- basic[-nrow(basic),]
-        ## ???
         
         row_count$x <- 0
         
@@ -484,7 +483,10 @@ If figures are wonky, chose rotate."
         names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
-        valpoints <- values$raw_data
+        valpoints$x <- values$raw_data$x
+        valpoints$y <- values$raw_data$y
+        valpoints$id <- values$raw_data$id
+        valpoints$n <- values$raw_data$n
       }
       
       # this is then rendered in a DT table.
@@ -701,42 +703,33 @@ If figures are wonky, chose rotate."
       
       if (input$plot_type == "mean_error") {
         if (plotcounter$plotclicks <= 2) {
-          # isolate({
           valpoints$x <- c(valpoints$x, input$plot_click2$x)
           valpoints$y <- c(valpoints$y, input$plot_click2$y)
           valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
           valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
-          # })
-          print(valpoints$x)
-          print(valpoints$y)
         } else {
           add_mode$add <- FALSE
         }
       }
       if (input$plot_type == "boxplot") {
         if (plotcounter$plotclicks <= 5) {
-          # isolate({
           valpoints$x <- c(valpoints$x, input$plot_click2$x)
           valpoints$y <- c(valpoints$y, input$plot_click2$y)
           valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
           valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
-          # })
         } else {
           add_mode$add <- FALSE 
         }
       }
       values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-      # }
       
       output$clickinfo <- renderText({
-        # print(any(duplicated(valpoints$x)))
         paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
       })
       
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
-        print(plot_values$raw_data)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })   
     }
@@ -807,7 +800,6 @@ If figures are wonky, chose rotate."
   })
   
   observeEvent(input$ok, {
-    print(mod_df$x[,1])
   if(any(duplicated(mod_df$x[,1]))){
     shinyalert(
       title = "Duplicated group name detected",
