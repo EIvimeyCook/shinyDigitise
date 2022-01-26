@@ -102,8 +102,8 @@ fluidPage(
         prettyRadioButtons(
           inputId = "plot_type",
           label = NULL,
-          choiceNames = c("Mean/error", "Boxplot"),
-          choiceValues = c("mean_error", "boxplot"),
+          choiceNames = c("Mean/error", "Boxplot", "XY Mean/Error"),
+          choiceValues = c("mean_error", "boxplot", "xy_mean_error"),
           # choiceNames = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
           # choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
           inline = T,
