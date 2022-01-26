@@ -1,5 +1,13 @@
 shinyDigitise_server <- function(input, output, session){
   
+  output$shinylogo <- renderImage({
+    list(src ="www/shiny.jpg", height = 60)
+  },deleteFile=FALSE)
+  
+  output$shinytext <- renderText({
+    "shinyDigitise"
+  })
+  
   ################################################
   # Counter and initial plots
   ################################################
@@ -19,7 +27,7 @@ shinyDigitise_server <- function(input, output, session){
       
       #read in that data.
       values <<- do.call("reactiveValues", readRDS(counter$caldat))
-
+      
       # update 
       updateSliderInput(session, "cex", value = values$cex)
       updatePrettyRadioButtons(session, "pos", selected = values$pos)
@@ -30,13 +38,13 @@ shinyDigitise_server <- function(input, output, session){
         updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
       }
       # update
-
-
+      
+      
     } else {
-        # if not then create a new values object that we can store data in.
-  #  keeps flip/rotate and image details.
-  
-
+      # if not then create a new values object that we can store data in.
+      #  keeps flip/rotate and image details.
+      
+      
       # plot_values <- reactiveValuesToList(values)
       # updateRadioButtons(session, "plot_type", selected=)
       
@@ -69,7 +77,7 @@ shinyDigitise_server <- function(input, output, session){
       inputId = "rotate_mode", 
       value = FALSE
     )
-
+    
     values$rotate_mode <- FALSE
     
     updateSliderInput(
@@ -77,7 +85,7 @@ shinyDigitise_server <- function(input, output, session){
       inputId = "rotate", 
       value = FALSE, 
       values$rotate
-      )
+    )
     output$rotation <- renderText({
       paste("rotation angle:", values$rotate)
     })
@@ -102,7 +110,7 @@ shinyDigitise_server <- function(input, output, session){
     #   inputId = "comment", 
     #   value = values$comment
     # )
-
+    
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
@@ -143,8 +151,8 @@ If figures are wonky, chose rotate."
   observe(values$pos <<- input$pos)
   
   observe(values$error_type <<- input$error_type_select)
-
-
+  
+  
   ################################################
   # Flip
   ################################################
@@ -396,7 +404,7 @@ If figures are wonky, chose rotate."
     }
   })
   
-
+  
   ################################################
   # Extraction
   ################################################
@@ -472,7 +480,7 @@ If figures are wonky, chose rotate."
         valpoints$y <- NULL
         valpoints$id <- NULL
         valpoints$n <- NULL
-
+        
       } else {
         # otherwise read in the data that already exists from the raw data.
         raw_dat <- as.data.frame(values$raw_data)
@@ -532,6 +540,7 @@ If figures are wonky, chose rotate."
       if (failed)
         div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
       footer = tagList(
+        actionButton("cancel", "Cancel"),
         actionButton("ok", "OK")
       )
     )
@@ -543,13 +552,13 @@ If figures are wonky, chose rotate."
   observeEvent(input$add_group, {
     showModal(popupModal())
     row_count$x <- row_count$x + 1
-        mod_df$x <- mod_df$x %>%
-          dplyr::bind_rows(
-            dplyr::tibble(
-              Group_Name = NA, 
-              Sample_Size = NA
-            )
-          )
+    mod_df$x <- mod_df$x %>%
+      dplyr::bind_rows(
+        dplyr::tibble(
+          Group_Name = NA, 
+          Sample_Size = NA
+        )
+      )
   })
   
   observeEvent(input$ok, {
@@ -559,6 +568,12 @@ If figures are wonky, chose rotate."
     } else {
       showModal(popupModal(failed = TRUE))
     }
+  })
+  
+  observeEvent(input$cancel, {
+      removeModal()
+    row_count$x <- row_count$x - 1
+    mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
   })
   
   # what happens when you click a cell on the group table. 
@@ -582,7 +597,7 @@ If figures are wonky, chose rotate."
   
   
   observeEvent(counter$countervalue,{
- if(is.null(input$group_table_rows_selected)){
+    if(is.null(input$group_table_rows_selected)){
       disable("click_group")
     }
   })
@@ -611,7 +626,7 @@ If figures are wonky, chose rotate."
         animation = TRUE
       )
     }
-    })
+  })
   
   observeEvent(input$del_group, {
     if(is.na(mod_df$x[selected$row,1])){
@@ -633,7 +648,7 @@ If figures are wonky, chose rotate."
       )
     }
   })
-      
+  
   
   
   observeEvent(input$click_group, {
@@ -699,9 +714,9 @@ If figures are wonky, chose rotate."
       print(dat_mod)
       max_clicks <- 
         ifelse(input$plot_type == "mean_error",2,
-        ifelse(input$plot_type == "xy_mean_error",3,
-        ifelse(input$plot_type == "boxplot",5,
-          NA)))
+               ifelse(input$plot_type == "xy_mean_error",3,
+                      ifelse(input$plot_type == "boxplot",5,
+                             NA)))
       if (plotcounter$plotclicks <= max_clicks) {
         valpoints$x <- c(valpoints$x, input$plot_click2$x)
         valpoints$y <- c(valpoints$y, input$plot_click2$y)
@@ -786,37 +801,39 @@ If figures are wonky, chose rotate."
   
   #edit data with DT input
   observeEvent(input$group_table_cell_edit, {
+    change_string <-  as.character(mod_df$x[selected$row,1])
+    values$raw_data[grepl(change_string, values$raw_data$id),]$n <- input$group_table_cell_edit$value
     mod_df$x <-  editData(mod_df$x, input$group_table_cell_edit)
   })
   
   observeEvent(input$ok, {
-  if(any(duplicated(mod_df$x[,1]))){
-    shinyalert(
-      title = "Duplicated group name detected",
-      text = "This group has been deleted",
-      size = "s",
-      closeOnEsc = TRUE,
-      closeOnClickOutside = FALSE,
-      html = FALSE,
-      type = "warning",
-      showConfirmButton = TRUE,
-      showCancelButton = FALSE,
-      confirmButtonText = "OK",
-      confirmButtonCol = "#AEDEF4",
-      timer = 0,
-      imageUrl = "",
-      animation = TRUE
-    )
-    row_count$x <- row_count$x - 1
-    values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
-    remove_string <-  as.character(mod_df$x[nrow(mod_df$x),1])
-    values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
-    valpoints$x <- values$raw_data$x
-    valpoints$y <- values$raw_data$y
-    valpoints$id <- values$raw_data$id
-    valpoints$n <- values$raw_data$n
-    mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
-  }
+    if(any(duplicated(mod_df$x[,1]))){
+      shinyalert(
+        title = "Duplicated group name detected",
+        text = "This group has been deleted",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "warning",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+      row_count$x <- row_count$x - 1
+      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+      remove_string <-  as.character(mod_df$x[nrow(mod_df$x),1])
+      values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
+      valpoints$x <- values$raw_data$x
+      valpoints$y <- values$raw_data$y
+      valpoints$id <- values$raw_data$id
+      valpoints$n <- values$raw_data$n
+      mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
+    }
   })
   
   
@@ -829,7 +846,7 @@ If figures are wonky, chose rotate."
   observeEvent(input$comment,{
     values$comment <<- input$comment
   })
-
+  
   
   ################################################
   # Previous/next buttons
@@ -847,9 +864,9 @@ If figures are wonky, chose rotate."
       plot_values$processed_data <- process_data(plot_values)
       class(plot_values) <- 'metaDigitise'
       saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
-
+      
       cv <- counter$countervalue + 1
-    
+      
       if (cv > counter_total) {
         counter$countervalue <- counter_total
         shinyalert(
