@@ -705,27 +705,20 @@ If figures are wonky, chose rotate."
       
       dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
       print(dat_mod)
+      max_clicks <- 
+        ifelse(input$plot_type == "mean_error",2,
+        ifelse(input$plot_type == "xy_mean_error",3,
+        ifelse(input$plot_type == "boxplot",5,
+          NA)))
+      if (plotcounter$plotclicks <= max_clicks) {
+        valpoints$x <- c(valpoints$x, input$plot_click2$x)
+        valpoints$y <- c(valpoints$y, input$plot_click2$y)
+        valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
+        valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
+      } else {
+        add_mode$add <- FALSE
+      }
       
-      if (input$plot_type == "mean_error") {
-        if (plotcounter$plotclicks <= 2) {
-          valpoints$x <- c(valpoints$x, input$plot_click2$x)
-          valpoints$y <- c(valpoints$y, input$plot_click2$y)
-          valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
-          valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
-        } else {
-          add_mode$add <- FALSE
-        }
-      }
-      if (input$plot_type == "boxplot") {
-        if (plotcounter$plotclicks <= 5) {
-          valpoints$x <- c(valpoints$x, input$plot_click2$x)
-          valpoints$y <- c(valpoints$y, input$plot_click2$y)
-          valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
-          valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
-        } else {
-          add_mode$add <- FALSE 
-        }
-      }
       values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
       
       output$clickinfo <- renderText({
