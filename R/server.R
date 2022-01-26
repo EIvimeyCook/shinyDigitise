@@ -251,11 +251,11 @@ If figures are wonky, chose rotate."
       # if in calib mode 
       
       ### show relevant input boxes
-      if(input$plot_type %in% c("mean_error","boxplot","scatterplot")){
+      if(!input$plot_type %in% c("histogram")){
         show("y_var_input")
       }
       
-      if(input$plot_type %in% c("histogram","scatterplot")){
+      if(!input$plot_type %in% c("mean_error","boxplot")){
         show("x_var_input")
         show("x_coord_input")
       }
@@ -270,7 +270,7 @@ If figures are wonky, chose rotate."
       calpoints$y <- NULL
       
       # plot-specific calibration help
-      if (input$plot_type == "scatterplot" | input$plot_type == "histogram") {
+      if (!input$plot_type %in% c("mean_error","boxplot")) {
         output$info <- renderText({
           "   Calibrate ---> Click on known values on axes in this order:
   |
@@ -337,21 +337,13 @@ If figures are wonky, chose rotate."
       # increase clickcounter (becomes clicktot object).
       clicktot <- clickcounter$clickcount + 1
       
-      # if the plot type is sp or hist and the clicktotal is four or less, then store the calibration points and update the clickcounter. 
-      if (input$plot_type %in% c("scatterplot", "histogram")) {
-        if (clicktot <= 4) {
-          clickcounter$clickcount <- clicktot
-          calpoints$x <- c(calpoints$x, input$plot_click2$x)
-          calpoints$y <- c(calpoints$y, input$plot_click2$y)
-        } 
-      } else {
-        # if the plot type is me or bp and the clicktotal is 2 or less, store the calibration points and update the clickcounter.
-        if (clicktot <= 2) {
-          clickcounter$clickcount <- clicktot
-          calpoints$x <- c(calpoints$x, input$plot_click2$x)
-          calpoints$y <- c(calpoints$y, input$plot_click2$y)
-        } 
-      }
+      # if the plot type is me or bp then stoe two clicks, otherwise store 4 clicks and update the clickcounter. 
+      max_cal_clicks <- ifelse(input$plot_type %in% c("mean_error","boxplot"),2,4)
+      if (clicktot <= max_cal_clicks) {
+        clickcounter$clickcount <- clicktot
+        calpoints$x <- c(calpoints$x, input$plot_click2$x)
+        calpoints$y <- c(calpoints$y, input$plot_click2$y)
+      } 
       
       # Then convert these to a dataframe and plot
       values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
