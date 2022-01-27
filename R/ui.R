@@ -135,7 +135,8 @@ shinyDigitise_UI <- function(){
             #   "plottype_check",
             #   height = "30px"
             # )
-          textOutput("plottype_check_text")
+          textOutput("plottype_check_text"),
+          tags$head(tags$style("#plottype_check_text{font-size: 20px;}"))
           )
         ),
         
@@ -162,7 +163,8 @@ shinyDigitise_UI <- function(){
                 #   "orientation_check",
                 #   height = "30px"
                 # )
-                textOutput("orientation_check_text")
+                textOutput("orientation_check_text"),
+                tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
               ),  
               # cellArgs = list(style = "padding: 1px"),
               textOutput("rotation", inline=TRUE),
@@ -210,7 +212,8 @@ shinyDigitise_UI <- function(){
             #   "calibrate_check",
             #   height = "30px"
             # )
-            textOutput("calibrate_check_text")
+            textOutput("calibrate_check_text"),
+            tags$head(tags$style("#calibrate_check_text{font-size: 20px;}"))
           ),
           hidden(
             div(id="y_var_input",
@@ -292,7 +295,8 @@ shinyDigitise_UI <- function(){
             #   "extract_check",
             #   height = "30px"
             # )
-            textOutput("extract_check_text")
+            textOutput("extract_check_text"),
+            tags$head(tags$style("#extract_check_text{font-size: 20px;}"))
           ),
           hidden(
             div(id = "group_data",

@@ -16,6 +16,8 @@ library(dplyr)
 library(RColorBrewer)
 library(scales)
 library(shinyalert)
+library(emojifont)
+load.emojifont('OpenSansEmoji.ttf')
 
 
 # if(Sys.info()["user"]=="joelpick"){

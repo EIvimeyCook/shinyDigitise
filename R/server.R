@@ -148,16 +148,32 @@ If figures are wonky, chose rotate."
 
   observeEvent(values,{
     output$plottype_check_text <- renderText({
-      check_plottype(values)
+      if(check_plottype(values)){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
     })
     output$orientation_check_text <- renderText({
-      check_orientation(values)
+      if(check_orientation(values)){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
     })
     output$calibrate_check_text <- renderText({
-      check_calibrate(values)
+      if(check_calibrate(values)){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
     })
     output$extract_check_text <- renderText({
-      check_extract(values)
+      if(check_extract(values)){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
     })
   })
 
