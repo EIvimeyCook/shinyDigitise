@@ -463,6 +463,9 @@ If figures are wonky, chose rotate."
 
   #container for which rows and cell are selected
   selected <- reactiveValues(row = NULL, cell=NULL)
+  
+  #container for which row are clicked
+  clicked<- reactiveValues(row = NULL)
 
   #container for for plotting values and
   valpoints <- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
