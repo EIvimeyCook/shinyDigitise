@@ -358,14 +358,14 @@ shinyDigitise_UI <- function(){
         ### next previous panel
         ####------------------
         wellPanel(
-          actionButton(
-            inputId = "previous",
-            label = "Previous",
-            style = "padding:4px"
-            # style = "float",
-            # color = "primary",
+          # actionButton(
+          #   inputId = "previous",
+          #   label = "Previous",
+          #   style = "padding:4px"
+          #   # style = "float",
+          #   # color = "primary",
             
-          ),
+          # ),
           actionButton(
             inputId = "continue",
             label = "Continue",

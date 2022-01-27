@@ -44,10 +44,6 @@ shinyDigitise_server <- function(input, output, session){
       # if not then create a new values object that we can store data in.
       #  keeps flip/rotate and image details.
 
-
-      # plot_values <- reactiveValuesToList(values)
-      # updateRadioButtons(session, "plot_type", selected=)
-
       values <<- reactiveValues(
         image_name = details$name[counter$countervalue],
         image_file = details$paths[counter$countervalue],
@@ -107,35 +103,11 @@ shinyDigitise_server <- function(input, output, session){
       value = FALSE
     )
 
-    # updateTextInput(
-    #   session = session,
-    #   inputId = "comment",
-    #   value = values$comment
-    # )
-
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
-
-        # output$plottype_check_text <- renderText({"FALSE"})
-        # output$orientation_check_text <- renderText({"FALSE"})
-        # output$calibrate_check_text <- renderText({"FALSE"})
-        # output$extract_check_text <- renderText({"FALSE"})
-
-
-    # output$orientation_check <- renderImage({
-    #   list(src ="www/tick.jpg", height = 30)
-    # },deleteFile=FALSE)
-
-    # output$calibrate_check <- renderImage({
-    #   list(src ="www/cross.jpg", height = 30)
-    # },deleteFile=FALSE)
-
-    # output$extract_check <- renderImage({
-    #   list(src ="www/cross.jpg", height = 30)
-    # },deleteFile=FALSE)
 
     # Provides for new plotting as text.
     output$info <- renderText({
@@ -356,18 +328,6 @@ If figures are wonky, chose rotate."
       hide("y_coord_input")
       hide("x_coord_input")
 
-      # if( check_calibrate(values) ){
-      #   # output$calibrate_check <- renderImage({
-      #   #   list(src ="www/cross.jpg", height = 30)
-      #   # },deleteFile=FALSE)
-      #   output$calibrate_check_text <- renderText({"TRUE"})
-      # }else{
-      #   # output$calibrate_check <- renderImage({
-      #   #   list(src ="www/tick.jpg", height = 30)
-      #   # },deleteFile=FALSE)
-      #   output$calibrate_check_text <- renderText({"FALSE"})
-      # }
-
       output$clickinfo <- renderText({
         " "
       })
@@ -555,18 +515,6 @@ If figures are wonky, chose rotate."
       hide("group_data")
       hide("error_type_select")
 
-      # if( is.null(values$raw_data) ){
-      #   # output$extract_check <- renderImage({
-      #   #   list(src ="www/cross.jpg", height = 30)
-      #   # },deleteFile=FALSE)
-      #   output$extract_check_text <- renderText({"FALSE"})
-      # }else{
-      #   # output$extract_check <- renderImage({
-      #   #   list(src ="www/tick.jpg", height = 30)
-      #   # },deleteFile=FALSE)
-      #   output$extract_check_text <- renderText({"TRUE"})
-      # }
-
       # help text to show when extract mode is false.
       output$info <- renderText({
         ""
@@ -665,51 +613,7 @@ If figures are wonky, chose rotate."
   })
 
 
-  #
-  # observeEvent(input$del_group, {
-  #   if(is.na(mod_df$x[selected$row,1])){
-  #     shinyalert(
-  #       title = "Can't delete group",
-  #       text = "No group has been created",
-  #       size = "s",
-  #       closeOnEsc = TRUE,
-  #       closeOnClickOutside = FALSE,
-  #       html = FALSE,
-  #       type = "warning",
-  #       showConfirmButton = TRUE,
-  #       showCancelButton = FALSE,
-  #       confirmButtonText = "OK",
-  #       confirmButtonCol = "#AEDEF4",
-  #       timer = 0,
-  #       imageUrl = "",
-  #       animation = TRUE
-  #     )
-  #   }
-  # })
-  #
-
   observeEvent(input$click_group, {
-    # plotcounter becomes 0.
-      # if(is.na(mod_df$x[selected$row,1])){
-      #   shinyalert(
-      #     title = "Add a group to begin extracting",
-      #     text = "No group has been created",
-      #     size = "s",
-      #     closeOnEsc = TRUE,
-      #     closeOnClickOutside = FALSE,
-      #     html = FALSE,
-      #     type = "warning",
-      #     showConfirmButton = TRUE,
-      #     showCancelButton = FALSE,
-      #     confirmButtonText = "OK",
-      #     confirmButtonCol = "#AEDEF4",
-      #     timer = 0,
-      #     imageUrl = "",
-      #     animation = TRUE
-      #   )
-      # }
-
-
 
     plotcounter$plotclicks <- 0
 
@@ -973,16 +877,16 @@ If figures are wonky, chose rotate."
   })
 
   # when next is pressed up the counter and check that its above 0
-  observeEvent(input$previous, {
-    cv <- counter$countervalue - 1
+  # observeEvent(input$previous, {
+  #   cv <- counter$countervalue - 1
 
-    if (cv == 0) {
-      counter$countervalue <- 1
-      # clickcounter$clickcount <- 0
-    } else {
-      counter$countervalue <- cv
-    }
-  })
+  #   if (cv == 0) {
+  #     counter$countervalue <- 1
+  #     # clickcounter$clickcount <- 0
+  #   } else {
+  #     counter$countervalue <- cv
+  #   }
+  # })
 
   #output the progress text
   output$progress <- renderText({
