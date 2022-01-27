@@ -72,6 +72,7 @@ shinyDigitise_UI <- function(){
         id = "tPanel",
         style = "overflow-y:scroll; max-height: 800px; position:relative;",
         
+        verbatimTextOutput("image_name"),
         ####------------------ 
         ### Plot Type Panel
         ####------------------
@@ -349,7 +350,7 @@ shinyDigitise_UI <- function(){
       ### Plot panel
       ####------------------
       mainPanel(
-        verbatimTextOutput("image_name"),
+        verbatimTextOutput("info"),
         plotOutput(
           "metaPlot",
           click = "plot_click2",
@@ -358,8 +359,7 @@ shinyDigitise_UI <- function(){
           brush = "plot_brush",
           height = "600px", 
           width = "100%"
-        ),
-        verbatimTextOutput("info"),
+        ),  
         verbatimTextOutput("clickinfo"),
         br(),
         br()
