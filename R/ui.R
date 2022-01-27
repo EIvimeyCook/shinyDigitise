@@ -21,48 +21,14 @@ shinyDigitise_UI <- function(){
         ),
         windowTitle = "shinyDigitise")
       ),
-    # column(width = 1,
-      #   br(),
-      # ),
+
       column(width = 8,
         br(),
         div(style="display: inline-block;vertical-align:top; width: 10%; font-size:x-large;",
            p(htmlOutput("progress", inline=TRUE)),
         ),
-        # div(style="display: inline-block;vertical-align:top; width: 50px;",HTML("<br>")),
-        # div(style="display: inline-block;vertical-align:top; width: 5%;",HTML("<br>")),
-
-        # ),
-        # column(3,
-        #   br(),
-        div(style="display: inline-block;vertical-align:top; width: 15% ",strong("Show processed images:")),
-        div(style="display: inline-block;vertical-align:top; width: 10%; ",prettyCheckbox(
-         value = F,
-         icon = icon("check"),
-         status = "danger",
-         animation = "jelly",
-         inputId = "ShowOnlyNew",
-         label = NULL,
-         #label_on = "Yes",
-         #icon_on = icon("check"),
-         #status_on = "info",
-         #status_off = "warning",
-         #label_off = "No",
-         #icon_off = icon("remove")
-        )),
-
-        # ),
-        # # column(1, align="left"
-        # #
-        # #   br(),
-
-        # # ),
-        # column(3,
-        #   br(),
-        # div(style="display: inline-block;vertical-align:top; width: 10%;",HTML("<br>")),
-
         div(style="display: inline-block;vertical-align:top; width: 10%;",strong("Point size:")),
-        div(style="display: inline-block;vertical-align:top;  width: 15%;",
+        div(style="display: inline-block;vertical-align:top;  width: 20%;",
          sliderInput(
            inputId = "cex",
            label = NULL,
@@ -71,10 +37,11 @@ shinyDigitise_UI <- function(){
            max = 3,
            ticks  = FALSE)),
         div(style="display: inline-block;vertical-align:top; width: 10% "),
-        div(style="display: inline-block;vertical-align:top;  width: 15%;",
+        div(style="display: inline-block;vertical-align:top; width: 20%;",strong("Group Name Position:")),
+        div(style="display: inline-block;vertical-align:top;  width: 20%;",
            prettyRadioButtons(
              inputId = "pos",
-             label = "Group Name Position",
+             label = NULL,
              choiceNames = c("right", "top"),
              choiceValues = c("right", "top"),
              inline = T,
