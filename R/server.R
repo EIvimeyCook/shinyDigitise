@@ -64,7 +64,9 @@ shinyDigitise_server <- function(input, output, session){
         pos="right",
         comment=NULL
       )
+    updatePrettyRadioButtons(session, "plot_type", selected = character(0))
     }
+    
 
     updateSwitchInput(
       session = session,
@@ -117,17 +119,23 @@ shinyDigitise_server <- function(input, output, session){
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
 
-    output$orientation_check <- renderImage({
-      list(src ="www/tick.jpg", height = 30)
-    },deleteFile=FALSE)
+        # output$plottype_check_text <- renderText({"FALSE"})
+        # output$orientation_check_text <- renderText({"FALSE"})
+        # output$calibrate_check_text <- renderText({"FALSE"})
+        # output$extract_check_text <- renderText({"FALSE"})
 
-    output$calibrate_check <- renderImage({
-      list(src ="www/cross.jpg", height = 30)
-    },deleteFile=FALSE)
 
-    output$extract_check <- renderImage({
-      list(src ="www/cross.jpg", height = 30)
-    },deleteFile=FALSE)
+    # output$orientation_check <- renderImage({
+    #   list(src ="www/tick.jpg", height = 30)
+    # },deleteFile=FALSE)
+
+    # output$calibrate_check <- renderImage({
+    #   list(src ="www/cross.jpg", height = 30)
+    # },deleteFile=FALSE)
+
+    # output$extract_check <- renderImage({
+    #   list(src ="www/cross.jpg", height = 30)
+    # },deleteFile=FALSE)
 
     # Provides for new plotting as text.
     output$info <- renderText({
@@ -137,6 +145,22 @@ If they are not then chose flip to correct this.
 If figures are wonky, chose rotate."
     })
   })
+
+  observeEvent(values,{
+    output$plottype_check_text <- renderText({
+      check_plottype(values)
+    })
+    output$orientation_check_text <- renderText({
+      check_orientation(values)
+    })
+    output$calibrate_check_text <- renderText({
+      check_calibrate(values)
+    })
+    output$extract_check_text <- renderText({
+      check_extract(values)
+    })
+  })
+
 
   ################################################
   # Plot type and cex
@@ -316,15 +340,17 @@ If figures are wonky, chose rotate."
       hide("y_coord_input")
       hide("x_coord_input")
 
-      if( is.null(values$calpoints) || is.null(values$variable) || is.null(values$point_vals) ){
-        output$calibrate_check <- renderImage({
-          list(src ="www/cross.jpg", height = 30)
-        },deleteFile=FALSE)
-      }else{
-        output$calibrate_check <- renderImage({
-          list(src ="www/tick.jpg", height = 30)
-        },deleteFile=FALSE)
-      }
+      # if( check_calibrate(values) ){
+      #   # output$calibrate_check <- renderImage({
+      #   #   list(src ="www/cross.jpg", height = 30)
+      #   # },deleteFile=FALSE)
+      #   output$calibrate_check_text <- renderText({"TRUE"})
+      # }else{
+      #   # output$calibrate_check <- renderImage({
+      #   #   list(src ="www/tick.jpg", height = 30)
+      #   # },deleteFile=FALSE)
+      #   output$calibrate_check_text <- renderText({"FALSE"})
+      # }
 
       output$clickinfo <- renderText({
         " "
@@ -510,15 +536,17 @@ If figures are wonky, chose rotate."
       hide("group_data")
       hide("error_type_select")
 
-      if( is.null(values$raw_data) ){
-        output$extract_check <- renderImage({
-          list(src ="www/cross.jpg", height = 30)
-        },deleteFile=FALSE)
-      }else{
-        output$extract_check <- renderImage({
-          list(src ="www/tick.jpg", height = 30)
-        },deleteFile=FALSE)
-      }
+      # if( is.null(values$raw_data) ){
+      #   # output$extract_check <- renderImage({
+      #   #   list(src ="www/cross.jpg", height = 30)
+      #   # },deleteFile=FALSE)
+      #   output$extract_check_text <- renderText({"FALSE"})
+      # }else{
+      #   # output$extract_check <- renderImage({
+      #   #   list(src ="www/tick.jpg", height = 30)
+      #   # },deleteFile=FALSE)
+      #   output$extract_check_text <- renderText({"TRUE"})
+      # }
 
       # help text to show when extract mode is false.
       output$info <- renderText({
@@ -866,7 +894,7 @@ If figures are wonky, chose rotate."
 
   observeEvent(input$continue, {
     plot_values <- reactiveValuesToList(values)
-    if(check_calibrate(plot_values) & check_extract(plot_values)){
+    if(check_plottype(plot_values) & check_calibrate(plot_values) & check_extract(plot_values)){
       plot_values$processed_data <- process_data(plot_values)
       class(plot_values) <- 'metaDigitise'
       saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))

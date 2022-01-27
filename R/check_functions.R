@@ -1,4 +1,9 @@
-
+check_plottype <- function(x){
+	!is.null(x$plot_type) #& !is.null(x$error_type)
+}
+check_orientation <- function(x){
+	TRUE
+}
 check_calibrate <- function(x){
   # check if they all calibrate parts are filled in 
   if( is.null(x$calpoints) || is.null(x$variable) || is.null(x$point_vals)|| is.null(x$log_axes) ){
