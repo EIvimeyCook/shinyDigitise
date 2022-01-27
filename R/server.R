@@ -632,6 +632,16 @@ If figures are wonky, chose rotate."
     selected$row <- input$group_table_rows_selected
     print(selected$row)
   })
+  
+    observeEvent(input$group_table_row_last_clicked, {
+    clicked$row <- c(clicked$row,input$group_table_row_last_clicked)
+    if(any(duplicated(clicked$row))){
+      clicked$row <<- NULL
+      selected$row <<- NULL
+      selectRows(proxy, selected = NULL)
+      print(paste("Clicked - ", clicked$row))
+    }
+  })
 
   observeEvent(counter$countervalue,{
     if(is.null(input$group_table_rows_selected)){
