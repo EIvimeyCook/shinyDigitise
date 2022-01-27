@@ -87,12 +87,12 @@ shinyDigitise_UI <- function(){
             choiceValues = c("mean_error", "boxplot", "xy_mean_error"),
             # choiceNames = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
             # choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
+            selected = character(0),
             inline = T,
             icon = icon("check"),
             bigger = TRUE,
             status = "info",
-            animation = "jelly",
-            selected = character(0)
+            animation = "jelly"
             #checkIcon = list(
             #yes = tags$i(class = "fa fa-check-square",
             #            style = "color: white"),

@@ -17,7 +17,6 @@ shinyDigitise_server <- function(input, output, session){
 
   # when counter value is changed (either conitnue or previous is pressed):
   observeEvent(counter$countervalue, {
-
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
 
@@ -60,7 +59,7 @@ shinyDigitise_server <- function(input, output, session){
         pos="right",
         comment=NULL
       )
-    updatePrettyRadioButtons(session, "plot_type", selected = character(0))
+    # updatePrettyRadioButtons(session, "plot_type", selected = character(0))
     }
     
 
@@ -103,6 +102,35 @@ shinyDigitise_server <- function(input, output, session){
       value = FALSE
     )
 
+    output$plottype_check_text <- renderText({
+      if(check_plottype(reactiveValuesToList(values))){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
+    })
+    output$orientation_check_text <- renderText({
+      if(check_orientation(reactiveValuesToList(values))){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
+    })
+    output$calibrate_check_text <- renderText({
+      if(check_calibrate(reactiveValuesToList(values))){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
+    })
+    output$extract_check_text <- renderText({
+      if(check_extract(reactiveValuesToList(values))){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
+    })
+
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
@@ -118,36 +146,57 @@ If figures are wonky, chose rotate."
     })
   })
 
-  observeEvent(values,{
-    output$plottype_check_text <- renderText({
-      if(check_plottype(values)){
-         emoji('white_check_mark')
-      }else{
-        emoji('warning')
-      }
-    })
-    output$orientation_check_text <- renderText({
-      if(check_orientation(values)){
-         emoji('white_check_mark')
-      }else{
-        emoji('warning')
-      }
-    })
-    output$calibrate_check_text <- renderText({
-      if(check_calibrate(values)){
-         emoji('white_check_mark')
-      }else{
-        emoji('warning')
-      }
-    })
-    output$extract_check_text <- renderText({
-      if(check_extract(values)){
-         emoji('white_check_mark')
-      }else{
-        emoji('warning')
-      }
-    })
-  })
+  # observeEvent(input$plot_type,{
+  #   plot_values <- reactiveValuesToList(values)
+
+  #   output$plottype_check_text <- renderText({
+  #     if(check_plottype(reactiveValuesToList(values))){
+  #        emoji('white_check_mark')
+  #     }else{
+  #       emoji('warning')
+  #     }
+  #   })
+  #   output$orientation_check_text <- renderText({
+  #     if(check_orientation(reactiveValuesToList(values))){
+  #        emoji('white_check_mark')
+  #     }else{
+  #       emoji('warning')
+  #     }
+  #   })
+  #   output$calibrate_check_text <- renderText({
+  #     if(check_calibrate(reactiveValuesToList(values))){
+  #        emoji('white_check_mark')
+  #     }else{
+  #       emoji('warning')
+  #     }
+  #   })
+  #   output$extract_check_text <- renderText({
+  #     if(check_extract(reactiveValuesToList(values))){
+  #        emoji('white_check_mark')
+  #     }else{
+  #       emoji('warning')
+  #     }
+  #   })
+  # })
+
+#   observeEvent(values,{
+#     output$plottype_check_text <- renderText({
+# check_plottype(values)
+
+#     })
+#     output$orientation_check_text <- renderText({
+# check_orientation(values)
+# print(check_orientation(values))
+#     })
+#     output$calibrate_check_text <- renderText({
+# check_calibrate(values)
+# print(check_calibrate(values))
+#     })
+#     output$extract_check_text <- renderText({
+# check_extract(values)
+# print(check_extract(values))
+#     })
+#   })
 
 
   ################################################
@@ -155,7 +204,24 @@ If figures are wonky, chose rotate."
   ################################################
 
   # record the plot type for the data file - influences clicking etc.
-  observe(values$plot_type <<- input$plot_type)
+
+  observeEvent(input$plot_type,{
+    values$plot_type <<- input$plot_type
+    output$plottype_check_text <- renderText({
+      if(check_plottype(reactiveValuesToList(values))){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
+    })
+    output$calibrate_check_text <- renderText({
+      if(check_calibrate(reactiveValuesToList(values))){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
+    })
+  })
 
   #record cex used (adjusted with slider)
   observe(values$cex <<- input$cex)
@@ -327,6 +393,14 @@ If figures are wonky, chose rotate."
       hide("x_var_input")
       hide("y_coord_input")
       hide("x_coord_input")
+
+    output$calibrate_check_text <- renderText({
+      if(check_calibrate(reactiveValuesToList(values))){
+         emoji('white_check_mark')
+      }else{
+        emoji('warning')
+      }
+    })
 
       output$clickinfo <- renderText({
         " "
@@ -514,6 +588,14 @@ If figures are wonky, chose rotate."
       ## hide
       hide("group_data")
       hide("error_type_select")
+
+      output$extract_check_text <- renderText({
+        if(check_extract(reactiveValuesToList(values))){
+           emoji('white_check_mark')
+        }else{
+          emoji('warning')
+        }
+      })
 
       # help text to show when extract mode is false.
       output$info <- renderText({
