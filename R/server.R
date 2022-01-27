@@ -705,6 +705,7 @@ If figures are wonky, chose rotate."
         imageUrl = "",
         animation = TRUE
       )
+      add_mode$add <- FALSE
     } else {
 
       if (add_mode$add) {
