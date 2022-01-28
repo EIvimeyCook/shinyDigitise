@@ -1,4 +1,4 @@
-![alt text](https://github.com/EIvimeyCook/ShinyDigitise/blob/master/www/shiny.png)
+![alt text](https://github.com/EIvimeyCook/ShinyDigitise/blob/master/www/shinyDigitise.png)
 
 # ShinyDigitise
 
