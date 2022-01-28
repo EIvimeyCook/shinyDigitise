@@ -55,11 +55,11 @@ shinyDigitise_server <- function(input, output, session){
         raw_data = NULL,
         # rotate_mode=FALSE,
         cex = input$cex,
-        plot_type = input$plot_type,
+        plot_type = NULL,
         pos="right",
         comment=NULL
       )
-    # updatePrettyRadioButtons(session, "plot_type", selected = character(0))
+    updatePrettyRadioButtons(session, "plot_type", selected = character(0))
     }
     
 
@@ -102,6 +102,7 @@ shinyDigitise_server <- function(input, output, session){
       value = FALSE
     )
 
+    #### update tick boxes
     output$plottype_check_text <- renderText({
       if(check_plottype(reactiveValuesToList(values))){
          emoji('white_check_mark')
@@ -146,58 +147,6 @@ If figures are wonky, chose rotate."
     })
   })
 
-  # observeEvent(input$plot_type,{
-  #   plot_values <- reactiveValuesToList(values)
-
-  #   output$plottype_check_text <- renderText({
-  #     if(check_plottype(reactiveValuesToList(values))){
-  #        emoji('white_check_mark')
-  #     }else{
-  #       emoji('warning')
-  #     }
-  #   })
-  #   output$orientation_check_text <- renderText({
-  #     if(check_orientation(reactiveValuesToList(values))){
-  #        emoji('white_check_mark')
-  #     }else{
-  #       emoji('warning')
-  #     }
-  #   })
-  #   output$calibrate_check_text <- renderText({
-  #     if(check_calibrate(reactiveValuesToList(values))){
-  #        emoji('white_check_mark')
-  #     }else{
-  #       emoji('warning')
-  #     }
-  #   })
-  #   output$extract_check_text <- renderText({
-  #     if(check_extract(reactiveValuesToList(values))){
-  #        emoji('white_check_mark')
-  #     }else{
-  #       emoji('warning')
-  #     }
-  #   })
-  # })
-
-#   observeEvent(values,{
-#     output$plottype_check_text <- renderText({
-# check_plottype(values)
-
-#     })
-#     output$orientation_check_text <- renderText({
-# check_orientation(values)
-# print(check_orientation(values))
-#     })
-#     output$calibrate_check_text <- renderText({
-# check_calibrate(values)
-# print(check_calibrate(values))
-#     })
-#     output$extract_check_text <- renderText({
-# check_extract(values)
-# print(check_extract(values))
-#     })
-#   })
-
 
   ################################################
   # Plot type and cex
@@ -207,6 +156,8 @@ If figures are wonky, chose rotate."
 
   observeEvent(input$plot_type,{
     values$plot_type <<- input$plot_type
+    
+    #### update tick boxes
     output$plottype_check_text <- renderText({
       if(check_plottype(reactiveValuesToList(values))){
          emoji('white_check_mark')
@@ -307,7 +258,6 @@ If figures are wonky, chose rotate."
 
   # if calib mode button pressed
   observeEvent(input$calib_mode, {
-
     # resent click counter
     clickcounter$clickcount <- 0
 
@@ -321,70 +271,94 @@ If figures are wonky, chose rotate."
     shinyjs::reset("y_coord_input")
 
     if (input$calib_mode) {
+      if(is.null(values$plot_type)){
+        shinyalert(
+          title = "No plot type selected",
+          text = "Please select a plot type before continuing with extraction",
+          size = "s",
+          closeOnEsc = TRUE,
+          closeOnClickOutside = FALSE,
+          html = FALSE,
+          type = "warning",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#AEDEF4",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
+        )
+        updateSwitchInput(
+            session = session,
+            inputId = "calib_mode",
+            value = FALSE
+        )
+      }else{
 
-      # toggle extract mode and rotate mode off.
-      updateSwitchInput(
-        session = session,
-        inputId = "extract_mode",
-        value = FALSE
-      )
-      updateSwitchInput(
-        session = session,
-        inputId = "rotate_mode",
-        value = FALSE
-      )
+        # toggle extract mode and rotate mode off.
+        updateSwitchInput(
+          session = session,
+          inputId = "extract_mode",
+          value = FALSE
+        )
+        updateSwitchInput(
+          session = session,
+          inputId = "rotate_mode",
+          value = FALSE
+        )
 
-      # if in calib mode
+        # if in calib mode
 
-      ### show relevant input boxes
-      if(!input$plot_type %in% c("histogram")){
-        show("y_var_input")
-      }
+        ### show relevant input boxes
+        if(!input$plot_type %in% c("histogram")){
+          show("y_var_input")
+        }
 
-      if(!input$plot_type %in% c("mean_error","boxplot")){
-        show("x_var_input")
-        show("x_coord_input")
-      }
+        if(!input$plot_type %in% c("mean_error","boxplot")){
+          show("x_var_input")
+          show("x_coord_input")
+        }
 
-      show("y_coord_input")
+        show("y_coord_input")
 
-      # delete all previous data
-      values$calpoints <<- NULL
-      values$variable <<- NULL
-      values$point_vals <<- NULL
-      calpoints$x <- NULL
-      calpoints$y <- NULL
+        # delete all previous data
+        values$calpoints <<- NULL
+        values$variable <<- NULL
+        values$point_vals <<- NULL
+        calpoints$x <- NULL
+        calpoints$y <- NULL
 
-      # plot-specific calibration help
-      if (!input$plot_type %in% c("mean_error","boxplot")) {
-        output$info <- renderText({
-          "   Calibrate ---> Click on known values on axes in this order:
-  |
-  2
-  |
-  |
-  1
-  |___3___________4_____
-  "
+        # plot-specific calibration help
+        if (!input$plot_type %in% c("mean_error","boxplot")) {
+          output$info <- renderText({
+            "   Calibrate ---> Click on known values on axes in this order:
+    |
+    2
+    |
+    |
+    1
+    |___3___________4_____
+    "
+          })
+        } else {
+          output$info <- renderText({
+            "   Calibrate ---> Click on known values on axes in this order:
+    |
+    2
+    |
+    |
+    1
+    |_____________________
+    "
+          })
+        }
+
+        # Also shows click locations (probably don't need this in future).
+        # and gives calibration placement help.
+        output$clickinfo <- renderText({
+          paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
         })
-      } else {
-        output$info <- renderText({
-          "   Calibrate ---> Click on known values on axes in this order:
-  |
-  2
-  |
-  |
-  1
-  |_____________________
-  "
-        })
       }
-
-      # Also shows click locations (probably don't need this in future).
-      # and gives calibration placement help.
-      output$clickinfo <- renderText({
-        paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
-      })
     } else {
       ## what happens when calibrate mode is switched off
 
@@ -512,77 +486,99 @@ If figures are wonky, chose rotate."
 
     # if we are in extract mode
     if (input$extract_mode) {
-
-      #toggle calibrate mode and rotate mode off.
-      updateSwitchInput(
-        session = session,
-        inputId = "calib_mode",
-        value = FALSE
-      )
-      updateSwitchInput(
-        session = session,
-        inputId = "rotate_mode",
-        value = FALSE
-      )
-      #show the group_data ovject (the table for clicking/groups and sample sizes)
-      show("group_data")
-
-      # show the error type select input (ofr mean_error).
-      if (input$plot_type == "mean_error") {
-        show("error_type_select")
-      }
-      # show help text
-      output$info <- renderText({
-        "**** EXTRACTING DATA ****
-1. Group names and sample size should be entered into the table on the sidebar before points are added.
-2. To add points to a group, first click the group on the sidebar then click 'Add Points'.
-3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
-      })
-
-
-      ################################################
-      # Group Name and Sample Size Table
-      ################################################
-
-      if (is.null(values$raw_data)) {
-        # if values raw data is null/empty then create new data to show in the table.
-        basic <- tibble(
-          Group_Name = NA,
-          Sample_Size = NA
+      if(is.null(values$plot_type)){
+        shinyalert(
+          title = "No plot type selected",
+          text = "Please select a plot type before continuing with extraction",
+          size = "s",
+          closeOnEsc = TRUE,
+          closeOnClickOutside = FALSE,
+          html = FALSE,
+          type = "warning",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#AEDEF4",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE
         )
-        #this is so it doesnt immediately plot a new row.
-        mod_df$x <- basic[-nrow(basic),]
-
-        row_count$x <- 0
-
-        valpoints$x <- NULL
-        valpoints$y <- NULL
-        valpoints$id <- NULL
-        valpoints$n <- NULL
-
-      } else {
-        # otherwise read in the data that already exists from the raw data.
-        raw_dat <- as.data.frame(values$raw_data)
-        raw_dat_sum <- aggregate(n ~ id, raw_dat, unique)
-        names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
-        mod_df$x <- raw_dat_sum
-        row_count$x <- nrow(raw_dat_sum)
-        valpoints$x <- values$raw_data$x
-        valpoints$y <- values$raw_data$y
-        valpoints$id <- values$raw_data$id
-        valpoints$n <- values$raw_data$n
-      }
-
-      # this is then rendered in a DT table.
-      output$group_table <- DT::renderDT({
-        DT::datatable(
-          mod_df$x,
-          editable = list(target = "cell", disable = list(columns = c(1))),
-          selection = "single",
-          options = list(lengthChange = TRUE, dom = "t")
+        updateSwitchInput(
+            session = session,
+            inputId = "extract_mode",
+            value = FALSE
         )
-      })
+      }else{
+        #toggle calibrate mode and rotate mode off.
+        updateSwitchInput(
+          session = session,
+          inputId = "calib_mode",
+          value = FALSE
+        )
+        updateSwitchInput(
+          session = session,
+          inputId = "rotate_mode",
+          value = FALSE
+        )
+        #show the group_data ovject (the table for clicking/groups and sample sizes)
+        show("group_data")
 
+        # show the error type select input (ofr mean_error).
+        if (input$plot_type == "mean_error") {
+          show("error_type_select")
+        }
+        # show help text
+        output$info <- renderText({
+          "**** EXTRACTING DATA ****
+  1. Group names and sample size should be entered into the table on the sidebar before points are added.
+  2. To add points to a group, first click the group on the sidebar then click 'Add Points'.
+  3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
+        })
+
+
+        ################################################
+        # Group Name and Sample Size Table
+        ################################################
+
+        if (is.null(values$raw_data)) {
+          # if values raw data is null/empty then create new data to show in the table.
+          basic <- tibble(
+            Group_Name = NA,
+            Sample_Size = NA
+          )
+          #this is so it doesnt immediately plot a new row.
+          mod_df$x <- basic[-nrow(basic),]
+
+          row_count$x <- 0
+
+          valpoints$x <- NULL
+          valpoints$y <- NULL
+          valpoints$id <- NULL
+          valpoints$n <- NULL
+
+        } else {
+          # otherwise read in the data that already exists from the raw data.
+          raw_dat <- as.data.frame(values$raw_data)
+          raw_dat_sum <- aggregate(n ~ id, raw_dat, unique)
+          names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+          mod_df$x <- raw_dat_sum
+          row_count$x <- nrow(raw_dat_sum)
+          valpoints$x <- values$raw_data$x
+          valpoints$y <- values$raw_data$y
+          valpoints$id <- values$raw_data$id
+          valpoints$n <- values$raw_data$n
+        }
+
+        # this is then rendered in a DT table.
+        output$group_table <- DT::renderDT({
+          DT::datatable(
+            mod_df$x,
+            editable = list(target = "cell", disable = list(columns = c(1))),
+            selection = "single",
+            options = list(lengthChange = TRUE, dom = "t")
+          )
+        })
+      }
     }else{
 
       ## hide
