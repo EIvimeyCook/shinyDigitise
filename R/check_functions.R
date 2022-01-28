@@ -17,7 +17,23 @@ check_calibrate <- function(x){
 	}
 }
 check_extract <- function(x){
-	!is.null(x$raw_data) #& !is.null(x$error_type)
-## check how many points per group
-	# table(x$raw_data)
+	if(is.null(x$raw_data)){
+		FALSE
+	}else{
+		group_lengths<-unique(table(x$raw_data$id))
+		if(length(group_lengths)>1){
+			FALSE
+		}else if(x$plot_type %in% c("mean_error","xy_mean_error","boxplot")){
+			(x$plot_type=="mean_error" & group_lengths==2)|
+			(x$plot_type=="xy_mean_error" & group_lengths==3)|
+			(x$plot_type=="boxplot" & group_lengths==5)
+		}else{
+			TRUE
+		}
+	}
 }
+#work out what to do with error type
+	#& !is.null(x$error_type)
+## check how many points per group
+	
+
