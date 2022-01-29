@@ -196,6 +196,7 @@ If figures are wonky, chose rotate."
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
+    session$resetBrush("plot_brush")
   })
 
   observeEvent(input$plot_dblclick,{
