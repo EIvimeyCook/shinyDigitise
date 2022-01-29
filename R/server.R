@@ -75,6 +75,8 @@ shinyDigitise_server <- function(input, output, session){
       value = FALSE
     )
 
+    values$zoom_coords <- NULL
+
     values$rotate_mode <- FALSE
 
     updateSliderInput(
@@ -181,6 +183,30 @@ If figures are wonky, chose rotate."
 
   observe(values$error_type <<- input$error_type_select)
 
+
+  ################################################
+  # zoom
+  ################################################
+  
+  observeEvent(input$plot_brush,{
+    # print(input$plot_brush)
+    values$zoom_coords <<- c(input$plot_brush$xmin,input$plot_brush$xmax,input$plot_brush$ymin,input$plot_brush$ymax)
+    output$metaPlot <- renderPlot({
+      par(mar = c(0, 0, 0, 0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
+    })
+  })
+
+  observeEvent(input$plot_dblclick,{
+    session$resetBrush("plot_brush")
+    values$zoom_coords <<- NULL
+    output$metaPlot <- renderPlot({
+      par(mar = c(0, 0, 0, 0))
+      plot_values <- reactiveValuesToList(values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
+    })
+  })
 
   ################################################
   # Flip

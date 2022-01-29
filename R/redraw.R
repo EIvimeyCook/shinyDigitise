@@ -149,10 +149,11 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 #' @param pos where group names should be plotted (either "right" or "top")
 #' @param points logical, should points be redrawn
 #' @param shiny logical, is plotting occuring in shiny app?
+#' @param zoom_coords x and y coords for zoom function
 #' @param ... further arguments passed to or from other methods.
 #' @export
 
-internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE,  ...){
+internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE, zoom_coords=NULL, ...){
 
 	if(!shiny){
 		op <- graphics::par(mar=c(3,0,2,0), mfrow=c(1,1))
@@ -166,7 +167,16 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 
 	text_cex <- 1*cex
 
-	graphics::plot(image)
+	if(is.null(zoom_coords)){
+		xlim <- c(0,image_details[1])	
+		ylim <- c(0,image_details[2])
+	}else{
+		xlim <- zoom_coords[c(1,2)]
+		ylim <- zoom_coords[c(3,4)]
+	}
+	plot(NA, xlim=xlim, ylim=ylim)
+	if(!is.null(image)) plot(image,add=TRUE)
+	graphics::plot(image, xlim=xlim, ylim=ylim)
 	if(!shiny){
 		graphics::mtext(filename(image_file),3, 1, cex=text_cex)
 	}
