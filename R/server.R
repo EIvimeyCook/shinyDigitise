@@ -619,11 +619,6 @@ If figures are wonky, chose rotate."
           emoji('warning')
         }
       })
-
-      # help text to show when extract mode is false.
-      output$info <- renderText({
-        ""
-      })
     }
 
   })
