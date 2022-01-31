@@ -3,8 +3,11 @@
 #' @param dir the path name to the directory / folder where the files are located
 #' @param import_all Logical - whether to import already completed files, defaults to FALSE (i.e. only import new files)
 #' @param image_name Vector of specific images for shinyDigitise to plot. defaults to NULL, i.e. all or only not completed images are input. If specified, overrides import_all
+#' @export
 
 shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
+
+	load.emojifont('OpenSansEmoji.ttf')
 
 
 	if( (substring(dir, nchar(dir)) == "/") == FALSE){

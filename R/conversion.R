@@ -1,10 +1,3 @@
-#' @title calibrate
-#' @param raw_data The raw data
-#' @param calpoints The calibration points
-#' @param point_vals The point values
-#' @param log_axes whether x or y is logged
-#' @param ... further arguments passed to or from other methods
-#' @description Converts x and y coordinates from original plot coords to actual coords using previous identified coordinates. Modified from digitise package
 
 calibrate <- function(raw_data, calpoints, point_vals, log_axes, ...) {
 	
@@ -34,12 +27,6 @@ calibrate <- function(raw_data, calpoints, point_vals, log_axes, ...) {
 }
 
 
-
-#' @title convert_group_data
-#' @param cal_data Calibrated data
-#' @param plot_type The type of plot
-#' @description Converts, pre-calibrated points clicked into a meaningful dataframe 
-
 convert_group_data <- function(cal_data, plot_type){
 	convert_data <- data.frame()
 
@@ -61,12 +48,6 @@ convert_group_data <- function(cal_data, plot_type){
 	return(convert_data)
 }
 
-
-
-#' @title convert_histogram_data 
-#' @param cal_data The calibration data
-#' @description Conversion of extracted data from histogram
-
 convert_histogram_data <- function(cal_data){
 	convert_data <- data.frame()
 
@@ -77,12 +58,6 @@ convert_histogram_data <- function(cal_data){
 	return(convert_data)
 }
 
-
-
-
-#' @title process_data
-#' @param object object from metaDigitise
-#' @description Processes points clicked into a meaningful dataframe 
 
 process_data <- function(object){
 

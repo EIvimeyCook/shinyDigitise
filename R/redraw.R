@@ -1,23 +1,9 @@
-#' @title rotate_graph
-#' @description Rotates/flips imported figures
-#' @param image Image object from magick::image_read
-#' @param flip whether to flip figure
-#' @param rotate how much to rotate figure
 
 redraw_rotation <- function(image, flip, rotate){
 	if(flip) image <- magick::image_flop(magick::image_rotate(image,270))
 	image <- magick::image_rotate(image, rotate)
 	return(image)
 }
-
-#' @title redraw_calibration
-#' @description plots calibration data on graph
-#' @param plot_type plot_type
-#' @param variable variable
-#' @param calpoints The calibration points
-#' @param point_vals The point values
-#' @param image_details image_details
-#' @param cex relative size of points and text
 
 
 redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_details,cex){
@@ -43,16 +29,6 @@ redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_d
 		graphics::text(mean(calpoints$x[3:4]), mean(calpoints$y[3:4]) - y_shift*1.5, variable[2], col=cal_col, cex=text_cex)
 	}
 }
-
-
-
-#' @title redraw_points
-#' @description plots clicked data on graph
-#' @param plot_type plot_type
-#' @param raw_data The raw data
-#' @param image_details image_details
-#' @param cex relative size of points and text
-#' @param pos position of group labels
 
 
 redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
