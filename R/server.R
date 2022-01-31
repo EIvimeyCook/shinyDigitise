@@ -1,3 +1,4 @@
+
 shinyDigitise_server <- function(input, output, session){
 
   output$shinylogo <- renderImage({
@@ -141,12 +142,15 @@ shinyDigitise_server <- function(input, output, session){
     })
 
     # Provides for new plotting as text.
-    output$info <- renderText({
-      "**** NEW PLOT ****
-mean_error and boxplots should be vertically orientated.
-If they are not then chose flip to correct this.
-If figures are wonky, chose rotate."
-    })
+    showNotification2(ui = 
+"1. mean_error and boxplots should be vertically orientated. <br/> 
+ 2. If they are not then chose flip to correct this. <br/>
+ 3. If figures are wonky, chose rotate.", id = "orient_notif", duration = NULL, type = "default"
+    )
+    removeNotification(id = "group_notif")
+    removeNotification(id = "calib_notif")
+    removeNotification(id = "rotate_notif")
+    
   })
 
 
@@ -243,16 +247,14 @@ If figures are wonky, chose rotate."
         inputId = "extract_mode",
         value = FALSE
       )
-
-      output$info <- renderText({
-        "**** ROTATE ****\nUse the slider to change the rotation angle\n"
-      })
+      showNotification2(ui = "Use the slider to change the rotation angle", id = "rotate_notif", duration = NULL, type = "message"
+      )
+      removeNotification(id = "orient_notif")
+      removeNotification(id = "calib_notif")
+      removeNotification(id = "group_notif")
       show("togslide")
     } else {
       hide("togslide")
-      output$info <- renderText({
-        " "
-      })
     }
 
     output$metaPlot <- renderPlot({
@@ -357,34 +359,35 @@ If figures are wonky, chose rotate."
 
         # plot-specific calibration help
         if (!input$plot_type %in% c("mean_error","boxplot")) {
-          output$info <- renderText({
-            "   Calibrate ---> Click on known values on axes in this order:
-    |
-    2
-    |
-    |
-    1
-    |___3___________4_____
-    "
-          })
+          showNotification2(ui = "
+          Click on known values on axes in this order: <br/>
+          | <br/>
+          2 <br/>
+          | <br/>
+          | <br/>
+          1 <br/>
+          |___3_________4___" ,
+          id = "calib_notif", duration = NULL, type = "default")
+          removeNotification(id = "orient_notif")
+          removeNotification(id = "group_notif")
+          removeNotification(id = "rotate_notif")
         } else {
-          output$info <- renderText({
-            "   Calibrate ---> Click on known values on axes in this order:
-    |
-    2
-    |
-    |
-    1
-    |_____________________
-    "
-          })
+          showNotification2(ui = "
+          Click on known values on axes in this order: <br/> 
+          | <br/>
+          2 <br/>
+          | <br/>
+          | <br/>
+          1 <br/>
+          |_________________" ,
+                            id = "calib_notif", duration = NULL, type = "default")          
+  removeNotification(id = "orient_notif")
+  removeNotification(id = "group_notif")
+  removeNotification(id = "rotate_notif")
         }
 
         # Also shows click locations (probably don't need this in future).
         # and gives calibration placement help.
-        output$clickinfo <- renderText({
-          paste0("x = ", calpoints$x, ", y = ", calpoints$y, "\n")
-        })
       }
     } else {
       ## what happens when calibrate mode is switched off
@@ -402,16 +405,6 @@ If figures are wonky, chose rotate."
         emoji('warning')
       }
     })
-
-      output$clickinfo <- renderText({
-        " "
-      })
-      output$info <- renderText({
-        "**** NEW PLOT ****
-mean_error and boxplots should be vertically orientated.
-If they are not then chose flip to correct this.
-If figures are wonky, chose rotate."
-      })
     }
   })
 
@@ -555,12 +548,16 @@ If figures are wonky, chose rotate."
           show("error_type_select")
         }
         # show help text
-        output$info <- renderText({
-          "**** EXTRACTING DATA ****
-  1. Group names and sample size should be entered into the table on the sidebar before points are added.
-  2. To add points to a group, first click the group on the sidebar then click 'Add Points'.
-  3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
-        })
+        showNotification2(ui =
+         "1. Group names and sample size should be entered into the table on the sidebar before points are added. <br/>
+          2. To add points to a group, first click the group on the sidebar then click 'Add Points'. <br/>
+          3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
+, duration = NULL, id = "group_notif", type = "default")
+        
+        removeNotification(id = "orient_notif")
+        removeNotification(id = "calib_notif")
+        removeNotification(id = "rotate_notif")
+        
 
 
         ################################################
@@ -794,10 +791,6 @@ If figures are wonky, chose rotate."
 
       values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
 
-      output$clickinfo <- renderText({
-        paste0("x = ", valpoints$x, ", y = ", valpoints$y, "\n")
-      })
-
       output$metaPlot <- renderPlot({
         par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
@@ -993,7 +986,57 @@ If figures are wonky, chose rotate."
     paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
   })
 
-
+  ################################################
+  # Previous/next step buttons
+  ################################################
+  
+  observeEvent(counter$countervalue, {
+    hide("orient_well")
+    hide("extract_well")
+    hide("calib_well")
+    hide("comm_well")
+  })
+  
+  observeEvent(input$plot_step, {
+    show("orient_well")
+    hide("plot_well")
+  })
+  
+  observeEvent(input$orient_step, {
+    show("calib_well")
+    hide("orient_well")
+  })
+  
+  observeEvent(input$calib_step, {
+    show("extract_well")
+    hide("calib_well")
+  })
+  
+  observeEvent(input$extract_step, {
+    show("comm_well")
+    hide("extract_well")
+  })
+  
+  observeEvent(input$orient_back, {
+    show("plot_well")
+    hide("orient_well")
+  })
+  
+  observeEvent(input$calib_back, {
+    show("orient_well")
+    hide("calib_well")
+  })
+  
+  observeEvent(input$extract_back, {
+    show("calib_well")
+    hide("extract_well")
+  })
+  
+  observeEvent(input$comm_back, {
+    show("extract_well")
+    hide("comm_well")
+  })
+  
 
 
   ################################################
