@@ -51,3 +51,17 @@ load.emojifont('OpenSansEmoji.ttf')
 
 # col=sample(col_vector, n)
 
+showNotification2 <- function (ui, action = NULL, duration = 5, closeButton = TRUE, 
+                               id = NULL, type = c("default", "message", "warning", "error"), 
+                               session = shiny:::getDefaultReactiveDomain()) {
+  if (is.null(id)) 
+    id <- shiny:::createUniqueId(8)
+  res <- shiny:::processDeps(HTML(ui), session)
+  actionRes <- shiny:::processDeps(action, session)
+  session$sendNotification("show", list(html = res$html, action = actionRes$html, 
+                                        deps = c(res$deps, actionRes$deps), duration = if (!is.null(duration)) duration * 
+                                          1000, closeButton = closeButton, id = id, type = match.arg(type)))
+  id
+}
+
+
