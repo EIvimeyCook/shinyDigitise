@@ -196,11 +196,13 @@ If figures are wonky, chose rotate."
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
-    session$resetBrush("plot_brush")
+    # session$resetBrush("plot_brush")
+    # runjs("document.getElementById('plot_brush').remove()")
   })
 
   observeEvent(input$plot_dblclick,{
     session$resetBrush("plot_brush")
+
     values$zoom_coords <<- NULL
     output$metaPlot <- renderPlot({
       par(mar = c(0, 0, 0, 0))

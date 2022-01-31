@@ -355,8 +355,11 @@ shinyDigitise_UI <- function(){
           "metaPlot",
           click = "plot_click2",
           dblclick = "plot_dblclick",
-          hover = "plot_hover",
-          brush = "plot_brush",
+          brush = brushOpts(
+            "plot_brush",
+            resetOnNew=TRUE,
+            delayType="debounce"
+          ),
           height = "600px", 
           width = "100%"
         ),  
