@@ -1,7 +1,22 @@
 shinyDigitise_UI <- function(){
   fluidPage(
-    useShinyjs(),
-    useShinyalert(),
+    shinyjs::useShinyjs(),
+    shinyalert::useShinyalert(),
+    tags$head(
+      tags$style(
+        HTML(".shiny-notification {
+             position:fixed;
+             bottom: calc(1%);
+             left: calc(1%);
+             margin-left: auto;
+             margin-right: auto;
+             width: 100%;
+             max-width: 450px;
+             }
+             "
+        )
+      )
+    ),
     theme = bs_theme(
       primary = "#66947A", secondary = "#66947A", 
       info = "#E51C23", font_scale = NULL, bootswatch = "materia",
@@ -76,8 +91,8 @@ shinyDigitise_UI <- function(){
         ####------------------ 
         ### Plot Type Panel
         ####------------------
-        wellPanel(
-          "Choose Plot type:",
+        wellPanel(id = 'plot_well',
+          strong("Choose Plot type:"),
           splitLayout(
             cellWidths = c("80%","20%"),
           prettyRadioButtons(
@@ -105,14 +120,19 @@ shinyDigitise_UI <- function(){
             # )
           textOutput("plottype_check_text"),
           tags$head(tags$style("#plottype_check_text{font-size: 20px;}"))
-          )
+          ),
+          actionButton(
+            inputId = "plot_step",
+            label = "Next step",
+            style = "padding:4px"
+          ),
         ),
         
         ####------------------ 
         ### Orientation Panel
         ####------------------
-        wellPanel(
-          "Orientate Figure:",
+        wellPanel(id = "orient_well",
+          strong("Orientate Figure:"),
           
           div(class = "buttonagency",
               # splitLayout(cellWidths = c(150, 200, 200),
@@ -156,16 +176,27 @@ shinyDigitise_UI <- function(){
                       grid = T
                     )
                 )
+              ),
+              splitLayout(
+              actionButton(
+                inputId = "orient_back",
+                label = "Previous step",
+                style = "padding:4px"
+              ),
+              actionButton(
+                inputId = "orient_step",
+                label = "Next step",
+                style = "padding:4px"
               )
-              
+              )
           )
         ),
         
         ####------------------ 
         ### Calibrate Panel
         ####------------------
-        wellPanel(
-          "Calibrate Axes:",
+        wellPanel(id = "calib_well",
+          strong("Calibrate Axes:"),
           splitLayout(
             cellWidths = c("80%","20%"),
             switchInput(
@@ -241,14 +272,26 @@ shinyDigitise_UI <- function(){
                   placeholder = "Known sample size",
                   label = NULL)
             )
+          ),
+          splitLayout(
+            actionButton(
+              inputId = "calib_back",
+              label = "Previous step",
+              style = "padding:4px"
+            ),
+            actionButton(
+              inputId = "calib_step",
+              label = "Next step",
+              style = "padding:4px"
+            )
           )
         ),
         
         ####------------------ 
         ### Extraction Panel
         ####------------------
-        wellPanel(
-          "Extract Data:",
+        wellPanel(id = "extract_well",
+          strong("Extract Data:"),
           splitLayout(
             cellWidths = c("80%","20%"),
             switchInput(
@@ -297,7 +340,7 @@ shinyDigitise_UI <- function(){
             div(id = "error_type_select",
               prettyRadioButtons(
                 inputId = "errortype",
-                label = h6(strong("Type of error:")),
+                label = strong("Type of error:"),
                 choiceNames = c("SE", "95%CI", "SD"),
                 choiceValues = c("se","CI95","sd"),
                 inline = T,
@@ -307,42 +350,43 @@ shinyDigitise_UI <- function(){
                 animation = "jelly"
               )
             )
+          ),
+          splitLayout(
+            actionButton(
+              inputId = "extract_back",
+              label = "Previous step",
+              style = "padding:4px"
+            ),
+            actionButton(
+              inputId = "extract_step",
+              label = "Next step",
+              style = "padding:4px"
+            )
           )
         ),
         
         ####------------------ 
         ### comment panel
         ####------------------
-        wellPanel(
-          "Comments:",
+        wellPanel(id = "comm_well",
+          strong("Comments:"),
           textInput(
             inputId = "comment",
             label = NULL,
             value=NULL
+          ),
+          splitLayout(
+            actionButton(
+              inputId = "comm_back",
+              label = "Previous step",
+              style = "padding:4px"
+            ),
+            actionButton(
+              inputId = "continue",
+              label = "Continue",
+              style = "padding:4px"
+            )
           )
-        ),
-        
-        ####------------------ 
-        ### next previous panel
-        ####------------------
-        wellPanel(
-          # actionButton(
-          #   inputId = "previous",
-          #   label = "Previous",
-          #   style = "padding:4px"
-          #   # style = "float",
-          #   # color = "primary",
-            
-          # ),
-          actionButton(
-            inputId = "continue",
-            label = "Continue",
-            style = "padding:4px"
-            # style = "float",
-            # color = "primary",
-            
-          )
-          
         )
       ),
       
@@ -350,7 +394,7 @@ shinyDigitise_UI <- function(){
       ### Plot panel
       ####------------------
       mainPanel(
-        verbatimTextOutput("info"),
+        #verbatimTextOutput("info"),
         plotOutput(
           "metaPlot",
           click = "plot_click2",
