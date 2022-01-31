@@ -678,7 +678,6 @@ shinyDigitise_server <- function(input, output, session){
   # Useful for deleting groups and labeling points. Highlights the row.
   observeEvent(input$group_table_rows_selected, {
     selected$row <- input$group_table_rows_selected
-    print(selected$row)
   })
   
     observeEvent(input$group_table_row_last_clicked, {
@@ -687,7 +686,6 @@ shinyDigitise_server <- function(input, output, session){
       clicked$row <<- NULL
       selected$row <<- NULL
       selectRows(proxy, selected = NULL)
-      print(paste("Clicked - ", clicked$row))
     }
   })
 
@@ -740,7 +738,6 @@ shinyDigitise_server <- function(input, output, session){
 
       if (add_mode$add) {
 
-        print(values$raw_data)
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         # if(as.data.frame(reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
         if(length(stringr::str_detect(values$raw_data$id, as.character(mod_df$x[selected$row,1]))) != 0){
@@ -767,11 +764,9 @@ shinyDigitise_server <- function(input, output, session){
   #  when you click to add points
 
   observeEvent(input$plot_click2, {
-    print(selected$row)
     if (add_mode$add) {
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
       dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
-      print(dat_mod)
       max_clicks <-
         ifelse(input$plot_type == "mean_error",2,
         ifelse(input$plot_type == "xy_mean_error",3,
@@ -1035,6 +1030,10 @@ shinyDigitise_server <- function(input, output, session){
   observeEvent(input$comm_back, {
     show("extract_well")
     hide("comm_well")
+  })
+  
+  observeEvent(input$continue, {
+    show("plot_well")
   })
   
 
