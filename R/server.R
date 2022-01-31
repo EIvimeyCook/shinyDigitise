@@ -18,6 +18,13 @@ shinyDigitise_server <- function(input, output, session){
 
   # when counter value is changed (either conitnue or previous is pressed):
   observeEvent(counter$countervalue, {
+
+    hide("orient_well")
+    hide("extract_well")
+    hide("calib_well")
+    hide("comm_well")
+    show("plot_well")
+
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
 
@@ -325,7 +332,21 @@ shinyDigitise_server <- function(input, output, session){
             value = FALSE
         )
       }else{
-
+        output$calib_info <- renderUI({ HTML(paste0(
+          "Click on known values on axes in this order: <br/>
+            | <br/>
+            2 <br/>
+            | <br/>
+            | <br/>
+            1 <br/>",
+            if(!input$plot_type %in% c("mean_error","boxplot")){
+              "|___3___________4_____ <br/>"
+            }else{
+              "|_____________________ <br/>"
+            },
+            "Then fill in info:"
+          ))})
+        
         # toggle extract mode and rotate mode off.
         updateSwitchInput(
           session = session,
@@ -358,6 +379,7 @@ shinyDigitise_server <- function(input, output, session){
         values$point_vals <<- NULL
         calpoints$x <- NULL
         calpoints$y <- NULL
+
 
         # plot-specific calibration help
         if (!input$plot_type %in% c("mean_error","boxplot")) {
@@ -399,7 +421,7 @@ shinyDigitise_server <- function(input, output, session){
       hide("x_var_input")
       hide("y_coord_input")
       hide("x_coord_input")
-
+  output$calib_info <- renderUI({HTML("")})
     output$calibrate_check_text <- renderText({
       if(check_calibrate(reactiveValuesToList(values))){
          emoji('white_check_mark')
@@ -987,12 +1009,9 @@ shinyDigitise_server <- function(input, output, session){
   # Previous/next step buttons
   ################################################
   
-  observeEvent(counter$countervalue, {
-    hide("orient_well")
-    hide("extract_well")
-    hide("calib_well")
-    hide("comm_well")
-  })
+  # observeEvent(counter$countervalue, {
+
+  # })
   
   observeEvent(input$plot_step, {
     show("orient_well")
@@ -1034,9 +1053,9 @@ shinyDigitise_server <- function(input, output, session){
     hide("comm_well")
   })
   
-  observeEvent(input$continue, {
-    show("plot_well")
-  })
+  # observeEvent(input$continue, {
+    
+  # })
   
 
 

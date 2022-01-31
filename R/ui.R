@@ -29,7 +29,7 @@ shinyDigitise_UI <- function(){
         titlePanel(
           title=splitLayout(cellWidths = c("15%","85%"),
           imageOutput(
-            "shinylogo",
+            "images/shinylogo",
             height = "60px"
           ),
           textOutput("shinytext")
@@ -91,10 +91,16 @@ shinyDigitise_UI <- function(){
         ####------------------ 
         ### Plot Type Panel
         ####------------------
-        wellPanel(id = 'plot_well',
-          strong("Choose Plot type:"),
+        wellPanel(
           splitLayout(
             cellWidths = c("80%","20%"),
+          
+          strong("1. Choose Plot type:"),
+          textOutput("plottype_check_text"),
+          tags$head(tags$style("#plottype_check_text{font-size: 20px;}"))
+
+          ),
+          hidden(div(id = 'plot_well',
           prettyRadioButtons(
             inputId = "plot_type",
             label = NULL,
@@ -118,26 +124,28 @@ shinyDigitise_UI <- function(){
             #   "plottype_check",
             #   height = "30px"
             # )
-          textOutput("plottype_check_text"),
-          tags$head(tags$style("#plottype_check_text{font-size: 20px;}"))
-          ),
+
+          
           actionButton(
             inputId = "plot_step",
             label = "Next step",
             style = "padding:4px"
-          ),
+          ),))
         ),
         
         ####------------------ 
         ### Orientation Panel
         ####------------------
-        wellPanel(id = "orient_well",
-          strong("Orientate Figure:"),
-          
-          div(class = "buttonagency",
-              # splitLayout(cellWidths = c(150, 200, 200),
-              splitLayout(
+        wellPanel(
+          splitLayout(
                 cellWidths = c("80%","20%"),
+          strong("2. Orientate Figure:"),
+          textOutput("orientation_check_text"),
+          tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
+          ),
+          hidden(div(id = "orient_well",class = "buttonagency",
+              # splitLayout(cellWidths = c(150, 200, 200),
+                "mean_error and boxplots should be vertically orientated. \n If they are not then chose flip to correct this. \n If figures are wonky, chose rotate.",
                 switchInput(
                   inputId = "flip",
                   label = strong("Flip"),
@@ -151,9 +159,9 @@ shinyDigitise_UI <- function(){
                 #   "orientation_check",
                 #   height = "30px"
                 # )
-                textOutput("orientation_check_text"),
-                tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
-              ),  
+                # textOutput("orientation_check_text"),
+                # tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
+                
               # cellArgs = list(style = "padding: 1px"),
               textOutput("rotation", inline=TRUE),
               switchInput(
@@ -190,23 +198,17 @@ shinyDigitise_UI <- function(){
               )
               )
           )
-        ),
+        )),
         
         ####------------------ 
         ### Calibrate Panel
         ####------------------
-        wellPanel(id = "calib_well",
-          strong("Calibrate Axes:"),
+        wellPanel(
           splitLayout(
             cellWidths = c("80%","20%"),
-            switchInput(
-              inputId = "calib_mode",
-              label = strong("Calibrate mode"),
-              labelWidth = "100px",
-              onLabel = "Yes",
-              offLabel = "No",
-              onStatus = "primary",
-            ),
+            strong("3. Calibrate Axes:"),
+
+
             # imageOutput(
             #   "calibrate_check",
             #   height = "30px"
@@ -214,6 +216,18 @@ shinyDigitise_UI <- function(){
             textOutput("calibrate_check_text"),
             tags$head(tags$style("#calibrate_check_text{font-size: 20px;}"))
           ),
+          hidden(
+            div(id = "calib_well",
+           switchInput(
+              inputId = "calib_mode",
+              label = strong("Calibrate mode"),
+              labelWidth = "100px",
+              onLabel = "Yes",
+              offLabel = "No",
+              onStatus = "primary",
+            ),
+           htmlOutput("calib_info"),
+           
           hidden(
             div(id="y_var_input",
                 textInput(inputId = "y_var",
@@ -285,15 +299,25 @@ shinyDigitise_UI <- function(){
               style = "padding:4px"
             )
           )
+        ))
         ),
         
         ####------------------ 
         ### Extraction Panel
         ####------------------
-        wellPanel(id = "extract_well",
-          strong("Extract Data:"),
+         # "1. Group names and sample size should be entered into the table on the sidebar before points are added. <br/>
+         #  2. To add points to a group, first click the group on the sidebar then click 'Add Points'. <br/>
+         #  3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
+
+        wellPanel(
           splitLayout(
             cellWidths = c("80%","20%"),
+            strong("Extract Data:"),
+            textOutput("extract_check_text"),
+            tags$head(tags$style("#extract_check_text{font-size: 20px;}"))
+          ),
+          hidden(
+            div(id = "extract_well",
             switchInput(
               inputId = "extract_mode",
               label = strong("Extract mode"),
@@ -306,11 +330,13 @@ shinyDigitise_UI <- function(){
             #   "extract_check",
             #   height = "30px"
             # )
-            textOutput("extract_check_text"),
-            tags$head(tags$style("#extract_check_text{font-size: 20px;}"))
-          ),
-          hidden(
+            
+          
+           hidden(
             div(id = "group_data",
+        "1. Click add groups to enter group names and sample size before adding points. \n
+        2. To add points click the group on the sidebar then click 'Click Points' and click points. \n
+         3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'.",
               splitLayout(
                 div(class = "buttonagency",
                     actionButton(
@@ -334,8 +360,7 @@ shinyDigitise_UI <- function(){
                   )
                 ),
                 DTOutput("group_table")
-            )
-          ),
+           )),
           hidden(
             div(id = "error_type_select",
               prettyRadioButtons(
@@ -363,13 +388,17 @@ shinyDigitise_UI <- function(){
               style = "padding:4px"
             )
           )
+          )
+          )
         ),
         
         ####------------------ 
         ### comment panel
         ####------------------
-        wellPanel(id = "comm_well",
-          strong("Comments:"),
+        wellPanel(
+          strong("5. Comments:"),
+          hidden(
+            div(id = "comm_well",
           textInput(
             inputId = "comment",
             label = NULL,
@@ -387,7 +416,7 @@ shinyDigitise_UI <- function(){
               style = "padding:4px"
             )
           )
-        )
+        )))
       ),
       
       ####------------------ 
