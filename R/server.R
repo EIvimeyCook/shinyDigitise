@@ -317,18 +317,19 @@ shinyDigitise_server <- function(input, output, session){
         )
       }else{
         output$calib_info <- renderUI({ HTML(paste0(
-          "Click on known values on axes in this order: <br/>
+        " <b> Click on known values on axes in this order: <br/>
             | <br/>
             2 <br/>
             | <br/>
             | <br/>
-            1 <br/>",
+            1 <br/> <b/>",
             if(!input$plot_type %in% c("mean_error","boxplot")){
-              "|___3___________4_____ <br/>"
+              "<b> |___3___________4_____ <br/> <b/>"
             }else{
-              "|_____________________ <br/>"
+              "<b> |_____________________ <br/> <b/>"
             },
-            "Then fill in info:"
+           "<br/>",
+         "<b> Then fill in info: <b/>"
           ))})
         
         # toggle extract mode and rotate mode off.
