@@ -312,7 +312,7 @@ shinyDigitise_UI <- function(){
         wellPanel(
           splitLayout(
             cellWidths = c("80%","20%"),
-            strong("Extract Data:"),
+            strong("4. Extract Data:"),
             textOutput("extract_check_text"),
             tags$head(tags$style("#extract_check_text{font-size: 20px;}"))
           ),
