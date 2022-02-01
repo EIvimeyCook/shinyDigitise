@@ -41,7 +41,7 @@ shinyDigitise_server <- function(input, output, session){
       updatePrettyRadioButtons(session, "plot_type", selected = values$plot_type)
       updateTextInput(session, "comment", value = paste(values$comment))
 
-      if (values$plot_type == "mean_error") {
+      if (values$plot_type %in% c("mean_error","xy_mean_error")) {
         updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
       }
       # update
@@ -54,20 +54,22 @@ shinyDigitise_server <- function(input, output, session){
       values <<- reactiveValues(
         image_name = details$name[counter$countervalue],
         image_file = details$paths[counter$countervalue],
+        plot_type = NULL,
         flip = FALSE,
         rotate = 0,
         calpoints = NULL,
         variable = NULL,
         point_vals = NULL,
-        log_axes=c(axes="n"),
+        log_axes = c(axes="n"),
         raw_data = NULL,
         # rotate_mode=FALSE,
+        error_type = NULL,
+        comment = NULL,
         cex = input$cex,
-        plot_type = NULL,
-        pos="right",
-        comment=NULL
+        pos = "right"
       )
     updatePrettyRadioButtons(session, "plot_type", selected = character(0))
+    updatePrettyRadioButtons(session, "errortype", selected = character(0))
     }
     
 
@@ -181,35 +183,38 @@ shinyDigitise_server <- function(input, output, session){
 
   observe(values$pos <<- input$pos)
 
-  observe(values$error_type <<- input$error_type_select)
+  observe(values$error_type <<- input$errortype)
 
+  # observeEvent(input$errortype,{
+  #   values$error_type <<- input$errortype
+  #   })
 
   ################################################
   # zoom
   ################################################
   
-  observeEvent(input$plot_brush,{
-    # print(input$plot_brush)
-    values$zoom_coords <<- c(input$plot_brush$xmin,input$plot_brush$xmax,input$plot_brush$ymin,input$plot_brush$ymax)
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, c(plot_values, shiny=TRUE))
-    })
-    # session$resetBrush("plot_brush")
-    # runjs("document.getElementById('plot_brush').remove()")
-  })
+  # observeEvent(input$plot_brush,{
+  #   # print(input$plot_brush)
+  #   values$zoom_coords <<- c(input$plot_brush$xmin,input$plot_brush$xmax,input$plot_brush$ymin,input$plot_brush$ymax)
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, c(plot_values, shiny=TRUE))
+  #   })
+  #   # session$resetBrush("plot_brush")
+  #   # runjs("document.getElementById('plot_brush').remove()")
+  # })
 
-  observeEvent(input$plot_dblclick,{
-    session$resetBrush("plot_brush")
+  # observeEvent(input$plot_dblclick,{
+  #   session$resetBrush("plot_brush")
 
-    values$zoom_coords <<- NULL
-    output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
-      do.call(internal_redraw, c(plot_values, shiny=TRUE))
-    })
-  })
+  #   values$zoom_coords <<- NULL
+  #   output$metaPlot <- renderPlot({
+  #     par(mar = c(0, 0, 0, 0))
+  #     plot_values <- reactiveValuesToList(values)
+  #     do.call(internal_redraw, c(plot_values, shiny=TRUE))
+  #   })
+  # })
 
   ################################################
   # Flip
@@ -474,98 +479,77 @@ shinyDigitise_server <- function(input, output, session){
   #container for for plotting values and
   valpoints <- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
 
+  # container for extract T/F.
+  extract_mode <- reactiveValues(extract = FALSE)
   # container for add T/F.
   add_mode <- reactiveValues(add = FALSE)
 
 
-  observeEvent(input$extract_mode, {
+  observeEvent(extract_mode$extract, {
 
     # if we are in extract mode
-    if (input$extract_mode) {
-      if(is.null(values$plot_type)){
-        shinyalert(
-          title = "No plot type selected",
-          text = "Please select a plot type before continuing with extraction",
-          size = "s",
-          closeOnEsc = TRUE,
-          closeOnClickOutside = FALSE,
-          html = FALSE,
-          type = "warning",
-          showConfirmButton = TRUE,
-          showCancelButton = FALSE,
-          confirmButtonText = "OK",
-          confirmButtonCol = "#AEDEF4",
-          timer = 0,
-          imageUrl = "",
-          animation = TRUE
-        )
-        updateSwitchInput(
-            session = session,
-            inputId = "extract_mode",
-            value = FALSE
-        )
-      }else{
+    if (extract_mode$extract) {
         #toggle calibrate mode and rotate mode off.
-        updateSwitchInput(
-          session = session,
-          inputId = "calib_mode",
-          value = FALSE
-        )
-        updateSwitchInput(
-          session = session,
-          inputId = "rotate_mode",
-          value = FALSE
-        )
-        #show the group_data ovject (the table for clicking/groups and sample sizes)
-        show("group_data")
+      updateSwitchInput(
+        session = session,
+        inputId = "calib_mode",
+        value = FALSE
+      )
+      updateSwitchInput(
+        session = session,
+        inputId = "rotate_mode",
+        value = FALSE
+      )
+      #show the group_data ovject (the table for clicking/groups and sample sizes)
+      show("group_data")
 
-        # show the error type select input (ofr mean_error).
-        if (input$plot_type == "mean_error") {
-          show("error_type_select")
-        }
-        ################################################
-        # Group Name and Sample Size Table
-        ################################################
-
-        if (is.null(values$raw_data)) {
-          # if values raw data is null/empty then create new data to show in the table.
-          basic <- tibble(
-            Group_Name = NA,
-            Sample_Size = NA
-          )
-          #this is so it doesnt immediately plot a new row.
-          mod_df$x <- basic[-nrow(basic),]
-
-          row_count$x <- 0
-
-          valpoints$x <- NULL
-          valpoints$y <- NULL
-          valpoints$id <- NULL
-          valpoints$n <- NULL
-
-        } else {
-          # otherwise read in the data that already exists from the raw data.
-          raw_dat <- as.data.frame(values$raw_data)
-          raw_dat_sum <- aggregate(n ~ id, raw_dat, unique)
-          names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
-          mod_df$x <- raw_dat_sum
-          row_count$x <- nrow(raw_dat_sum)
-          valpoints$x <- values$raw_data$x
-          valpoints$y <- values$raw_data$y
-          valpoints$id <- values$raw_data$id
-          valpoints$n <- values$raw_data$n
-        }
-
-        # this is then rendered in a DT table.
-        output$group_table <- DT::renderDT({
-          DT::datatable(
-            mod_df$x,
-            editable = list(target = "cell", disable = list(columns = c(1))),
-            selection = "single",
-            options = list(lengthChange = TRUE, dom = "t")
-          )
-        })
+      # show the error type select input (ofr mean_error).
+      if (input$plot_type %in% c("mean_error","xy_mean_error")) {
+        show("error_type_select")
       }
+      ################################################
+      # Group Name and Sample Size Table
+      ################################################
+
+      if (is.null(values$raw_data)) {
+        # if values raw data is null/empty then create new data to show in the table.
+        basic <- tibble(
+          Group_Name = NA,
+          Sample_Size = NA
+        )
+        #this is so it doesnt immediately plot a new row.
+        mod_df$x <- basic[-nrow(basic),]
+
+        row_count$x <- 0
+
+        valpoints$x <- NULL
+        valpoints$y <- NULL
+        valpoints$id <- NULL
+        valpoints$n <- NULL
+
+      } else {
+        # otherwise read in the data that already exists from the raw data.
+        raw_dat <- as.data.frame(values$raw_data)
+        raw_dat_sum <- aggregate(n ~ id, raw_dat, unique)
+        names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+        mod_df$x <- raw_dat_sum
+        row_count$x <- nrow(raw_dat_sum)
+        valpoints$x <- values$raw_data$x
+        valpoints$y <- values$raw_data$y
+        valpoints$id <- values$raw_data$id
+        valpoints$n <- values$raw_data$n
+      }
+
+      # this is then rendered in a DT table.
+      output$group_table <- DT::renderDT({
+        DT::datatable(
+          mod_df$x,
+          editable = list(target = "cell", disable = list(columns = c(1))),
+          selection = "single",
+          options = list(lengthChange = TRUE, dom = "t")
+        )
+      })
+    
     }else{
 
       ## hide
@@ -711,10 +695,12 @@ shinyDigitise_server <- function(input, output, session){
           valpoints$y <- values$raw_data$y
           valpoints$id <- values$raw_data$id
           valpoints$n <- values$raw_data$n
+        }else{
+          values$raw_data <<-NULL
         }
       }
       ## ?? this seems problematic
-      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+      # values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
     }
   })
 
@@ -904,6 +890,9 @@ shinyDigitise_server <- function(input, output, session){
           imageUrl = "",
           animation = TRUE
         )
+        # getExtracted(dir)
+        # stopApp()
+        
       } else {
         counter$countervalue <- cv
       }
@@ -953,8 +942,27 @@ shinyDigitise_server <- function(input, output, session){
   # })
   
   observeEvent(input$plot_step, {
-    show("orient_well")
-    hide("plot_well")
+    if(is.null(values$plot_type)){
+      shinyalert(
+        title = "No plot type selected",
+        text = "Please select a plot type before continuing with extraction",
+        size = "s",
+        closeOnEsc = TRUE,
+        closeOnClickOutside = FALSE,
+        html = FALSE,
+        type = "warning",
+        showConfirmButton = TRUE,
+        showCancelButton = FALSE,
+        confirmButtonText = "OK",
+        confirmButtonCol = "#AEDEF4",
+        timer = 0,
+        imageUrl = "",
+        animation = TRUE
+      )
+    }else{
+      show("orient_well")
+      hide("plot_well")
+    }
   })
   
   observeEvent(input$orient_step, {
@@ -964,12 +972,14 @@ shinyDigitise_server <- function(input, output, session){
   
   observeEvent(input$calib_step, {
     show("extract_well")
+    extract_mode$extract <<- TRUE
     hide("calib_well")
   })
   
   observeEvent(input$extract_step, {
     show("comm_well")
     hide("extract_well")
+    extract_mode$extract <<- FALSE
   })
   
   observeEvent(input$orient_back, {
@@ -985,10 +995,12 @@ shinyDigitise_server <- function(input, output, session){
   observeEvent(input$extract_back, {
     show("calib_well")
     hide("extract_well")
+    extract_mode$extract <<- FALSE
   })
   
   observeEvent(input$comm_back, {
     show("extract_well")
+    extract_mode$extract <<- TRUE
     hide("comm_well")
   })
   
@@ -1004,6 +1016,7 @@ shinyDigitise_server <- function(input, output, session){
 
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
-    stopApp()
+        getExtracted(dir)
+    stopApp(returnValue=getExtracted(dir))
   })
 }

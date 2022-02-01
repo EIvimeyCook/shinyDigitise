@@ -45,6 +45,7 @@ shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
 
 #https://bryer.org/post/2021-02-12-shiny_apps_in_r_packages/
   shiny_env <- new.env()
+  assign('dir', dir, shiny_env)
   assign('details', details, shiny_env)
   assign('counter_total', counter_total, shiny_env)
   

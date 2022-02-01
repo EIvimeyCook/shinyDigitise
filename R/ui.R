@@ -131,10 +131,10 @@ shinyDigitise_UI <- function(){
           hidden(div(id = "orient_well",class = "buttonagency",
               # splitLayout(cellWidths = c(150, 200, 200),
                 tags$br(),
-                strong("mean_error and boxplots should be vertically orientated."), tags$br(),
+                strong("mean_error, boxplots and histograms should be vertically orientated."), tags$br(),
                 strong("If they are not then chose flip to correct this."), tags$br(), 
                 strong("If figures are wonky, chose rotate."),tags$br(),
-              br(),
+                strong("Otherwise press next."),tags$br(),
               br(),
               splitLayout(  
               switchInput(
@@ -156,7 +156,7 @@ shinyDigitise_UI <- function(){
               # cellArgs = list(style = "padding: 1px"),
               switchInput(
                 inputId = "rotate_mode",
-                label = strong("Rotate mode"),
+                label = strong("Rotate"),
                 labelWidth = "100px",
                 onLabel = "Yes",
                 offLabel = "No"
@@ -164,7 +164,9 @@ shinyDigitise_UI <- function(){
                 #color = "primary"
                 # )
               )),
+              splitLayout(br(),
               textOutput("rotation", inline=TRUE),
+              ),
               br(),
               hidden(
                 div(id="togslide",
@@ -218,7 +220,6 @@ shinyDigitise_UI <- function(){
               offLabel = "No",
               onStatus = "primary",
             ),
-           br(),
            htmlOutput("calib_info"),
           hidden(
             div(id="y_var_input",
@@ -310,19 +311,18 @@ shinyDigitise_UI <- function(){
           ),
           hidden(
             div(id = "extract_well",
-            switchInput(
-              inputId = "extract_mode",
-              label = strong("Extract mode"),
-              labelWidth = "100px",
-              onLabel = "Yes",
-              offLabel = "No",
-              onStatus = "primary"
-            ),
+            # switchInput(
+            #   inputId = "extract_mode",
+            #   label = strong("Extract mode"),
+            #   labelWidth = "100px",
+            #   onLabel = "Yes",
+            #   offLabel = "No",
+            #   onStatus = "primary"
+            # ),
             # imageOutput(
             #   "extract_check",
             #   height = "30px"
             # )
-            br(),
            hidden(
             div(id = "group_data",
         strong(" 1. Click add groups to enter group names and sample size before adding points."), tags$br(),
@@ -373,7 +373,7 @@ shinyDigitise_UI <- function(){
             actionButton(
               inputId = "extract_back",
               label = "Previous step",
-              style = "padding:4px"
+              style = "padding:4px; color: #fff; background-color: #337ab7; border-color: #2e6da4"
             ),
             actionButton(
               inputId = "extract_step",
