@@ -2,21 +2,6 @@ shinyDigitise_UI <- function(){
   fluidPage(
     shinyjs::useShinyjs(),
     shinyalert::useShinyalert(),
-    tags$head(
-      tags$style(
-        HTML(".shiny-notification {
-             position:fixed;
-             bottom: calc(1%);
-             left: calc(1%);
-             margin-left: auto;
-             margin-right: auto;
-             width: 100%;
-             max-width: 450px;
-             }
-             "
-        )
-      )
-    ),
     theme = bs_theme(
       primary = "#66947A", secondary = "#66947A", 
       info = "#E51C23", font_scale = NULL, bootswatch = "materia",
@@ -145,8 +130,14 @@ shinyDigitise_UI <- function(){
           ),
           hidden(div(id = "orient_well",class = "buttonagency",
               # splitLayout(cellWidths = c(150, 200, 200),
-                "mean_error and boxplots should be vertically orientated. \n If they are not then chose flip to correct this. \n If figures are wonky, chose rotate.",
-                switchInput(
+                tags$br(),
+                strong("mean_error and boxplots should be vertically orientated."), tags$br(),
+                strong("If they are not then chose flip to correct this."), tags$br(), 
+                strong("If figures are wonky, chose rotate."),tags$br(),
+              br(),
+              br(),
+              splitLayout(  
+              switchInput(
                   inputId = "flip",
                   label = strong("Flip"),
                   labelWidth = "100px",
@@ -163,7 +154,6 @@ shinyDigitise_UI <- function(){
                 # tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
                 
               # cellArgs = list(style = "padding: 1px"),
-              textOutput("rotation", inline=TRUE),
               switchInput(
                 inputId = "rotate_mode",
                 label = strong("Rotate mode"),
@@ -173,7 +163,9 @@ shinyDigitise_UI <- function(){
                 #style = "float",
                 #color = "primary"
                 # )
-              ),
+              )),
+              textOutput("rotation", inline=TRUE),
+              br(),
               hidden(
                 div(id="togslide",
                     sliderTextInput(
@@ -226,8 +218,8 @@ shinyDigitise_UI <- function(){
               offLabel = "No",
               onStatus = "primary",
             ),
+           br(),
            htmlOutput("calib_info"),
-           
           hidden(
             div(id="y_var_input",
                 textInput(inputId = "y_var",
@@ -330,13 +322,14 @@ shinyDigitise_UI <- function(){
             #   "extract_check",
             #   height = "30px"
             # )
-            
-          
+            br(),
            hidden(
             div(id = "group_data",
-        "1. Click add groups to enter group names and sample size before adding points. \n
-        2. To add points click the group on the sidebar then click 'Click Points' and click points. \n
-         3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'.",
+        strong(" 1. Click add groups to enter group names and sample size before adding points."), tags$br(),
+        strong("2. To add points click the group on the sidebar then click 'Click Points' and click points."), tags$br(),
+        strong("3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."), tags$br(),
+        tags$br(),
+        tags$br(),
               splitLayout(
                 div(class = "buttonagency",
                     actionButton(
