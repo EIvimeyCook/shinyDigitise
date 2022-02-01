@@ -147,17 +147,6 @@ shinyDigitise_server <- function(input, output, session){
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
-
-    # Provides for new plotting as text.
-    showNotification2(ui = 
-"1. mean_error and boxplots should be vertically orientated. <br/> 
- 2. If they are not then chose flip to correct this. <br/>
- 3. If figures are wonky, chose rotate.", id = "orient_notif", duration = NULL, type = "default"
-    )
-    removeNotification(id = "group_notif")
-    removeNotification(id = "calib_notif")
-    removeNotification(id = "rotate_notif")
-    
   })
 
 
@@ -256,11 +245,6 @@ shinyDigitise_server <- function(input, output, session){
         inputId = "extract_mode",
         value = FALSE
       )
-      showNotification2(ui = "Use the slider to change the rotation angle", id = "rotate_notif", duration = NULL, type = "message"
-      )
-      removeNotification(id = "orient_notif")
-      removeNotification(id = "calib_notif")
-      removeNotification(id = "group_notif")
       show("togslide")
     } else {
       hide("togslide")
@@ -379,39 +363,6 @@ shinyDigitise_server <- function(input, output, session){
         values$point_vals <<- NULL
         calpoints$x <- NULL
         calpoints$y <- NULL
-
-
-        # plot-specific calibration help
-        if (!input$plot_type %in% c("mean_error","boxplot")) {
-          showNotification2(ui = "
-          Click on known values on axes in this order: <br/>
-          | <br/>
-          2 <br/>
-          | <br/>
-          | <br/>
-          1 <br/>
-          |___3_________4___" ,
-          id = "calib_notif", duration = NULL, type = "default")
-          removeNotification(id = "orient_notif")
-          removeNotification(id = "group_notif")
-          removeNotification(id = "rotate_notif")
-        } else {
-          showNotification2(ui = "
-          Click on known values on axes in this order: <br/> 
-          | <br/>
-          2 <br/>
-          | <br/>
-          | <br/>
-          1 <br/>
-          |_________________" ,
-                            id = "calib_notif", duration = NULL, type = "default")          
-  removeNotification(id = "orient_notif")
-  removeNotification(id = "group_notif")
-  removeNotification(id = "rotate_notif")
-        }
-
-        # Also shows click locations (probably don't need this in future).
-        # and gives calibration placement help.
       }
     } else {
       ## what happens when calibrate mode is switched off
@@ -571,19 +522,6 @@ shinyDigitise_server <- function(input, output, session){
         if (input$plot_type == "mean_error") {
           show("error_type_select")
         }
-        # show help text
-        showNotification2(ui =
-         "1. Group names and sample size should be entered into the table on the sidebar before points are added. <br/>
-          2. To add points to a group, first click the group on the sidebar then click 'Add Points'. <br/>
-          3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
-, duration = NULL, id = "group_notif", type = "default")
-        
-        removeNotification(id = "orient_notif")
-        removeNotification(id = "calib_notif")
-        removeNotification(id = "rotate_notif")
-        
-
-
         ################################################
         # Group Name and Sample Size Table
         ################################################
