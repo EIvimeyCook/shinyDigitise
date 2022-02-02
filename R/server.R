@@ -876,6 +876,7 @@ shinyDigitise_server <- function(input, output, session){
         counter$countervalue <- counter_total
         shinyalert(
           title = "Congratulations!",
+          text = "You've finished digitising!",
           size = "s",
           closeOnEsc = TRUE,
           closeOnClickOutside = FALSE,
@@ -888,7 +889,10 @@ shinyDigitise_server <- function(input, output, session){
           timer = 0,
           imageUrl = "",
           animation = TRUE,
-          inputId = "exit")
+          inputId = "exit",
+          callbackJS = "function(x){
+                 setTimeout(function(){window.close();}, 500);
+               }")
         # getExtracted(dir)
         # stopApp()
         
@@ -916,10 +920,7 @@ shinyDigitise_server <- function(input, output, session){
   })
   
   observeEvent(input$exit, {
-    window.cl
-    getExtracted(dir)
     stopApp(returnValue=getExtracted(dir))
-    
   })
 
   # when next is pressed up the counter and check that its above 0
@@ -1022,7 +1023,6 @@ shinyDigitise_server <- function(input, output, session){
 
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
-        getExtracted(dir)
     stopApp(returnValue=getExtracted(dir))
   })
 }
