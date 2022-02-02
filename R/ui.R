@@ -131,9 +131,10 @@ shinyDigitise_UI <- function(){
           hidden(div(id = "orient_well",class = "buttonagency",
               # splitLayout(cellWidths = c(150, 200, 200),
                 tags$br(),
-                strong("mean_error, boxplots and histograms should be vertically orientated."), tags$br(),
-                strong("If they are not then chose flip to correct this."), tags$br(), 
-                strong("If figures are wonky, chose rotate."),tags$br(),
+                strong("1. mean_error, boxplots and histograms should be vertically orientated."), tags$br(),
+                strong("2. If they are not then chose flip to correct this."), tags$br(), 
+                strong("3. If figures are wonky, chose rotate."),tags$br(),
+                tags$br(),
                 strong("Otherwise press next."),tags$br(),
               br(),
               splitLayout(  
@@ -325,10 +326,10 @@ shinyDigitise_UI <- function(){
             # )
            hidden(
             div(id = "group_data",
+                tags$br(),
         strong(" 1. Click add groups to enter group names and sample size before adding points."), tags$br(),
         strong("2. To add points click the group on the sidebar then click 'Click Points' and click points."), tags$br(),
         strong("3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."), tags$br(),
-        tags$br(),
         tags$br(),
               splitLayout(
                 div(class = "buttonagency",
@@ -352,8 +353,10 @@ shinyDigitise_UI <- function(){
                     )
                   )
                 ),
+        tags$br(),
                 DTOutput("group_table")
            )),
+        tags$br(),
           hidden(
             div(id = "error_type_select",
               prettyRadioButtons(
