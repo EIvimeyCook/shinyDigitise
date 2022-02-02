@@ -2,7 +2,7 @@
 shinyDigitise_server <- function(input, output, session){
 
   output$shinylogo <- renderImage({
-    list(src ="www/shiny.jpg", height = 60)
+    list(src ="images/shiny.jpg", height = 60)
   },deleteFile=FALSE)
 
   output$shinytext <- renderText({

@@ -14,7 +14,7 @@ shinyDigitise_UI <- function(){
         titlePanel(
           title=splitLayout(cellWidths = c("15%","85%"),
           imageOutput(
-            "images/shinylogo",
+            "shinylogo",
             height = "60px"
           ),
           textOutput("shinytext")

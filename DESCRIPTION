@@ -1,10 +1,10 @@
 Package: shinyDigitise
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Extract and Summarise Data from Published Figures
+Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+     c(person("Ed", "Ivimey-Cook", email = "e.ivimeycook@gmail.com", role = c("aut", "cre")), 
+     person("Joel", "Pick", email = "joel.l.pick@gmail.com", role = c("aut", "cre")))
+Description: User-friendly shiny app for the metaDigitise package, which facilitates high-throughput, flexible and reproducible extraction of data from figures in primary research papers. shinyDigitise() can extract data and calculate summary statistics for users from box plots, mean and error plots, scatter plots and histograms.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
