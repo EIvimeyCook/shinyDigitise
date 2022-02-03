@@ -546,7 +546,7 @@ shinyDigitise_server <- function(input, output, session){
           mod_df$x,
           editable = list(target = "cell", disable = list(columns = c(1))),
           selection = "single",
-          options = list(lengthChange = TRUE, dom = "t")
+          options = list(lengthChange = TRUE, dom = "t", pageLength = 100)
         )
       })
     
