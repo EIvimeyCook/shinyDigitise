@@ -165,7 +165,7 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 	if(points) redraw_points(plot_type=plot_type,raw_data=raw_data,image_details=image_details,  cex=cex, pos=pos)
 
 	if(rotate_mode) {
-		abline(
+		graphics::abline(
 			v=seq(0,image_details["width"], length.out=20),
 			h=seq(0,image_details["height"], length.out=20),
 			col=alpha(1,0.5)

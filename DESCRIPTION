@@ -9,7 +9,8 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
-Imports: shiny,
+Imports: methods,
+    shiny,
     shinyWidgets,
     shinyFiles,
     shinyjs,
@@ -25,5 +26,6 @@ Imports: shiny,
     RColorBrewer,
     scales,
     shinyalert,
-    emojifont
+    emojifont,
+    stringr
 BugReports: https://github.com/EIvimeyCook/ShinyDigitise/issues

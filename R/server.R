@@ -145,7 +145,7 @@ shinyDigitise_server <- function(input, output, session){
     })
 
     output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
+      graphics::par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
@@ -225,7 +225,7 @@ shinyDigitise_server <- function(input, output, session){
     values$flip <<- input$flip
 
     output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
+      graphics::par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
@@ -256,7 +256,7 @@ shinyDigitise_server <- function(input, output, session){
     }
 
     output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
+      graphics::par(mar = c(0, 0, 0, 0))
       values$rotate_mode <- input$rotate_mode
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
@@ -407,7 +407,7 @@ shinyDigitise_server <- function(input, output, session){
       # Then convert these to a dataframe and plot
       values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
       output$metaPlot <- renderPlot({
-        par(mar = c(0, 0, 0, 0))
+        graphics::par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
@@ -432,7 +432,7 @@ shinyDigitise_server <- function(input, output, session){
       }
 
       output$metaPlot <- renderPlot({
-        par(mar = c(0, 0, 0, 0))
+        graphics::par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
@@ -448,7 +448,7 @@ shinyDigitise_server <- function(input, output, session){
       }
 
       output$metaPlot <- renderPlot({
-        par(mar = c(0, 0, 0, 0))
+        graphics::par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
@@ -530,7 +530,7 @@ shinyDigitise_server <- function(input, output, session){
       } else {
         # otherwise read in the data that already exists from the raw data.
         raw_dat <- as.data.frame(values$raw_data)
-        raw_dat_sum <- aggregate(n ~ id, raw_dat, unique)
+        raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
         names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
@@ -736,7 +736,7 @@ shinyDigitise_server <- function(input, output, session){
       values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
 
       output$metaPlot <- renderPlot({
-        par(mar = c(0, 0, 0, 0))
+        graphics::par(mar = c(0, 0, 0, 0))
         plot_values <- reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
@@ -785,7 +785,7 @@ shinyDigitise_server <- function(input, output, session){
     # }
 
     output$metaPlot <- renderPlot({
-      par(mar = c(0, 0, 0, 0))
+      graphics::par(mar = c(0, 0, 0, 0))
       plot_values <- reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
@@ -921,7 +921,7 @@ shinyDigitise_server <- function(input, output, session){
   
   observeEvent(input$exit, {
     stopApp(returnValue=getExtracted(dir))
-        write.csv(getExtracted(dir), "ExtractedData.csv")
+        utils::write.csv(getExtracted(dir), "ExtractedData.csv")
 
   })
 
