@@ -1,7 +1,7 @@
 shinyDigitise_UI <- function(){
   fluidPage(
     shinyjs::useShinyjs(),
-    shinyalert::useShinyalert(),
+    # shinyalert::useShinyalert(),
     theme = bs_theme(
       primary = "#66947A", secondary = "#66947A", 
       info = "#E51C23", font_scale = NULL, bootswatch = "materia",

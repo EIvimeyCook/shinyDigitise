@@ -117,30 +117,30 @@ shinyDigitise_server <- function(input, output, session){
     #### update tick boxes
     output$plottype_check_text <- renderText({
       if(check_plottype(reactiveValuesToList(values))){
-         emoji('white_check_mark')
+         emojifont::emoji('white_check_mark')
       }else{
-        emoji('warning')
+        emojifont::emoji('warning')
       }
     })
     output$orientation_check_text <- renderText({
       if(check_orientation(reactiveValuesToList(values))){
-         emoji('white_check_mark')
+         emojifont::emoji('white_check_mark')
       }else{
-        emoji('warning')
+        emojifont::emoji('warning')
       }
     })
     output$calibrate_check_text <- renderText({
       if(check_calibrate(reactiveValuesToList(values))){
-         emoji('white_check_mark')
+         emojifont::emoji('white_check_mark')
       }else{
-        emoji('warning')
+        emojifont::emoji('warning')
       }
     })
     output$extract_check_text <- renderText({
       if(check_extract(reactiveValuesToList(values))){
-         emoji('white_check_mark')
+         emojifont::emoji('white_check_mark')
       }else{
-        emoji('warning')
+        emojifont::emoji('warning')
       }
     })
 
@@ -164,16 +164,16 @@ shinyDigitise_server <- function(input, output, session){
     #### update tick boxes
     output$plottype_check_text <- renderText({
       if(check_plottype(reactiveValuesToList(values))){
-         emoji('white_check_mark')
+         emojifont::emoji('white_check_mark')
       }else{
-        emoji('warning')
+        emojifont::emoji('warning')
       }
     })
     output$calibrate_check_text <- renderText({
       if(check_calibrate(reactiveValuesToList(values))){
-         emoji('white_check_mark')
+         emojifont::emoji('white_check_mark')
       }else{
-        emoji('warning')
+        emojifont::emoji('warning')
       }
     })
   })
@@ -381,9 +381,9 @@ shinyDigitise_server <- function(input, output, session){
   output$calib_info <- renderUI({HTML("")})
     output$calibrate_check_text <- renderText({
       if(check_calibrate(reactiveValuesToList(values))){
-         emoji('white_check_mark')
+         emojifont::emoji('white_check_mark')
       }else{
-        emoji('warning')
+        emojifont::emoji('warning')
       }
     })
     }
@@ -558,9 +558,9 @@ shinyDigitise_server <- function(input, output, session){
 
       output$extract_check_text <- renderText({
         if(check_extract(reactiveValuesToList(values))){
-           emoji('white_check_mark')
+           emojifont::emoji('white_check_mark')
         }else{
-          emoji('warning')
+          emojifont::emoji('warning')
         }
       })
     }

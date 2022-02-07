@@ -7,23 +7,23 @@
 
 shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
 
-	load.emojifont('OpenSansEmoji.ttf')
+	emojifont::load.emojifont('OpenSansEmoji.ttf')
 
 
 	if( (substring(dir, nchar(dir)) == "/") == FALSE){
 	    dir <- paste0(dir, "/")
 	  }
-	  setup_calibration_dir(dir)
+	  metaDigitise::setup_calibration_dir(dir)
 # dir="~/Downloads/Image/"
 
 	if(is.null(image_name)){
 	  if(import_all){
-	  	details <- dir_details(dir)
+	  	details <- metaDigitise::dir_details(dir)
 	  }else{
-			details <- get_notDone_file_details(dir) 	
+			details <- metaDigitise::get_notDone_file_details(dir) 	
 	  }	
 	}else{
-		details <- dir_details(dir)
+		details <- metaDigitise::dir_details(dir)
 
 		if(!image_name %in% details$name){
 			stop("image_name must refer to images within the directory")
@@ -31,14 +31,6 @@ shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
 		details$paths <- details$paths[match(image_name,details$name)]
 		details$name <- image_name
 	}
-
-
-
-
-
-
-
-
 
 	counter_total <- length(details$paths)
 	# filename(details$paths[1])
