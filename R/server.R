@@ -1,11 +1,11 @@
 
 shinyDigitise_server <- function(input, output, session){
 
-  output$shinylogo <- renderImage({
+  output$shinylogo <- shiny::renderImage({
     list(src =base::system.file("logos/shinyDigitise.png", package="shinyDigitise"), height = 60)
   },deleteFile=FALSE)
 
-  output$shinytext <- renderText({
+  output$shinytext <- shiny::renderText({
     "shinyDigitise"
   })
 
@@ -14,16 +14,16 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
 
   # start counter at 1.
-  counter <<- reactiveValues(countervalue = 1)
+  counter <<- shiny::reactiveValues(countervalue = 1)
 
   # when counter value is changed (either conitnue or previous is pressed):
-  observeEvent(counter$countervalue, {
+  shiny::observeEvent(counter$countervalue, {
 
-    hide("orient_well")
-    hide("extract_well")
-    hide("calib_well")
-    hide("comm_well")
-    show("plot_well")
+    shinyjs::hide("orient_well")
+    shinyjs::hide("extract_well")
+    shinyjs::hide("calib_well")
+    shinyjs::hide("comm_well")
+    shinyjs::show("plot_well")
 
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
@@ -33,16 +33,16 @@ shinyDigitise_server <- function(input, output, session){
       # plot_values <- readRDS(values$caldat)
 
       #read in that data.
-      values <<- do.call("reactiveValues", readRDS(counter$caldat))
+      values <<- do.call("shiny::reactiveValues", readRDS(counter$caldat))
 
       # update
-      updateSliderInput(session, "cex", value = values$cex)
-      updatePrettyRadioButtons(session, "pos", selected = values$pos)
-      updatePrettyRadioButtons(session, "plot_type", selected = values$plot_type)
-      updateTextInput(session, "comment", value = paste(values$comment))
+      shiny::updateSliderInput(session, "cex", value = values$cex)
+      shinyWidgets::updatePrettyRadioButtons(session, "pos", selected = values$pos)
+      shinyWidgets::updatePrettyRadioButtons(session, "plot_type", selected = values$plot_type)
+      shiny::updateTextInput(session, "comment", value = paste(values$comment))
 
       if (values$plot_type %in% c("mean_error","xy_mean_error")) {
-        updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
+        shinyWidgets::updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
       }
       # update
 
@@ -51,7 +51,7 @@ shinyDigitise_server <- function(input, output, session){
       # if not then create a new values object that we can store data in.
       #  keeps flip/rotate and image details.
 
-      values <<- reactiveValues(
+      values <<- shiny::reactiveValues(
         image_name = details$name[counter$countervalue],
         image_file = details$paths[counter$countervalue],
         plot_type = NULL,
@@ -68,18 +68,18 @@ shinyDigitise_server <- function(input, output, session){
         cex = input$cex,
         pos = "right"
       )
-    updatePrettyRadioButtons(session, "plot_type", selected = character(0))
-    updatePrettyRadioButtons(session, "errortype", selected = character(0))
+    shinyWidgets::updatePrettyRadioButtons(session, "plot_type", selected = character(0))
+    shinyWidgets::updatePrettyRadioButtons(session, "errortype", selected = character(0))
     }
     
 
-    updateSwitchInput(
+    shinyWidgets::updateSwitchInput(
       session = session,
       inputId = "flip",
       value = values$flip
     )
 
-    updateSwitchInput(
+    shinyWidgets::updateSwitchInput(
       session = session,
       inputId = "rotate_mode",
       value = FALSE
@@ -89,64 +89,64 @@ shinyDigitise_server <- function(input, output, session){
 
     values$rotate_mode <- FALSE
 
-    updateSliderInput(
+    shiny::updateSliderInput(
       session = session,
       inputId = "rotate",
       value = FALSE,
       values$rotate
     )
-    output$rotation <- renderText({
+    output$rotation <- shiny::renderText({
       paste("rotation angle:", values$rotate)
     })
-    output$image_name <- renderText({
+    output$image_name <- shiny::renderText({
       values$image_name
     })
 
-    updateSwitchInput(
+    shinyWidgets::updateSwitchInput(
       session = session,
       inputId = "calib_mode",
       value = FALSE
     )
 
-    updateSwitchInput(
+    shinyWidgets::updateSwitchInput(
       session = session,
       inputId = "extract_mode",
       value = FALSE
     )
 
     #### update tick boxes
-    output$plottype_check_text <- renderText({
-      if(check_plottype(reactiveValuesToList(values))){
+    output$plottype_check_text <- shiny::renderText({
+      if(check_plottype(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
       }else{
         emojifont::emoji('warning')
       }
     })
-    output$orientation_check_text <- renderText({
-      if(check_orientation(reactiveValuesToList(values))){
+    output$orientation_check_text <- shiny::renderText({
+      if(check_orientation(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
       }else{
         emojifont::emoji('warning')
       }
     })
-    output$calibrate_check_text <- renderText({
-      if(check_calibrate(reactiveValuesToList(values))){
+    output$calibrate_check_text <- shiny::renderText({
+      if(check_calibrate(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
       }else{
         emojifont::emoji('warning')
       }
     })
-    output$extract_check_text <- renderText({
-      if(check_extract(reactiveValuesToList(values))){
+    output$extract_check_text <- shiny::renderText({
+      if(check_extract(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
       }else{
         emojifont::emoji('warning')
       }
     })
 
-    output$metaPlot <- renderPlot({
+    output$metaPlot <- shiny::renderPlot({
       graphics::par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
+      plot_values <- shiny::reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
@@ -158,19 +158,19 @@ shinyDigitise_server <- function(input, output, session){
 
   # record the plot type for the data file - influences clicking etc.
 
-  observeEvent(input$plot_type,{
+  shiny::observeEvent(input$plot_type,{
     values$plot_type <<- input$plot_type
     
     #### update tick boxes
-    output$plottype_check_text <- renderText({
-      if(check_plottype(reactiveValuesToList(values))){
+    output$plottype_check_text <- shiny::renderText({
+      if(check_plottype(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
       }else{
         emojifont::emoji('warning')
       }
     })
-    output$calibrate_check_text <- renderText({
-      if(check_calibrate(reactiveValuesToList(values))){
+    output$calibrate_check_text <- shiny::renderText({
+      if(check_calibrate(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
       }else{
         emojifont::emoji('warning')
@@ -179,13 +179,13 @@ shinyDigitise_server <- function(input, output, session){
   })
 
   #record cex used (adjusted with slider)
-  observe(values$cex <<- input$cex)
+  shiny::observe(values$cex <<- input$cex)
 
-  observe(values$pos <<- input$pos)
+  shiny::observe(values$pos <<- input$pos)
 
-  observe(values$error_type <<- input$errortype)
+  shiny::observe(values$error_type <<- input$errortype)
 
-  # observeEvent(input$errortype,{
+  # shiny::observeEvent(input$errortype,{
   #   values$error_type <<- input$errortype
   #   })
 
@@ -193,25 +193,25 @@ shinyDigitise_server <- function(input, output, session){
   # zoom
   ################################################
   
-  # observeEvent(input$plot_brush,{
+  # shiny::observeEvent(input$plot_brush,{
   #   # print(input$plot_brush)
   #   values$zoom_coords <<- c(input$plot_brush$xmin,input$plot_brush$xmax,input$plot_brush$ymin,input$plot_brush$ymax)
-  #   output$metaPlot <- renderPlot({
+  #   output$metaPlot <- shiny::renderPlot({
   #     par(mar = c(0, 0, 0, 0))
-  #     plot_values <- reactiveValuesToList(values)
+  #     plot_values <- shiny::reactiveValuesToList(values)
   #     do.call(internal_redraw, c(plot_values, shiny=TRUE))
   #   })
   #   # session$resetBrush("plot_brush")
   #   # runjs("document.getElementById('plot_brush').remove()")
   # })
 
-  # observeEvent(input$plot_dblclick,{
+  # shiny::observeEvent(input$plot_dblclick,{
   #   session$resetBrush("plot_brush")
 
   #   values$zoom_coords <<- NULL
-  #   output$metaPlot <- renderPlot({
+  #   output$metaPlot <- shiny::renderPlot({
   #     par(mar = c(0, 0, 0, 0))
-  #     plot_values <- reactiveValuesToList(values)
+  #     plot_values <- shiny::reactiveValuesToList(values)
   #     do.call(internal_redraw, c(plot_values, shiny=TRUE))
   #   })
   # })
@@ -221,12 +221,12 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
 
   # record whether we flip the image or not
-  observeEvent(input$flip, {
+  shiny::observeEvent(input$flip, {
     values$flip <<- input$flip
 
-    output$metaPlot <- renderPlot({
+    output$metaPlot <- shiny::renderPlot({
       graphics::par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
+      plot_values <- shiny::reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
@@ -236,37 +236,37 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
 
   # rotate the image using a slider. Text + slider gets displayed as you click rotate mode.
-  observeEvent(input$rotate_mode, {
+  shiny::observeEvent(input$rotate_mode, {
     if (input$rotate_mode) {
 
       # if we are in rotate mode - toggle extract mode and calib mode off.
-      updateSwitchInput(
+      shinyWidgets::updateSwitchInput(
         session = session,
         inputId = "calib_mode",
         value = FALSE
       )
-      updateSwitchInput(
+      shinyWidgets::updateSwitchInput(
         session = session,
         inputId = "extract_mode",
         value = FALSE
       )
-      show("togslide")
+      shinyjs::show("togslide")
     } else {
-      hide("togslide")
+      shinyjs::hide("togslide")
     }
 
-    output$metaPlot <- renderPlot({
+    output$metaPlot <- shiny::renderPlot({
       graphics::par(mar = c(0, 0, 0, 0))
       values$rotate_mode <- input$rotate_mode
-      plot_values <- reactiveValuesToList(values)
+      plot_values <- shiny::reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
 
-  observeEvent(input$rotate, {
+  shiny::observeEvent(input$rotate, {
     if (input$rotate_mode) {
       values$rotate <<- input$rotate
-      output$rotation <- renderText({
+      output$rotation <- shiny::renderText({
         paste("rotation angle:", values$rotate)
       })
     }
@@ -278,13 +278,13 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
 
   # create empty clikc counter for plotclicks.
-  clickcounter <- reactiveValues(clickcount = 0)
+  clickcounter <- shiny::reactiveValues(clickcount = 0)
 
   # create a container for calibration points.
-  calpoints <- reactiveValues(x = NULL, y = NULL)
+  calpoints <- shiny::reactiveValues(x = NULL, y = NULL)
 
   # if calib mode button pressed
-  observeEvent(input$calib_mode, {
+  shiny::observeEvent(input$calib_mode, {
     # resent click counter
     clickcounter$clickcount <- 0
 
@@ -299,7 +299,7 @@ shinyDigitise_server <- function(input, output, session){
 
     if (input$calib_mode) {
       if(is.null(values$plot_type)){
-        shinyalert(
+        shinyalert::shinyalert(
           title = "No plot type selected",
           text = "Please select a plot type before continuing with extraction",
           size = "s",
@@ -315,13 +315,13 @@ shinyDigitise_server <- function(input, output, session){
           imageUrl = "",
           animation = TRUE
         )
-        updateSwitchInput(
+        shinyWidgets::updateSwitchInput(
             session = session,
             inputId = "calib_mode",
             value = FALSE
         )
       }else{
-        output$calib_info <- renderUI({ HTML(paste0(
+        output$calib_info <- shiny::renderUI({ HTML(paste0(
         " <b> Click on known values on axes in this order: <br/>
             | <br/>
             2 <br/>
@@ -338,12 +338,12 @@ shinyDigitise_server <- function(input, output, session){
           ))})
         
         # toggle extract mode and rotate mode off.
-        updateSwitchInput(
+        shinyWidgets::updateSwitchInput(
           session = session,
           inputId = "extract_mode",
           value = FALSE
         )
-        updateSwitchInput(
+        shinyWidgets::updateSwitchInput(
           session = session,
           inputId = "rotate_mode",
           value = FALSE
@@ -353,15 +353,15 @@ shinyDigitise_server <- function(input, output, session){
 
         ### show relevant input boxes
         if(!input$plot_type %in% c("histogram")){
-          show("y_var_input")
+          shinyjs::show("y_var_input")
         }
 
         if(!input$plot_type %in% c("mean_error","boxplot")){
-          show("x_var_input")
-          show("x_coord_input")
+          shinyjs::show("x_var_input")
+          shinyjs::show("x_coord_input")
         }
 
-        show("y_coord_input")
+        shinyjs::show("y_coord_input")
 
         # delete all previous data
         values$calpoints <<- NULL
@@ -374,13 +374,13 @@ shinyDigitise_server <- function(input, output, session){
       ## what happens when calibrate mode is switched off
 
       # hide variable and coord inputs
-      hide("y_var_input")
-      hide("x_var_input")
-      hide("y_coord_input")
-      hide("x_coord_input")
-  output$calib_info <- renderUI({HTML("")})
-    output$calibrate_check_text <- renderText({
-      if(check_calibrate(reactiveValuesToList(values))){
+      shinyjs::hide("y_var_input")
+      shinyjs::hide("x_var_input")
+      shinyjs::hide("y_coord_input")
+      shinyjs::hide("x_coord_input")
+  output$calib_info <- shiny::renderUI({HTML("")})
+    output$calibrate_check_text <- shiny::renderText({
+      if(check_calibrate(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
       }else{
         emojifont::emoji('warning')
@@ -390,7 +390,7 @@ shinyDigitise_server <- function(input, output, session){
   })
 
   # when the plot is clicked in calibrate mode
-  observeEvent(input$plot_click2, {
+  shiny::observeEvent(input$plot_click2, {
     if (input$calib_mode) {
 
       # increase clickcounter (becomes clicktot object).
@@ -405,10 +405,10 @@ shinyDigitise_server <- function(input, output, session){
       }
 
       # Then convert these to a dataframe and plot
-      values$calpoints <<- as.data.frame(reactiveValuesToList(calpoints))
-      output$metaPlot <- renderPlot({
+      values$calpoints <<- as.data.frame(shiny::reactiveValuesToList(calpoints))
+      output$metaPlot <- shiny::renderPlot({
         graphics::par(mar = c(0, 0, 0, 0))
-        plot_values <- reactiveValuesToList(values)
+        plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
@@ -421,7 +421,7 @@ shinyDigitise_server <- function(input, output, session){
   # take the inputs from the y axis/y1 and y2 and add to the values object
   # other plots to be finished
 
-  observeEvent(c(input$y_var,input$x_var), {
+  shiny::observeEvent(c(input$y_var,input$x_var), {
     if (input$calib_mode) {
       if(input$plot_type %in% c("mean_error","boxplot")){
         values$variable <<- input$y_var
@@ -431,15 +431,15 @@ shinyDigitise_server <- function(input, output, session){
         values$variable <<- c(y=input$y_var,y=input$x_var)
       }
 
-      output$metaPlot <- renderPlot({
+      output$metaPlot <- shiny::renderPlot({
         graphics::par(mar = c(0, 0, 0, 0))
-        plot_values <- reactiveValuesToList(values)
+        plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
   })
 
-  observeEvent(c(input$y1, input$y2,input$x1, input$x2), {
+  shiny::observeEvent(c(input$y1, input$y2,input$x1, input$x2), {
     if (input$calib_mode) {
       if(input$plot_type %in% c("mean_error","boxplot")){
         values$point_vals <<- c(input$y1,input$y2)
@@ -447,9 +447,9 @@ shinyDigitise_server <- function(input, output, session){
         values$point_vals <<- c(input$y1,input$y2,input$x1, input$x2)
       }
 
-      output$metaPlot <- renderPlot({
+      output$metaPlot <- shiny::renderPlot({
         graphics::par(mar = c(0, 0, 0, 0))
-        plot_values <- reactiveValuesToList(values)
+        plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
@@ -462,50 +462,50 @@ shinyDigitise_server <- function(input, output, session){
 
 
   # for row count,
-  row_count <- reactiveValues(x = NULL)
+  row_count <- shiny::reactiveValues(x = NULL)
 
   # dataframe containing group name etc
-  mod_df <- reactiveValues(x = NULL)
+  mod_df <- shiny::reactiveValues(x = NULL)
 
   # create empty click counter
-  plotcounter <- reactiveValues(plotclicks = NULL)
+  plotcounter <- shiny::reactiveValues(plotclicks = NULL)
 
   #container for which rows and cell are selected
-  selected <- reactiveValues(row = NULL, cell=NULL)
+  selected <- shiny::reactiveValues(row = NULL, cell=NULL)
   
   #container for which row are clicked
-  clicked<- reactiveValues(row = NULL)
+  clicked<- shiny::reactiveValues(row = NULL)
 
   #container for for plotting values and
-  valpoints <- reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+  valpoints <- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
 
   # container for extract T/F.
-  extract_mode <- reactiveValues(extract = FALSE)
+  extract_mode <- shiny::reactiveValues(extract = FALSE)
   # container for add T/F.
-  add_mode <- reactiveValues(add = FALSE)
+  add_mode <- shiny::reactiveValues(add = FALSE)
 
 
-  observeEvent(extract_mode$extract, {
+  shiny::observeEvent(extract_mode$extract, {
 
     # if we are in extract mode
     if (extract_mode$extract) {
         #toggle calibrate mode and rotate mode off.
-      updateSwitchInput(
+      shinyWidgets::updateSwitchInput(
         session = session,
         inputId = "calib_mode",
         value = FALSE
       )
-      updateSwitchInput(
+      shinyWidgets::updateSwitchInput(
         session = session,
         inputId = "rotate_mode",
         value = FALSE
       )
       #show the group_data ovject (the table for clicking/groups and sample sizes)
-      show("group_data")
+      shinyjs::show("group_data")
 
       # show the error type select input (ofr mean_error).
       if (input$plot_type %in% c("mean_error","xy_mean_error")) {
-        show("error_type_select")
+        shinyjs::show("error_type_select")
       }
       ################################################
       # Group Name and Sample Size Table
@@ -513,7 +513,7 @@ shinyDigitise_server <- function(input, output, session){
 
       if (is.null(values$raw_data)) {
         # if values raw data is null/empty then create new data to show in the table.
-        basic <- tibble(
+        basic <- tibble::tibble(
           Group_Name = NA,
           Sample_Size = NA
         )
@@ -553,11 +553,11 @@ shinyDigitise_server <- function(input, output, session){
     }else{
 
       ## hide
-      hide("group_data")
-      hide("error_type_select")
+      shinyjs::hide("group_data")
+      shinyjs::hide("error_type_select")
 
-      output$extract_check_text <- renderText({
-        if(check_extract(reactiveValuesToList(values))){
+      output$extract_check_text <- shiny::renderText({
+        if(check_extract(shiny::reactiveValuesToList(values))){
            emojifont::emoji('white_check_mark')
         }else{
           emojifont::emoji('warning')
@@ -573,14 +573,14 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
   # Create modal
   popupModal <- function(failed = FALSE) {
-    modalDialog(
-      textInput("group", "Group Name", ""),
-      numericInput("sample_size", "Sample Size", ""),
+    shiny::modalDialog(
+      shiny::textInput("group", "Group Name", ""),
+      shiny::numericInput("sample_size", "Sample Size", ""),
       if (failed)
         div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
-      footer = tagList(
-        actionButton("cancel", "Cancel"),
-        actionButton("ok", "OK")
+      footer = shiny::tagList(
+        shiny::actionButton("cancel", "Cancel"),
+        shiny::actionButton("ok", "OK")
       )
     )
   }
@@ -588,74 +588,74 @@ shinyDigitise_server <- function(input, output, session){
   # when you click add group a popup appears which asks you to add group and sample size.
   # this is then added onto the raw data.
   # the row count increases and another row is then added after.
-  observeEvent(input$add_group, {
-    showModal(popupModal())
+  shiny::observeEvent(input$add_group, {
+    shiny::showModal(popupModal())
     row_count$x <- row_count$x + 1
     mod_df$x <- mod_df$x %>%
       dplyr::bind_rows(
-        dplyr::tibble(
+        tibble::tibble(
           Group_Name = NA,
           Sample_Size = NA
         )
       )
   })
 
-  observeEvent(input$ok, {
+  shiny::observeEvent(input$ok, {
 
     if (!is.null(input$group) && nzchar(input$group)){
-      removeModal()
+      shiny::removeModal()
     } else {
-      showModal(popupModal(failed = TRUE))
+      shiny::showModal(popupModal(failed = TRUE))
     }
   })
 
-  observeEvent(input$cancel, {
-      removeModal()
+  shiny::observeEvent(input$cancel, {
+      shiny::removeModal()
     row_count$x <- row_count$x - 1
     mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
   })
 
   # what happens when you click a cell on the group table.
   # Useful for deleting groups and labeling points. Highlights the cell.
-  observeEvent(input$group_table_cell_clicked, {
+  shiny::observeEvent(input$group_table_cell_clicked, {
     selected$cell <- input$group_table_cell_clicked$value
   })
 
   # what happens when you click on a cell/row on the group table.
   # Useful for deleting groups and labeling points. Highlights the row.
-  observeEvent(input$group_table_rows_selected, {
+  shiny::observeEvent(input$group_table_rows_selected, {
     selected$row <- input$group_table_rows_selected
   })
   
-    observeEvent(input$group_table_row_last_clicked, {
+    shiny::observeEvent(input$group_table_row_last_clicked, {
     clicked$row <- c(clicked$row,input$group_table_row_last_clicked)
     if(any(duplicated(clicked$row))){
       clicked$row <<- NULL
       selected$row <<- NULL
-      selectRows(proxy, selected = NULL)
+      DT::selectRows(proxy, selected = NULL)
     }
   })
 
-  observeEvent(counter$countervalue,{
+  shiny::observeEvent(counter$countervalue,{
     if(is.null(input$group_table_rows_selected)){
-      disable("del_group")
+      shinyjs::disable("del_group")
     }
   })
 
 
-  observeEvent(counter$countervalue,{
+  shiny::observeEvent(counter$countervalue,{
     if(is.null(input$group_table_rows_selected)){
-      disable("click_group")
+      shinyjs::disable("click_group")
     }
   })
 
-  observeEvent(input$group_table_rows_selected,{
-    enable("click_group")
-    enable("del_group")
+  shiny::observeEvent(input$group_table_rows_selected,{
+    shinyjs::enable("click_group")
+    shinyjs::enable("del_group")
   })
 
 
-  observeEvent(input$click_group, {
+  shiny::observeEvent(input$click_group, {
 
     plotcounter$plotclicks <- 0
 
@@ -664,7 +664,7 @@ shinyDigitise_server <- function(input, output, session){
 
     # if you click group without any row selected - return an error.
     if(length(selected$row) == 0){
-      shinyalert(
+      shinyalert::shinyalert(
         title = "Select a group to plot",
         text = "No group has been selected",
         size = "s",
@@ -686,9 +686,9 @@ shinyDigitise_server <- function(input, output, session){
       if (add_mode$add) {
 
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
-        # if(as.data.frame(reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
+        # if(as.data.frame(shiny::reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
         if(length(stringr::str_detect(values$raw_data$id, as.character(mod_df$x[selected$row,1]))) != 0){
-          values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+          values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
           remove_string <-  as.character(mod_df$x[selected$row,1])
           values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
           valpoints$x <- values$raw_data$x
@@ -700,7 +700,7 @@ shinyDigitise_server <- function(input, output, session){
         }
       }
       ## ?? this seems problematic
-      # values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+      # values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
     }
   })
 
@@ -712,10 +712,10 @@ shinyDigitise_server <- function(input, output, session){
   # location of x and y valpoints are given in text.
   #  when you click to add points
 
-  observeEvent(input$plot_click2, {
+  shiny::observeEvent(input$plot_click2, {
     if (add_mode$add) {
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
-      dat_mod <- as.data.frame(reactiveValuesToList(mod_df))
+      dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
       max_clicks <-
         ifelse(input$plot_type == "mean_error",2,
         ifelse(input$plot_type == "xy_mean_error",3,
@@ -730,14 +730,14 @@ shinyDigitise_server <- function(input, output, session){
       if (plotcounter$plotclicks == max_clicks) {
         add_mode$add <- FALSE
         selected$row <<- NULL
-        selectRows(proxy, selected = NULL)
+        DT::selectRows(proxy, selected = NULL)
       }
 
-      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+      values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
 
-      output$metaPlot <- renderPlot({
+      output$metaPlot <- shiny::renderPlot({
         graphics::par(mar = c(0, 0, 0, 0))
-        plot_values <- reactiveValuesToList(values)
+        plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
     }
@@ -752,10 +752,10 @@ shinyDigitise_server <- function(input, output, session){
   # if no cell is selected to delete, then show a modal alert.
   # however if one is, then search the data fro that cell and remove it from the df.
   # this will also cause the plot and raw data to update and remove anything with this group.
-  observeEvent(input$del_group, {
+  shiny::observeEvent(input$del_group, {
     # if (input$del_group) {
       if(is.null(selected$row)){
-        shinyalert(
+        shinyalert::shinyalert(
           title = "Select a group to delete",
           text = "No group has been selected",
           size = "s",
@@ -773,7 +773,7 @@ shinyDigitise_server <- function(input, output, session){
         )
       } else{
         row_count$x <- row_count$x - 1
-        values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+        values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
         remove_string <-  as.character(mod_df$x[selected$row,1])
         values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
         valpoints$x <- values$raw_data$x
@@ -784,9 +784,9 @@ shinyDigitise_server <- function(input, output, session){
       }
     # }
 
-    output$metaPlot <- renderPlot({
+    output$metaPlot <- shiny::renderPlot({
       graphics::par(mar = c(0, 0, 0, 0))
-      plot_values <- reactiveValuesToList(values)
+      plot_values <- shiny::reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
   })
@@ -795,25 +795,25 @@ shinyDigitise_server <- function(input, output, session){
   proxy <- DT::dataTableProxy("group_table")
 
   # edit the data table with data from the modal popup.
-  observeEvent(input$sample_size, {
+  shiny::observeEvent(input$sample_size, {
     mod_df$x[row_count$x,2] <<- input$sample_size
   })
 
   # edit the data table with data from the modal poopup.
-  observeEvent(input$group, {
+  shiny::observeEvent(input$group, {
     mod_df$x[row_count$x,1] <<- input$group
   })
 
   #edit data with DT input
-  observeEvent(input$group_table_cell_edit, {
+  shiny::observeEvent(input$group_table_cell_edit, {
     change_string <-  as.character(mod_df$x[selected$row,1])
     values$raw_data[grepl(change_string, values$raw_data$id),]$n <- input$group_table_cell_edit$value
-    mod_df$x <-  editData(mod_df$x, input$group_table_cell_edit)
+    mod_df$x <-  DT::editData(mod_df$x, input$group_table_cell_edit)
   })
 
-  observeEvent(input$ok, {
+  shiny::observeEvent(input$ok, {
     if(any(duplicated(mod_df$x[,1]))){
-      shinyalert(
+      shinyalert::shinyalert(
         title = "Duplicated group name detected",
         text = "This group has been deleted",
         size = "s",
@@ -830,7 +830,7 @@ shinyDigitise_server <- function(input, output, session){
         animation = TRUE
       )
       row_count$x <- row_count$x - 1
-      values$raw_data <<- as.data.frame(reactiveValuesToList(valpoints))
+      values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
       remove_string <-  as.character(mod_df$x[nrow(mod_df$x),1])
       values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
       valpoints$x <- values$raw_data$x
@@ -848,7 +848,7 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
 
   # record comments
-  observeEvent(input$comment,{
+  shiny::observeEvent(input$comment,{
     values$comment <<- input$comment
   })
 
@@ -863,8 +863,8 @@ shinyDigitise_server <- function(input, output, session){
   # switch calib and etxract mode to false.
   # modal box pops up when you've finished.
 
-  observeEvent(input$continue, {
-    plot_values <- reactiveValuesToList(values)
+  shiny::observeEvent(input$continue, {
+    plot_values <- shiny::reactiveValuesToList(values)
     if(check_plottype(plot_values) & check_calibrate(plot_values) & check_extract(plot_values)){
       plot_values$processed_data <- process_data(plot_values)
       class(plot_values) <- 'metaDigitise'
@@ -874,7 +874,7 @@ shinyDigitise_server <- function(input, output, session){
 
       if (cv > counter_total) {
         counter$countervalue <- counter_total
-        shinyalert(
+        shinyalert::shinyalert(
           title = "Congratulations!",
           text = "You've finished digitising!",
           size = "s",
@@ -893,14 +893,14 @@ shinyDigitise_server <- function(input, output, session){
           callbackJS = "function(x){
                  setTimeout(function(){window.close();}, 500);
                }")
-        # getExtracted(dir)
-        # stopApp()
+        # metaDigitise::getExtracted(dir)
+        # shiny::stopApp()
         
       } else {
         counter$countervalue <- cv
       }
     }else{
-      shinyalert(
+      shinyalert::shinyalert(
         title = "Warning!",
         text = "You haven't completed this image.",
         size = "s",
@@ -919,14 +919,14 @@ shinyDigitise_server <- function(input, output, session){
     }
   })
   
-  observeEvent(input$exit, {
-    stopApp(returnValue=getExtracted(dir))
-        utils::write.csv(getExtracted(dir), "ExtractedData.csv")
+  shiny::observeEvent(input$exit, {
+    shiny::stopApp(returnValue=metaDigitise::getExtracted(dir))
+        utils::write.csv(metaDigitise::getExtracted(dir), "ExtractedData.csv")
 
   })
 
   # when next is pressed up the counter and check that its above 0
-  # observeEvent(input$previous, {
+  # shiny::observeEvent(input$previous, {
   #   cv <- counter$countervalue - 1
 
   #   if (cv == 0) {
@@ -938,7 +938,7 @@ shinyDigitise_server <- function(input, output, session){
   # })
 
   #output the progress text
-  output$progress <- renderText({
+  output$progress <- shiny::renderText({
     paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
   })
 
@@ -946,13 +946,13 @@ shinyDigitise_server <- function(input, output, session){
   # Previous/next step buttons
   ################################################
   
-  # observeEvent(counter$countervalue, {
+  # shiny::observeEvent(counter$countervalue, {
 
   # })
   
-  observeEvent(input$plot_step, {
+  shiny::observeEvent(input$plot_step, {
     if(is.null(values$plot_type)){
-      shinyalert(
+      shinyalert::shinyalert(
         title = "No plot type selected",
         text = "Please select a plot type before continuing with extraction",
         size = "s",
@@ -969,51 +969,51 @@ shinyDigitise_server <- function(input, output, session){
         animation = TRUE
       )
     }else{
-      show("orient_well")
-      hide("plot_well")
+      shinyjs::show("orient_well")
+      shinyjs::hide("plot_well")
     }
   })
   
-  observeEvent(input$orient_step, {
-    show("calib_well")
-    hide("orient_well")
+  shiny::observeEvent(input$orient_step, {
+    shinyjs::show("calib_well")
+    shinyjs::hide("orient_well")
   })
   
-  observeEvent(input$calib_step, {
-    show("extract_well")
+  shiny::observeEvent(input$calib_step, {
+    shinyjs::show("extract_well")
     extract_mode$extract <<- TRUE
-    hide("calib_well")
+    shinyjs::hide("calib_well")
   })
   
-  observeEvent(input$extract_step, {
-    show("comm_well")
-    hide("extract_well")
+  shiny::observeEvent(input$extract_step, {
+    shinyjs::show("comm_well")
+    shinyjs::hide("extract_well")
     extract_mode$extract <<- FALSE
   })
   
-  observeEvent(input$orient_back, {
-    show("plot_well")
-    hide("orient_well")
+  shiny::observeEvent(input$orient_back, {
+    shinyjs::show("plot_well")
+    shinyjs::hide("orient_well")
   })
   
-  observeEvent(input$calib_back, {
-    show("orient_well")
-    hide("calib_well")
+  shiny::observeEvent(input$calib_back, {
+    shinyjs::show("orient_well")
+    shinyjs::hide("calib_well")
   })
   
-  observeEvent(input$extract_back, {
-    show("calib_well")
-    hide("extract_well")
+  shiny::observeEvent(input$extract_back, {
+    shinyjs::show("calib_well")
+    shinyjs::hide("extract_well")
     extract_mode$extract <<- FALSE
   })
   
-  observeEvent(input$comm_back, {
-    show("extract_well")
+  shiny::observeEvent(input$comm_back, {
+    shinyjs::show("extract_well")
     extract_mode$extract <<- TRUE
-    hide("comm_well")
+    shinyjs::hide("comm_well")
   })
   
-  # observeEvent(input$continue, {
+  # shiny::observeEvent(input$continue, {
     
   # })
   
@@ -1025,6 +1025,6 @@ shinyDigitise_server <- function(input, output, session){
 
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
-    stopApp(returnValue=getExtracted(dir))
+    shiny::stopApp(returnValue=metaDigitise::getExtracted(dir))
   })
 }

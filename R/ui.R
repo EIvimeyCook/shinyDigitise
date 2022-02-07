@@ -171,7 +171,7 @@ shinyDigitise_UI <- function(){
               br(),
               hidden(
                 div(id="togslide",
-                    sliderTextInput(
+                    shinyWidgets::sliderTextInput(
                       inputId = "rotate",
                       label = NULL,
                       choices = seq(from = -45, to = 45, by = 5),
@@ -224,7 +224,7 @@ shinyDigitise_UI <- function(){
            htmlOutput("calib_info"),
           hidden(
             div(id="y_var_input",
-                textInput(inputId = "y_var",
+                shiny::textInput(inputId = "y_var",
                           label = NULL,
                           placeholder = "Y Variable")
                 
@@ -232,7 +232,7 @@ shinyDigitise_UI <- function(){
           ),
           hidden(
             div(id="x_var_input",
-                textInput(inputId = "x_var",
+                shiny::textInput(inputId = "x_var",
                           label = NULL,
                           placeholder = "X Variable")
                 
@@ -243,11 +243,11 @@ shinyDigitise_UI <- function(){
                 splitLayout(
                   cellWidths = c("15%","35%","15%","35%"),
                   "Y1",
-                  numericInput(inputId = "y1",
+                  shiny::numericInput(inputId = "y1",
                                label = NULL,
                                value= NA),
                   "Y2",
-                  numericInput(inputId = "y2",
+                  shiny::numericInput(inputId = "y2",
                                label= NULL,
                                value= NA )
                 )
@@ -258,11 +258,11 @@ shinyDigitise_UI <- function(){
                 splitLayout(
                   cellWidths = c("15%","35%","15%","35%"),
                   "X1",
-                  numericInput(inputId = "x1",
+                  shiny::numericInput(inputId = "x1",
                                label = NULL,
                                value= NA),
                   "X2",
-                  numericInput(inputId = "x2",
+                  shiny::numericInput(inputId = "x2",
                                label= NULL,
                                value= NA )
                 )
@@ -275,7 +275,7 @@ shinyDigitise_UI <- function(){
                   label = "Logged values?",
                   value = FALSE,
                   status = "info"),
-                textInput(
+                shiny::textInput(
                   inputId = "nsamp_sp",
                   placeholder = "Known sample size",
                   label = NULL)
@@ -395,7 +395,7 @@ shinyDigitise_UI <- function(){
           strong("5. Comments:"),
           hidden(
             div(id = "comm_well",
-          textInput(
+          shiny::textInput(
             inputId = "comment",
             label = NULL,
             value=NULL

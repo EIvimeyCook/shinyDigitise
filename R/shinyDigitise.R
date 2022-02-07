@@ -47,6 +47,6 @@ shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
       ui = shinyDigitise_UI,
       server = shinyDigitise_server
   )
-  runApp(app)
+  shiny::runApp(app)
 
 	}
