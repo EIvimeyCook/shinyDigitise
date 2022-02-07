@@ -921,6 +921,8 @@ shinyDigitise_server <- function(input, output, session){
   
   observeEvent(input$exit, {
     stopApp(returnValue=getExtracted(dir))
+        write.csv(getExtracted(dir), "ExtractedData.csv")
+
   })
 
   # when next is pressed up the counter and check that its above 0
