@@ -513,7 +513,7 @@ shinyDigitise_server <- function(input, output, session){
 
       if (is.null(values$raw_data)) {
         # if values raw data is null/empty then create new data to show in the table.
-        basic <- tibble::tibble(
+        basic <- data.frame(
           Group_Name = NA,
           Sample_Size = NA
         )
@@ -591,13 +591,12 @@ shinyDigitise_server <- function(input, output, session){
   shiny::observeEvent(input$add_group, {
     shiny::showModal(popupModal())
     row_count$x <- row_count$x + 1
-    mod_df$x <- mod_df$x %>%
-      dplyr::bind_rows(
-        tibble::tibble(
-          Group_Name = NA,
-          Sample_Size = NA
-        )
-      )
+    mod_df$x <- rbind(mod_df$x,
+      data.frame(
+         Group_Name = NA,
+         Sample_Size = NA
+       )
+    )
   })
 
   shiny::observeEvent(input$ok, {

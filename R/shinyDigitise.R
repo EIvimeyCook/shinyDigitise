@@ -7,6 +7,7 @@
 
 shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
 
+
 	emojifont::load.emojifont('OpenSansEmoji.ttf')
 
 

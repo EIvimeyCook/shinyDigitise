@@ -1,3 +1,10 @@
+is.even <- function(x) x %% 2 == 0
+
+filename <- function(x) {
+	y <- strsplit(x,"/")
+	sapply(y, function(z) z[length(z)], USE.NAMES = FALSE)
+}
+
 
 redraw_rotation <- function(image, flip, rotate){
 	if(flip) image <- magick::image_flop(magick::image_rotate(image,270))
