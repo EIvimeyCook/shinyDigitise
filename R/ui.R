@@ -1,51 +1,51 @@
 shinyDigitise_UI <- function(){
-  fluidPage(
+  shiny::fluidPage(
     shinyjs::useShinyjs(),
     # shinyalert::useShinyalert(),
-    theme = bs_theme(
+    theme = bslib::bs_theme(
       primary = "#66947A", secondary = "#66947A", 
       info = "#E51C23", font_scale = NULL, bootswatch = "materia",
-      base_font = font_collection(font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif"),
-      code_font = font_collection(font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif")),
+      base_font = bslib::font_collection(bslib::font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif"),
+      code_font = bslib::font_collection(bslib::font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif")),
     
-    fluidRow(
-      column(
+    shiny::fluidRow(
+      shiny::column(
         width = 4,
-        titlePanel(
-          title=splitLayout(cellWidths = c("15%","85%"),
-          imageOutput(
+        shiny::titlePanel(
+          title=shiny::splitLayout(cellWidths = c("15%","85%"),
+          shiny::imageOutput(
             "shinylogo",
             height = "60px"
           ),
-          textOutput("shinytext")
+          shiny::textOutput("shinytext")
         ),
         windowTitle = "shinyDigitise")
       ),
 
-      column(width = 8,
-        br(),
-        div(style="display: inline-block;vertical-align:top; width: 10%; font-size:x-large;",
-           p(htmlOutput("progress", inline=TRUE)),
+      shiny::column(width = 8,
+        shiny::br(),
+        shiny::div(style="display: inline-block;vertical-align:top; width: 10%; font-size:x-large;",
+           shiny::p(shiny::htmlOutput("progress", inline=TRUE)),
         ),
-        div(style="display: inline-block;vertical-align:top; width: 10%;",strong("Point size:")),
-        div(style="display: inline-block;vertical-align:top;  width: 20%;",
-         sliderInput(
+        shiny::div(style="display: inline-block;vertical-align:top; width: 10%;",shiny::strong("Point size:")),
+        shiny::div(style="display: inline-block;vertical-align:top;  width: 20%;",
+        shiny::sliderInput(
            inputId = "cex",
            label = NULL,
            value = 1,
            min = 0.1,
            max = 3,
            ticks  = FALSE)),
-        div(style="display: inline-block;vertical-align:top; width: 10% "),
-        div(style="display: inline-block;vertical-align:top; width: 20%;",strong("Group Name Position:")),
-        div(style="display: inline-block;vertical-align:top;  width: 20%;",
-           prettyRadioButtons(
+        shiny::div(style="display: inline-block;vertical-align:top; width: 10% "),
+        shiny::div(style="display: inline-block;vertical-align:top; width: 20%;",shiny::strong("Group Name Position:")),
+        shiny::div(style="display: inline-block;vertical-align:top;  width: 20%;",
+           shinyWidgets::prettyRadioButtons(
              inputId = "pos",
              label = NULL,
              choiceNames = c("right", "top"),
              choiceValues = c("right", "top"),
              inline = T,
-             icon = icon("check"),
+             icon = shiny::icon("check"),
              bigger = TRUE,
              status = "info",
              animation = "jelly"
@@ -57,7 +57,7 @@ shinyDigitise_UI <- function(){
            )
         )
       )
-      # column(2,
+      # shiny::column(2,
       #   br(),
       
       # )
@@ -66,27 +66,27 @@ shinyDigitise_UI <- function(){
     
     
     # Sidebar with a slider input for number of bins
-    sidebarLayout(
-      sidebarPanel( 
+    shiny::sidebarLayout(
+      shiny::sidebarPanel( 
         width = 4,
         id = "tPanel",
         style = "overflow-y:scroll; max-height: 800px; position:relative;",
         
-        verbatimTextOutput("image_name"),
+        shiny::verbatimTextOutput("image_name"),
         ####------------------ 
         ### Plot Type Panel
         ####------------------
-        wellPanel(
-          splitLayout(
+        shiny::wellPanel(
+          shiny::splitLayout(
             cellWidths = c("80%","20%"),
           
-          strong("1. Choose Plot type:"),
-          textOutput("plottype_check_text"),
+          shiny::strong("1. Choose Plot type:"),
+          shiny::textOutput("plottype_check_text"),
           tags$head(tags$style("#plottype_check_text{font-size: 20px;}"))
 
           ),
-          hidden(div(id = 'plot_well',
-          prettyRadioButtons(
+          shinyjs::hidden(shiny::div(id = 'plot_well',
+          shinyWidgets::prettyRadioButtons(
             inputId = "plot_type",
             label = NULL,
             choiceNames = c("Mean/error", "Boxplot", "XY Mean/Error"),
@@ -95,7 +95,7 @@ shinyDigitise_UI <- function(){
             # choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
             selected = character(0),
             inline = T,
-            icon = icon("check"),
+            icon = shiny::icon("check"),
             bigger = TRUE,
             status = "info",
             animation = "jelly"
@@ -105,13 +105,13 @@ shinyDigitise_UI <- function(){
             #no = tags$i(class = "fa fa-square-o",
             #style = "color: white"))
           ),
-          # imageOutput(
+          # shiny::imageOutput(
             #   "plottype_check",
             #   height = "30px"
             # )
 
           
-          actionButton(
+          shiny::actionButton(
             inputId = "plot_step",
             label = "Next step",
             style = "padding:4px"
@@ -121,33 +121,33 @@ shinyDigitise_UI <- function(){
         ####------------------ 
         ### Orientation Panel
         ####------------------
-        wellPanel(
-          splitLayout(
+        shiny::wellPanel(
+          shiny::splitLayout(
                 cellWidths = c("80%","20%"),
-          strong("2. Orientate Figure:"),
-          textOutput("orientation_check_text"),
+          shiny::strong("2. Orientate Figure:"),
+          shiny::textOutput("orientation_check_text"),
           tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
           ),
-          hidden(div(id = "orient_well",class = "buttonagency",
-              # splitLayout(cellWidths = c(150, 200, 200),
+          shinyjs::hidden(shiny::div(id = "orient_well",class = "buttonagency",
+              # shiny::splitLayout(cellWidths = c(150, 200, 200),
                 tags$br(),
-                strong("mean_error, boxplots and histograms should be vertically orientated."), tags$br(),
-                strong("If they are not then chose flip to correct this."), tags$br(), 
-                strong("If figures are wonky, chose rotate."),tags$br(),
+                shiny::strong("mean_error, boxplots and histograms should be vertically orientated."), tags$br(),
+                shiny::strong("If they are not then chose flip to correct this."), tags$br(), 
+                shiny::strong("If figures are wonky, chose rotate."),tags$br(),
                 tags$br(),
-                strong("Otherwise press next."),tags$br(),
-              br(),
-              splitLayout(  
-              switchInput(
+                shiny::strong("Otherwise press next."),tags$br(),
+              shiny::br(),
+              shiny::splitLayout(  
+              shinyWidgets::switchInput(
                   inputId = "flip",
-                  label = strong("Flip"),
+                  label = shiny::strong("Flip"),
                   labelWidth = "100px",
                   onLabel = "Yes",
                   offLabel = "No"
                   #style = "float",
                   #color = "primary"
                 ),
-                # imageOutput(
+                # shiny::imageOutput(
                 #   "orientation_check",
                 #   height = "30px"
                 # )
@@ -155,9 +155,9 @@ shinyDigitise_UI <- function(){
                 # tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
                 
               # cellArgs = list(style = "padding: 1px"),
-              switchInput(
+              shinyWidgets::switchInput(
                 inputId = "rotate_mode",
-                label = strong("Rotate"),
+                label = shiny::strong("Rotate"),
                 labelWidth = "100px",
                 onLabel = "Yes",
                 offLabel = "No"
@@ -165,12 +165,12 @@ shinyDigitise_UI <- function(){
                 #color = "primary"
                 # )
               )),
-              splitLayout(br(),
-              textOutput("rotation", inline=TRUE),
+              shiny::splitLayout(shiny::br(),
+              shiny::textOutput("rotation", inline=TRUE),
               ),
-              br(),
-              hidden(
-                div(id="togslide",
+              shiny::br(),
+              shinyjs::hidden(
+                shiny::div(id="togslide",
                     shinyWidgets::sliderTextInput(
                       inputId = "rotate",
                       label = NULL,
@@ -180,13 +180,13 @@ shinyDigitise_UI <- function(){
                     )
                 )
               ),
-              splitLayout(
-              actionButton(
+              shiny::splitLayout(
+              shiny::actionButton(
                 inputId = "orient_back",
                 label = "Previous step",
                 style = "padding:4px"
               ),
-              actionButton(
+              shiny::actionButton(
                 inputId = "orient_step",
                 label = "Next step",
                 style = "padding:4px"
@@ -198,49 +198,49 @@ shinyDigitise_UI <- function(){
         ####------------------ 
         ### Calibrate Panel
         ####------------------
-        wellPanel(
-          splitLayout(
+        shiny::wellPanel(
+          shiny::splitLayout(
             cellWidths = c("80%","20%"),
-            strong("3. Calibrate Axes:"),
+            shiny::strong("3. Calibrate Axes:"),
 
 
-            # imageOutput(
+            # shiny::imageOutput(
             #   "calibrate_check",
             #   height = "30px"
             # )
-            textOutput("calibrate_check_text"),
+            shiny::textOutput("calibrate_check_text"),
             tags$head(tags$style("#calibrate_check_text{font-size: 20px;}"))
           ),
-          hidden(
-            div(id = "calib_well",
-           switchInput(
+          shinyjs::hidden(
+            shiny::div(id = "calib_well",
+           shinyWidgets::switchInput(
               inputId = "calib_mode",
-              label = strong("Calibrate mode"),
+              label = shiny::strong("Calibrate mode"),
               labelWidth = "100px",
               onLabel = "Yes",
               offLabel = "No",
               onStatus = "primary",
             ),
-           htmlOutput("calib_info"),
-          hidden(
-            div(id="y_var_input",
+           shiny::htmlOutput("calib_info"),
+          shinyjs::hidden(
+            shiny::div(id="y_var_input",
                 shiny::textInput(inputId = "y_var",
                           label = NULL,
                           placeholder = "Y Variable")
                 
             )
           ),
-          hidden(
-            div(id="x_var_input",
+          shinyjs::hidden(
+            shiny::div(id="x_var_input",
                 shiny::textInput(inputId = "x_var",
                           label = NULL,
                           placeholder = "X Variable")
                 
             )
           ),
-          hidden(
-            div(id="y_coord_input",
-                splitLayout(
+          shinyjs::hidden(
+            shiny::div(id="y_coord_input",
+                shiny::splitLayout(
                   cellWidths = c("15%","35%","15%","35%"),
                   "Y1",
                   shiny::numericInput(inputId = "y1",
@@ -253,9 +253,9 @@ shinyDigitise_UI <- function(){
                 )
             )
           ),
-          hidden(
-            div(id="x_coord_input",
-                splitLayout(
+          shinyjs::hidden(
+            shiny::div(id="x_coord_input",
+                shiny::splitLayout(
                   cellWidths = c("15%","35%","15%","35%"),
                   "X1",
                   shiny::numericInput(inputId = "x1",
@@ -268,9 +268,9 @@ shinyDigitise_UI <- function(){
                 )
             )
           ),
-          hidden(
-            div(id="log_input",
-                prettyCheckbox(
+          shinyjs::hidden(
+            shiny::div(id="log_input",
+               shinyWidgets::prettyCheckbox(
                   inputId = "log_sp",
                   label = "Logged values?",
                   value = FALSE,
@@ -281,13 +281,13 @@ shinyDigitise_UI <- function(){
                   label = NULL)
             )
           ),
-          splitLayout(
-            actionButton(
+          shiny::splitLayout(
+            shiny::actionButton(
               inputId = "calib_back",
               label = "Previous step",
               style = "padding:4px"
             ),
-            actionButton(
+            shiny::actionButton(
               inputId = "calib_step",
               label = "Next step",
               style = "padding:4px"
@@ -303,49 +303,49 @@ shinyDigitise_UI <- function(){
          #  2. To add points to a group, first click the group on the sidebar then click 'Add Points'. <br/>
          #  3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
 
-        wellPanel(
-          splitLayout(
+        shiny::wellPanel(
+          shiny::splitLayout(
             cellWidths = c("80%","20%"),
-            strong("4. Extract Data:"),
-            textOutput("extract_check_text"),
+            shiny::strong("4. Extract Data:"),
+            shiny::textOutput("extract_check_text"),
             tags$head(tags$style("#extract_check_text{font-size: 20px;}"))
           ),
-          hidden(
-            div(id = "extract_well",
-            # switchInput(
+          shinyjs::hidden(
+            shiny::div(id = "extract_well",
+            # shinyWidgets::switchInput(
             #   inputId = "extract_mode",
-            #   label = strong("Extract mode"),
+            #   label = shiny::strong("Extract mode"),
             #   labelWidth = "100px",
             #   onLabel = "Yes",
             #   offLabel = "No",
             #   onStatus = "primary"
             # ),
-            # imageOutput(
+            # shiny::imageOutput(
             #   "extract_check",
             #   height = "30px"
             # )
-           hidden(
-            div(id = "group_data",
+           shinyjs::hidden(
+            shiny::div(id = "group_data",
                 tags$br(),
-        strong(" 1. Click add groups to enter group names and sample size before adding points."), tags$br(),
-        strong("2. To add points click the group on the sidebar then click 'Click Points' and click points."), tags$br(),
-        strong("3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."), tags$br(),
+        shiny::strong(" 1. Click add groups to enter group names and sample size before adding points."), tags$br(),
+        shiny::strong("2. To add points click the group on the sidebar then click 'Click Points' and click points."), tags$br(),
+        shiny::strong("3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."), tags$br(),
         tags$br(),
-              splitLayout(
-                div(class = "buttonagency",
-                    actionButton(
+              shiny::splitLayout(
+                shiny::div(class = "buttonagency",
+                    shiny::actionButton(
                       inputId = "add_group",
                       label = "Add Group",
                       #style = "float",
                       #color = "primary"
                     ),
-                    actionButton(
+                    shiny::actionButton(
                       inputId = "click_group",
                       label = "Click Points",
                       #style = "float",
                       #color = "primary"
                     ),
-                    actionButton(
+                    shiny::actionButton(
                       inputId = "del_group",
                       label = "Delete Group",
                       #style = "float",
@@ -354,31 +354,31 @@ shinyDigitise_UI <- function(){
                   )
                 ),
         tags$br(),
-                DTOutput("group_table")
+                DT::DTOutput("group_table")
            )),
         tags$br(),
-          hidden(
-            div(id = "error_type_select",
-              prettyRadioButtons(
+          shinyjs::hidden(
+            shiny::div(id = "error_type_select",
+              shinyWidgets::prettyRadioButtons(
                 inputId = "errortype",
-                label = strong("Type of error:"),
+                label = shiny::strong("Type of error:"),
                 choiceNames = c("SE", "95%CI", "SD"),
                 choiceValues = c("se","CI95","sd"),
                 inline = T,
-                icon = icon("check"),
+                icon = shiny::icon("check"),
                 bigger = TRUE,
                 status = "danger",
                 animation = "jelly"
               )
             )
           ),
-          splitLayout(
-            actionButton(
+          shiny::splitLayout(
+            shiny::actionButton(
               inputId = "extract_back",
               label = "Previous step",
               style = "padding:4px; color: #fff; background-color: #337ab7; border-color: #2e6da4"
             ),
-            actionButton(
+            shiny::actionButton(
               inputId = "extract_step",
               label = "Next step",
               style = "padding:4px"
@@ -391,22 +391,22 @@ shinyDigitise_UI <- function(){
         ####------------------ 
         ### comment panel
         ####------------------
-        wellPanel(
-          strong("5. Comments:"),
-          hidden(
-            div(id = "comm_well",
+        shiny::wellPanel(
+          shiny::strong("5. Comments:"),
+          shinyjs::hidden(
+            shiny::div(id = "comm_well",
           shiny::textInput(
             inputId = "comment",
             label = NULL,
             value=NULL
           ),
-          splitLayout(
-            actionButton(
+          shiny::splitLayout(
+            shiny::actionButton(
               inputId = "comm_back",
               label = "Previous step",
               style = "padding:4px"
             ),
-            actionButton(
+            shiny::actionButton(
               inputId = "continue",
               label = "Continue",
               style = "padding:4px"
@@ -418,13 +418,13 @@ shinyDigitise_UI <- function(){
       ####------------------ 
       ### Plot panel
       ####------------------
-      mainPanel(
-        #verbatimTextOutput("info"),
-        plotOutput(
+      shiny::mainPanel(
+        #shiny::verbatimTextOutput("info"),
+        shiny::plotOutput(
           "metaPlot",
           click = "plot_click2",
           dblclick = "plot_dblclick",
-          brush = brushOpts(
+          brush = shiny::brushOpts(
             "plot_brush",
             resetOnNew=TRUE,
             delayType="debounce"
@@ -432,9 +432,9 @@ shinyDigitise_UI <- function(){
           height = "600px", 
           width = "100%"
         ),  
-        verbatimTextOutput("clickinfo"),
-        br(),
-        br()
+        shiny::verbatimTextOutput("clickinfo"),
+        shiny::br(),
+        shiny::br()
         
       )
     )

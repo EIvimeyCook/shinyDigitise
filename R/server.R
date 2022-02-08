@@ -33,7 +33,7 @@ shinyDigitise_server <- function(input, output, session){
       # plot_values <- readRDS(values$caldat)
 
       #read in that data.
-      values <<- do.call("shiny::reactiveValues", readRDS(counter$caldat))
+      values <<- do.call("reactiveValues", readRDS(counter$caldat))
 
       # update
       shiny::updateSliderInput(session, "cex", value = values$cex)
@@ -321,7 +321,7 @@ shinyDigitise_server <- function(input, output, session){
             value = FALSE
         )
       }else{
-        output$calib_info <- shiny::renderUI({ HTML(paste0(
+        output$calib_info <- shiny::renderUI({ shiny::HTML(paste0(
         " <b> Click on known values on axes in this order: <br/>
             | <br/>
             2 <br/>
@@ -378,7 +378,7 @@ shinyDigitise_server <- function(input, output, session){
       shinyjs::hide("x_var_input")
       shinyjs::hide("y_coord_input")
       shinyjs::hide("x_coord_input")
-  output$calib_info <- shiny::renderUI({HTML("")})
+  output$calib_info <- shiny::renderUI({shiny::HTML("")})
     output$calibrate_check_text <- shiny::renderText({
       if(check_calibrate(shiny::reactiveValuesToList(values))){
          emojifont::emoji('white_check_mark')
@@ -577,7 +577,7 @@ shinyDigitise_server <- function(input, output, session){
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
       if (failed)
-        div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
+        shiny::div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
       footer = shiny::tagList(
         shiny::actionButton("cancel", "Cancel"),
         shiny::actionButton("ok", "OK")
@@ -921,7 +921,7 @@ shinyDigitise_server <- function(input, output, session){
   
   shiny::observeEvent(input$exit, {
     shiny::stopApp(returnValue=metaDigitise::getExtracted(dir))
-        utils::write.csv(metaDigitise::getExtracted(dir), "ExtractedData.csv")
+    utils::write.csv(metaDigitise::getExtracted(dir), paste0(dir,"ExtractedData.csv"))
 
   })
 
@@ -1026,5 +1026,7 @@ shinyDigitise_server <- function(input, output, session){
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
     shiny::stopApp(returnValue=metaDigitise::getExtracted(dir))
+    utils::write.csv(metaDigitise::getExtracted(dir), paste0(dir,"ExtractedData.csv"))
+
   })
 }

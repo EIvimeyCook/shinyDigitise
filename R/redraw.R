@@ -168,7 +168,7 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 		graphics::abline(
 			v=seq(0,image_details["width"], length.out=20),
 			h=seq(0,image_details["height"], length.out=20),
-			col=alpha(1,0.5)
+			col=scales::alpha(1,0.5)
 			)
 		}
 
