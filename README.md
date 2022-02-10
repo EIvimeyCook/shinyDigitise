@@ -2,8 +2,7 @@
 
 # ShinyDigitise
 
-Shiny interface to the metaDigitise package
-
+Shiny interface to the metaDigitise package (https://github.com/daniel1noble/metaDigitise)
 
 ## To install:
 
