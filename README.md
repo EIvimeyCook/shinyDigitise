@@ -7,6 +7,7 @@ Shiny interface to the metaDigitise package (https://github.com/daniel1noble/met
 ## To install:
 
 devtools::install_github("EIvimeyCook/ShinyDigitise")
+
 library(shinyDigitise)
 
 ## To use the shiny app:
