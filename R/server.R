@@ -625,15 +625,6 @@ shinyDigitise_server <- function(input, output, session){
   shiny::observeEvent(input$group_table_rows_selected, {
     selected$row <- input$group_table_rows_selected
   })
-  
-    shiny::observeEvent(input$group_table_row_last_clicked, {
-    clicked$row <- c(clicked$row,input$group_table_row_last_clicked)
-    if(any(duplicated(clicked$row))){
-      clicked$row <<- NULL
-      selected$row <<- NULL
-      DT::selectRows(proxy, selected = NULL)
-    }
-  })
 
   shiny::observeEvent(counter$countervalue,{
     if(is.null(input$group_table_rows_selected)){
@@ -806,8 +797,23 @@ shinyDigitise_server <- function(input, output, session){
   #edit data with DT input
   shiny::observeEvent(input$group_table_cell_edit, {
     change_string <-  as.character(mod_df$x[selected$row,1])
-    values$raw_data[grepl(change_string, values$raw_data$id),]$n <- input$group_table_cell_edit$value
     mod_df$x <-  DT::editData(mod_df$x, input$group_table_cell_edit)
+    print(change_string)
+    print(mod_df$x)
+    if(is.null(values$raw_data)){
+    } else {values$raw_data[grepl(change_string, values$raw_data[[2]]),][[3]] <- input$group_table_cell_edit$value
+}
+  })
+  
+  
+  shiny::observeEvent(input$group_table_row_last_clicked, {
+    clicked$row <- c(clicked$row,input$group_table_row_last_clicked)
+    print(values$raw_data)
+    if(any(duplicated(clicked$row))){
+      clicked$row <<- NULL
+      #selected$row <<- NULL
+      DT::selectRows(proxy, selected = NULL)
+    }
   })
 
   shiny::observeEvent(input$ok, {
@@ -829,13 +835,6 @@ shinyDigitise_server <- function(input, output, session){
         animation = TRUE
       )
       row_count$x <- row_count$x - 1
-      values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
-      remove_string <-  as.character(mod_df$x[nrow(mod_df$x),1])
-      values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
-      valpoints$x <- values$raw_data$x
-      valpoints$y <- values$raw_data$y
-      valpoints$id <- values$raw_data$id
-      valpoints$n <- values$raw_data$n
       mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
     }
   })
