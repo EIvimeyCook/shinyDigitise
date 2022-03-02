@@ -14,4 +14,4 @@ library(shinyDigitise)
 
 df<-shinyDigitise(Folder where your images are located)
 
-*To view the extracted data just simply call the object you've created or view the resulting .csv file.*
+*To view the extracted data just simply call the object you've created or view the resulting .csv file (which will be saved into the same folder as the images).*
