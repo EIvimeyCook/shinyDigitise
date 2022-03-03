@@ -459,7 +459,36 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
   # Extraction
   ################################################
-
+   #hint for extraction step
+  shiny::observeEvent(input$plot_type, {
+    
+      if(input$plot_type == "mean_error"){
+        output$plothintmean <- shiny::renderUI({ 
+          shiny::strong("Click on Error Bar, followed by the Mean")
+        })
+        shinyjs::hide("plothintxy")
+        shinyjs::hide("plothintbox")
+        shinyjs::show("plothintmean")
+      }
+      if(input$plot_type == "xy_mean_error"){
+        output$plothintxy <- shiny::renderUI({ 
+        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
+        })
+        shinyjs::hide("plothintmean")
+        shinyjs::hide("plothintbox")
+        shinyjs::show("plothintxy")
+      }
+    
+      if(input$plot_type == "boxplot"){
+        output$plothintbox <- shiny::renderUI({ 
+        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
+      })
+        shinyjs::hide("plothintxy")
+        shinyjs::hide("plothintmean")
+        shinyjs::show("plothintbox")
+      }
+    
+    })
 
   # for row count,
   row_count <- shiny::reactiveValues(x = NULL)
