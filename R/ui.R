@@ -327,10 +327,14 @@ shinyDigitise_UI <- function(){
            shinyjs::hidden(
             shiny::div(id = "group_data",
                 tags$br(),
-        shiny::strong(" 1. Click add groups to enter group names and sample size before adding points."), tags$br(),
+        shiny::strong("1. Click add groups to enter group names and sample size before adding points."), tags$br(),
         shiny::strong("2. To add points click the group on the sidebar then click 'Click Points' and click points."), tags$br(),
         shiny::strong("3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."), tags$br(),
         tags$br(),
+        shiny::uiOutput("plothintmean"),
+        shiny::uiOutput("plothintxy"),
+        shiny::uiOutput("plothintbox"),
+          tags$br(),
               shiny::splitLayout(
                 shiny::div(class = "buttonagency",
                     shiny::actionButton(
