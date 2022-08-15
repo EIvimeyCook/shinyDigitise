@@ -1,4 +1,7 @@
-![alt text](https://github.com/EIvimeyCook/ShinyDigitise/blob/master/inst/logos/shiny.png)
+
+<p align="center">
+  <img src="https://github.com/EIvimeyCook/ShinyDigitise/blob/master/inst/logos/shiny.png" width = "200"/>
+</p>
 
 # shinyDigitise
 
