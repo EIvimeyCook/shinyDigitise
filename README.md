@@ -3,7 +3,9 @@
   <img src="https://github.com/EIvimeyCook/ShinyDigitise/blob/master/inst/logos/shiny.png" width = "200"/>
 </p>
 
-# shinyDigitise
+<div align="center">
+ <h1>shinyDigitise</h1>
+</div>
 
 shinyDigitise builds upon the popular metaDigitise package and provides users with an interactive UI to help extraction of data from (currently) three different plot types.
 The main functions used in shinyDigitise are called from the [metaDigitise package](https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13118) which allows users to extract descriptive statistics from various plot types. 
