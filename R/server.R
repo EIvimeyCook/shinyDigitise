@@ -202,7 +202,7 @@ shinyDigitise_server <- function(input, output, session){
   do.call(internal_redraw, c(plot_values, shiny = TRUE))
   })
  session$resetBrush("plot_brush")
-  runjs("document.getElementById('plot_brush').remove()")
+  shinyjs::runjs("document.getElementById('plot_brush').remove()")
     }
     })
   
