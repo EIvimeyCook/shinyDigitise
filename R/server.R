@@ -378,14 +378,14 @@ shinyDigitise_server <- function(input, output, session){
       shinyjs::hide("x_var_input")
       shinyjs::hide("y_coord_input")
       shinyjs::hide("x_coord_input")
-  output$calib_info <- shiny::renderUI({shiny::HTML("")})
-    output$calibrate_check_text <- shiny::renderText({
-      if(check_calibrate(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
-    })
+    output$calib_info <- shiny::renderUI({shiny::HTML("")})
+      output$calibrate_check_text <- shiny::renderText({
+        if(check_calibrate(shiny::reactiveValuesToList(values))){
+           emojifont::emoji('white_check_mark')
+        }else{
+          emojifont::emoji('warning')
+        }
+      })
     }
   })
 
@@ -479,7 +479,7 @@ shinyDigitise_server <- function(input, output, session){
 
     if(input$plot_type == "xy_mean_error"){
       output$plothintxy <- shiny::renderUI({ 
-      shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
+        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
       })
       shinyjs::hide("plothintmean")
       shinyjs::hide("plothintbox")
@@ -491,8 +491,8 @@ shinyDigitise_server <- function(input, output, session){
   
     if(input$plot_type == "boxplot"){
       output$plothintbox <- shiny::renderUI({ 
-      shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
-    })
+        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
+      })
       shinyjs::hide("plothintxy")
       shinyjs::hide("plothintscatter")
       shinyjs::hide("plothintmean")
@@ -524,7 +524,7 @@ shinyDigitise_server <- function(input, output, session){
       shinyjs::hide("plothintmean")
       shinyjs::hide("plothintbox")
       shinyjs::show("plothinthist")
-      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, pch=NULL, col=NULL)
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, bar=NULL)
 
     }
 
@@ -604,7 +604,10 @@ shinyDigitise_server <- function(input, output, session){
         valpoints$id <- NULL
         valpoints$n <- NULL
 
-
+        if(input$plot_type=="histogram"){
+          # basic$Bar <- NA
+          valpoints$bar <- NULL
+        }
 
       } else {
         # otherwise read in the data that already exists from the raw data.
@@ -629,7 +632,10 @@ shinyDigitise_server <- function(input, output, session){
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
-        
+       
+        if(input$plot_type=="histogram"){
+          valpoints$bar <- values$raw_data$bar
+        }  
 
       }
 
@@ -682,10 +688,10 @@ shinyDigitise_server <- function(input, output, session){
     shiny::modalDialog(
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
-      shiny::selectInput("pch", "Shape", "", choices = c("Circle" = 19,
+      shiny::selectInput("pch", "Shape", "Circle", choices = c("Circle" = 19,
                                                          "Square" = 15,
                                                          "Triangle" = 17)),
-      shiny::selectInput("col", "Colour", "", choices = c("Orange" = "orange",
+      shiny::selectInput("col", "Colour", "Orange", choices = c("Orange" = "orange",
                                                          "Purple" = "purple",
                                                          "Blue" = "blue")),
       if (failed)
@@ -731,7 +737,12 @@ shinyDigitise_server <- function(input, output, session){
     if (!is.null(input$group) && nzchar(input$group)){
       shiny::removeModal()
     } else {
-      shiny::showModal(popupModal(failed = TRUE))
+      if(input$plot_type == "scatterplot"){
+        shiny::showModal(popupModal2(failed = TRUE))
+      }else{
+        shiny::showModal(popupModal1(failed = TRUE))      
+      }
+      
     }
   })
 
@@ -812,6 +823,13 @@ shinyDigitise_server <- function(input, output, session){
           valpoints$y <- values$raw_data$y
           valpoints$id <- values$raw_data$id
           valpoints$n <- values$raw_data$n
+          if(input$plot_type=="scatterplot"){
+            valpoints$pch <- values$raw_data$pch
+            valpoints$col <- values$raw_data$col
+          }
+          if(input$plot_type=="histogram"){
+            valpoints$bar <- values$raw_data$bar
+          }
         }else{
           values$raw_data <<-NULL
         }
@@ -838,7 +856,8 @@ shinyDigitise_server <- function(input, output, session){
         ifelse(input$plot_type == "xy_mean_error",3,
         ifelse(input$plot_type == "boxplot",5,
         ifelse(input$plot_type == "scatterplot",1000,
-           NA))))
+        ifelse(input$plot_type == "histogram",1000,
+           NA)))))
       if (plotcounter$plotclicks <= max_clicks) {
         valpoints$x <- c(valpoints$x, input$plot_click2$x)
         valpoints$y <- c(valpoints$y, input$plot_click2$y)
@@ -848,6 +867,10 @@ shinyDigitise_server <- function(input, output, session){
           valpoints$pch <- c(valpoints$pch, dat_mod[selected$row, 3])
           valpoints$col <- c(valpoints$col, dat_mod[selected$row, 4])
         }
+        if(input$plot_type=="histogram"){
+          valpoints$bar <- c(valpoints$bar, ceiling((plotcounter$plotclicks)/2))
+        }
+
       }
       if (plotcounter$plotclicks == max_clicks) {
         add_mode$add <- FALSE
@@ -857,11 +880,17 @@ shinyDigitise_server <- function(input, output, session){
 
       values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
 
-      output$metaPlot <- shiny::renderPlot({
+      if(!input$plot_type=="histogram" | is.even(plotcounter$plotclicks)){
+
+
+       output$metaPlot <- shiny::renderPlot({
         graphics::par(mar = c(0, 0, 0, 0))
         plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
+      }
+
+
     }
   })
 
@@ -905,6 +934,9 @@ shinyDigitise_server <- function(input, output, session){
         if(input$plot_type=="scatterplot"){
           valpoints$pch <- values$raw_data$pch
           valpoints$col <- values$raw_data$col
+        }
+        if(input$plot_type=="histogram"){
+          valpoints$bar <- values$raw_data$bar
         }
         mod_df$x <- mod_df$x[-selected$row, ]
       }
