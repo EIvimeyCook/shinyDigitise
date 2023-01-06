@@ -614,10 +614,29 @@ shinyDigitise_server <- function(input, output, session){
   #  Adding points
   ################################################
   # Create modal
-  popupModal <- function(failed = FALSE) {
+  popupModal1 <- function(failed = FALSE) {
     shiny::modalDialog(
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
+      if (failed)
+        shiny::div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
+      footer = shiny::tagList(
+        shiny::actionButton("cancel", "Cancel"),
+        shiny::actionButton("ok", "OK")
+      )
+    )
+  }
+  
+  popupModal2 <- function(failed = FALSE) {
+    shiny::modalDialog(
+      shiny::textInput("group", "Group Name", ""),
+      shiny::numericInput("sample_size", "Sample Size", ""),
+      shiny::selectInput("pch", "Shape", "", choices = c("Circle" = "19",
+                                                         "Square" = "15",
+                                                         "Triangle" = "17")),
+      shiny::selectInput("col", "Colour", "", choices = c("Orange" = "orange",
+                                                         "Purple" = "purple",
+                                                         "Blue" = "blue")),
       if (failed)
         shiny::div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
       footer = shiny::tagList(
@@ -631,13 +650,24 @@ shinyDigitise_server <- function(input, output, session){
   # this is then added onto the raw data.
   # the row count increases and another row is then added after.
   shiny::observeEvent(input$add_group, {
-    shiny::showModal(popupModal())
+    shiny::showModal(popupModal1())
     row_count$x <- row_count$x + 1
     mod_df$x <- rbind(mod_df$x,
       data.frame(
          Group_Name = NA,
          Sample_Size = NA
        )
+    )
+  })
+  
+  shiny::observeEvent(input$add_group & input$plot_type == "scatterplot", {
+    shiny::showModal(popupModal1())
+    row_count$x <- row_count$x + 1
+    mod_df$x <- rbind(mod_df$x,
+                      data.frame(
+                        Group_Name = NA,
+                        Sample_Size = NA
+                      )
     )
   })
 
