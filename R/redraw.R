@@ -1,23 +1,16 @@
-#' @title rotate_graph
-#' @description Rotates/flips imported figures
-#' @param image Image object from magick::image_read
-#' @param flip whether to flip figure
-#' @param rotate how much to rotate figure
+is.even <- function(x) x %% 2 == 0
+
+filename <- function(x) {
+	y <- strsplit(x,"/")
+	sapply(y, function(z) z[length(z)], USE.NAMES = FALSE)
+}
+
 
 redraw_rotation <- function(image, flip, rotate){
 	if(flip) image <- magick::image_flop(magick::image_rotate(image,270))
 	image <- magick::image_rotate(image, rotate)
 	return(image)
 }
-
-#' @title redraw_calibration
-#' @description plots calibration data on graph
-#' @param plot_type plot_type
-#' @param variable variable
-#' @param calpoints The calibration points
-#' @param point_vals The point values
-#' @param image_details image_details
-#' @param cex relative size of points and text
 
 
 redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_details,cex){
@@ -45,16 +38,6 @@ redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_d
 }
 
 
-
-#' @title redraw_points
-#' @description plots clicked data on graph
-#' @param plot_type plot_type
-#' @param raw_data The raw data
-#' @param image_details image_details
-#' @param cex relative size of points and text
-#' @param pos position of group labels
-
-
 redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	image_width <- image_details["width"]
 	image_height <- image_details["height"]
@@ -64,6 +47,7 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	line_width <- 2*cex
 	point_cex <- 1*cex
 	point_col="red"
+	pch = 20
 
 
 	## legend
@@ -96,17 +80,17 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 			}
 					
 			graphics::text(text_x,text_y,paste0(group_data$id[1]," (",group_data$n[1],")"),srt=90, cex=text_cex, col=point_col, adj=if(pos=="right"){0.5}else{0})
-			if(plot_type %in% c("xy_mean_error","mean_error")){
+			if(plot_type %in% c("xy_mean_error","mean_error", "scatterplot")){
 				graphics::points(group_data$x[1],group_data$y[1], pch=20, col="yellow", cex=point_cex)
 			}
-			if(plot_type == "xy_mean_error"){
+			if(plot_type %in% c("xy_mean_error")){
 				graphics::points(group_data$x[3],group_data$y[3], pch=20, col="purple", cex=point_cex)
 			}
 		}
 	}
 
 	if(plot_type=="scatterplot"& nrow(raw_data)>0){
-		graphics::points(y~x,raw_data, pch=raw_data$pch, col=as.character(raw_data$col), cex=point_cex)
+		graphics::points(y~x,raw_data, pch=56, col=as.character(raw_data$col), cex=point_cex)
 
 	#legend
 		legend_dat <- stats::aggregate(x~id+col+pch+group,raw_data, length)
@@ -149,10 +133,11 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 #' @param pos where group names should be plotted (either "right" or "top")
 #' @param points logical, should points be redrawn
 #' @param shiny logical, is plotting occuring in shiny app?
+#' @param zoom_coords x and y coords for zoom function
 #' @param ... further arguments passed to or from other methods.
 #' @export
 
-internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE,  ...){
+internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE, zoom_coords=NULL, ...){
 
 	if(!shiny){
 		op <- graphics::par(mar=c(3,0,2,0), mfrow=c(1,1))
@@ -166,7 +151,16 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 
 	text_cex <- 1*cex
 
-	graphics::plot(image)
+	if(is.null(zoom_coords)){
+		xlim <- c(0,image_details[1])	
+		ylim <- c(0,image_details[2])
+	}else{
+		xlim <- zoom_coords[c(1,2)]
+		ylim <- zoom_coords[c(3,4)]
+	}
+	plot(NA, xlim=xlim, ylim=ylim)
+	if(!is.null(image)) plot(image,add=TRUE)
+	graphics::plot(image, xlim=xlim, ylim=ylim)
 	if(!shiny){
 		graphics::mtext(filename(image_file),3, 1, cex=text_cex)
 	}
@@ -179,10 +173,10 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 	if(points) redraw_points(plot_type=plot_type,raw_data=raw_data,image_details=image_details,  cex=cex, pos=pos)
 
 	if(rotate_mode) {
-		abline(
+		graphics::abline(
 			v=seq(0,image_details["width"], length.out=20),
 			h=seq(0,image_details["height"], length.out=20),
-			col=alpha(1,0.5)
+			col=scales::alpha(1,0.5)
 			)
 		}
 
