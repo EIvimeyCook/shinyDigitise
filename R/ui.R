@@ -1,7 +1,6 @@
 shinyDigitise_UI <- function(){
   shiny::fluidPage(
     shinyjs::useShinyjs(),
-    # shinyalert::useShinyalert(),
     theme = bslib::bs_theme(
       primary = "#66947A", secondary = "#66947A", 
       info = "#E51C23", font_scale = NULL, bootswatch = "materia",
@@ -49,21 +48,12 @@ shinyDigitise_UI <- function(){
              bigger = TRUE,
              status = "info",
              animation = "jelly"
-             #checkIcon = list(
-             #yes = tags$i(class = "fa fa-check-square",
-             #            style = "color: white"),
-             #no = tags$i(class = "fa fa-square-o",
-             #style = "color: white"))
            )
         ),
         shiny::div(style="display: inline-block;vertical-align:top;  width: 2%;",
 actionButton("zoom", "Zoom")
                    )
       )
-      # shiny::column(2,
-      #   br(),
-      
-      # )
     ),
     
     
@@ -92,28 +82,16 @@ actionButton("zoom", "Zoom")
           shinyWidgets::prettyRadioButtons(
             inputId = "plot_type",
             label = NULL,
-            choiceNames = c("Mean/error", "Boxplot", "XY Mean/Error", "Scatterplot"),
-            choiceValues = c("mean_error", "boxplot", "xy_mean_error", "scatterplot"),
-            # choiceNames = c("Mean/error", "Scatterplot", "Histogram", "Boxplot"),
-            # choiceValues = c("mean_error", "scatterplot", "histogram", "boxplot"),
+            choiceNames = c("Mean/error", "Boxplot", "XY Mean/Error", "Scatterplot", "Histogram"),
+            choiceValues = c("mean_error", "boxplot", "xy_mean_error", "scatterplot", "histogram"),
             selected = character(0),
             inline = T,
             icon = shiny::icon("check"),
             bigger = TRUE,
             status = "info",
             animation = "jelly"
-            #checkIcon = list(
-            #yes = tags$i(class = "fa fa-check-square",
-            #            style = "color: white"),
-            #no = tags$i(class = "fa fa-square-o",
-            #style = "color: white"))
           ),
-          # shiny::imageOutput(
-            #   "plottype_check",
-            #   height = "30px"
-            # )
-
-          
+      
           shiny::actionButton(
             inputId = "plot_step",
             label = "Next step",
@@ -132,7 +110,6 @@ actionButton("zoom", "Zoom")
           tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
           ),
           shinyjs::hidden(shiny::div(id = "orient_well",class = "buttonagency",
-              # shiny::splitLayout(cellWidths = c(150, 200, 200),
                 tags$br(),
                 shiny::strong("All graph types should be vertically orientated."), tags$br(),
                 shiny::strong("If they are not then chose flip to correct this."), tags$br(), 
@@ -147,26 +124,13 @@ actionButton("zoom", "Zoom")
                   labelWidth = "100px",
                   onLabel = "Yes",
                   offLabel = "No"
-                  #style = "float",
-                  #color = "primary"
                 ),
-                # shiny::imageOutput(
-                #   "orientation_check",
-                #   height = "30px"
-                # )
-                # textOutput("orientation_check_text"),
-                # tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
-                
-              # cellArgs = list(style = "padding: 1px"),
               shinyWidgets::switchInput(
                 inputId = "rotate_mode",
                 label = shiny::strong("Rotate"),
                 labelWidth = "100px",
                 onLabel = "Yes",
                 offLabel = "No"
-                #style = "float",
-                #color = "primary"
-                # )
               )),
               shiny::splitLayout(shiny::br(),
               shiny::textOutput("rotation", inline=TRUE),
@@ -205,12 +169,6 @@ actionButton("zoom", "Zoom")
           shiny::splitLayout(
             cellWidths = c("80%","20%"),
             shiny::strong("3. Calibrate Axes:"),
-
-
-            # shiny::imageOutput(
-            #   "calibrate_check",
-            #   height = "30px"
-            # )
             shiny::textOutput("calibrate_check_text"),
             tags$head(tags$style("#calibrate_check_text{font-size: 20px;}"))
           ),
@@ -315,18 +273,6 @@ actionButton("zoom", "Zoom")
           ),
           shinyjs::hidden(
             shiny::div(id = "extract_well",
-            # shinyWidgets::switchInput(
-            #   inputId = "extract_mode",
-            #   label = shiny::strong("Extract mode"),
-            #   labelWidth = "100px",
-            #   onLabel = "Yes",
-            #   offLabel = "No",
-            #   onStatus = "primary"
-            # ),
-            # shiny::imageOutput(
-            #   "extract_check",
-            #   height = "30px"
-            # )
            shinyjs::hidden(
             shiny::div(id = "group_data",
                 tags$br(),
@@ -338,26 +284,21 @@ actionButton("zoom", "Zoom")
         shiny::uiOutput("plothintxy"),
         shiny::uiOutput("plothintbox"),
         shiny::uiOutput("plothintscatter"),
+        shiny::uiOutput("plothinthist"),
           tags$br(),
               shiny::splitLayout(
                 shiny::div(class = "buttonagency",
                     shiny::actionButton(
                       inputId = "add_group",
-                      label = "Add Group",
-                      #style = "float",
-                      #color = "primary"
+                      label = "Add Group"
                     ),
                     shiny::actionButton(
                       inputId = "click_group",
-                      label = "Click Points",
-                      #style = "float",
-                      #color = "primary"
+                      label = "Click Points"
                     ),
                     shiny::actionButton(
                       inputId = "del_group",
-                      label = "Delete Group",
-                      #style = "float",
-                      #color = "primary"
+                      label = "Delete Group"
                     )
                   )
                 ),
@@ -427,11 +368,9 @@ actionButton("zoom", "Zoom")
       ### Plot panel
       ####------------------
       shiny::mainPanel(
-        #shiny::verbatimTextOutput("info"),
         shiny::plotOutput(
           "metaPlot",
           click = "plot_click2",
-          dblclick = "plot_dblclick",
           brush = shiny::brushOpts(
             "plot_brush",
             resetOnNew=TRUE,
