@@ -90,10 +90,13 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	}
 
 	if(plot_type=="scatterplot"& nrow(raw_data)>0){
-		graphics::points(y~x,raw_data, pch=56, col=as.character(raw_data$col), cex=point_cex)
+		graphics::points(y~x,raw_data, pch=raw_data$pch, col=as.character(raw_data$col), cex=point_cex)
 
 	#legend
-		legend_dat <- stats::aggregate(x~id+col+pch+group,raw_data, length)
+		## changed in shinyD 
+		#legend_dat <- stats::aggregate(x~id+col+pch + group,raw_data, length)
+
+		legend_dat <- stats::aggregate(x~id+col+pch,raw_data, length)
 		nGroups <- nrow(legend_dat)
 		legend_x <- (image_width/nGroups)/2 + (image_width/nGroups)*((1:nGroups)-1)
 

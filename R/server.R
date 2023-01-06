@@ -396,7 +396,7 @@ shinyDigitise_server <- function(input, output, session){
       # increase clickcounter (becomes clicktot object).
       clicktot <- clickcounter$clickcount + 1
 
-      # if the plot type is me or bp then stoe two clicks, otherwise store 4 clicks and update the clickcounter.
+      # if the plot type is me or bp then store two clicks, otherwise store 4 clicks and update the clickcounter.
       max_cal_clicks <- ifelse(input$plot_type %in% c("mean_error","boxplot"),2,4)
       if (clicktot <= max_cal_clicks) {
         clickcounter$clickcount <- clicktot
@@ -461,47 +461,74 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
    #hint for extraction step
   shiny::observeEvent(input$plot_type, {
-    
-      if(input$plot_type == "mean_error"){
-        output$plothintmean <- shiny::renderUI({ 
-          shiny::strong("Click on Error Bar, followed by the Mean")
-        })
-        shinyjs::hide("plothintxy")
-        shinyjs::hide("plothintbox")
-        shinyjs::hide("plothintscatter")
-        shinyjs::show("plothintmean")
-      }
-      if(input$plot_type == "xy_mean_error"){
-        output$plothintxy <- shiny::renderUI({ 
-        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
-        })
-        shinyjs::hide("plothintmean")
-        shinyjs::hide("plothintbox")
-        shinyjs::hide("plothintscatter")
-        shinyjs::show("plothintxy")
-      }
-    
-      if(input$plot_type == "boxplot"){
-        output$plothintbox <- shiny::renderUI({ 
-        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
+
+    if(input$plot_type == "mean_error"){
+      output$plothintmean <- shiny::renderUI({ 
+        shiny::strong("Click on Error Bar, followed by the Mean")
       })
-        shinyjs::hide("plothintxy")
-        shinyjs::hide("plothintscatter")
-        shinyjs::hide("plothintmean")
-        shinyjs::show("plothintbox")
-      }
+      shinyjs::hide("plothintxy")
+      shinyjs::hide("plothintbox")
+      shinyjs::hide("plothintscatter")
+      shinyjs::show("plothintmean")
+      shinyjs::hide("plothinthist")
+
+      #container for for plotting values
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+
+    }
+
+    if(input$plot_type == "xy_mean_error"){
+      output$plothintxy <- shiny::renderUI({ 
+      shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
+      })
+      shinyjs::hide("plothintmean")
+      shinyjs::hide("plothintbox")
+      shinyjs::hide("plothintscatter")
+      shinyjs::show("plothintxy")
+      shinyjs::hide("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+    }
+  
+    if(input$plot_type == "boxplot"){
+      output$plothintbox <- shiny::renderUI({ 
+      shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
+    })
+      shinyjs::hide("plothintxy")
+      shinyjs::hide("plothintscatter")
+      shinyjs::hide("plothintmean")
+      shinyjs::show("plothintbox")
+      shinyjs::hide("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+
+    }
     
     if(input$plot_type == "scatterplot"){
-      output$plothintbox <- shiny::renderUI({ 
+      output$plothintscatter <- shiny::renderUI({ 
         shiny::strong("Click on points you want to add")
       })
       shinyjs::hide("plothintxy")
       shinyjs::show("plothintscatter")
       shinyjs::hide("plothintmean")
       shinyjs::hide("plothintbox")
+      shinyjs::hide("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, pch=NULL, col=NULL)
+
     }
-    
-    })
+
+    if(input$plot_type == "histogram"){
+      output$plothinthist <- shiny::renderUI({ 
+        shiny::strong("Click on the left followed by the right upper corners of each bar")
+      })
+      shinyjs::hide("plothintxy")
+      shinyjs::hide("plothintscatter")
+      shinyjs::hide("plothintmean")
+      shinyjs::hide("plothintbox")
+      shinyjs::show("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, pch=NULL, col=NULL)
+
+    }
+
+  })
 
   # for row count,
   row_count <- shiny::reactiveValues(x = NULL)
@@ -518,8 +545,7 @@ shinyDigitise_server <- function(input, output, session){
   #container for which row are clicked
   clicked<- shiny::reactiveValues(row = NULL)
 
-  #container for for plotting values and
-  valpoints <- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+
 
   # container for extract T/F.
   extract_mode <- shiny::reactiveValues(extract = FALSE)
@@ -555,10 +581,19 @@ shinyDigitise_server <- function(input, output, session){
 
       if (is.null(values$raw_data)) {
         # if values raw data is null/empty then create new data to show in the table.
-        basic <- data.frame(
+         basic <- data.frame(
           Group_Name = NA,
           Sample_Size = NA
         )
+        
+        if(input$plot_type=="scatterplot"){
+          basic$Shape <- NA
+          basic$Colour <- NA
+
+          valpoints$pch <- NULL
+          valpoints$col <- NULL
+        }
+       
         #this is so it doesnt immediately plot a new row.
         mod_df$x <- basic[-nrow(basic),]
 
@@ -569,17 +604,33 @@ shinyDigitise_server <- function(input, output, session){
         valpoints$id <- NULL
         valpoints$n <- NULL
 
+
+
       } else {
         # otherwise read in the data that already exists from the raw data.
         raw_dat <- as.data.frame(values$raw_data)
-        raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
-        names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+
+        if(input$plot_type=="scatterplot"){
+          valpoints$pch <- values$raw_data$pch
+          valpoints$col <- values$raw_data$col
+          raw_dat_sum <- stats::aggregate(n ~ id + pch + col, raw_dat, unique)
+          names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
+
+        }else{
+          raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
+          names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+        }
+
+           
+
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
         valpoints$x <- values$raw_data$x
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
+        
+
       }
 
       # this is then rendered in a DT table.
@@ -631,9 +682,9 @@ shinyDigitise_server <- function(input, output, session){
     shiny::modalDialog(
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
-      shiny::selectInput("pch", "Shape", "", choices = c("Circle" = "19",
-                                                         "Square" = "15",
-                                                         "Triangle" = "17")),
+      shiny::selectInput("pch", "Shape", "", choices = c("Circle" = 19,
+                                                         "Square" = 15,
+                                                         "Triangle" = 17)),
       shiny::selectInput("col", "Colour", "", choices = c("Orange" = "orange",
                                                          "Purple" = "purple",
                                                          "Blue" = "blue")),
@@ -650,25 +701,29 @@ shinyDigitise_server <- function(input, output, session){
   # this is then added onto the raw data.
   # the row count increases and another row is then added after.
   shiny::observeEvent(input$add_group, {
-    shiny::showModal(popupModal1())
-    row_count$x <- row_count$x + 1
-    mod_df$x <- rbind(mod_df$x,
-      data.frame(
+    if(input$plot_type == "scatterplot"){
+      shiny::showModal(popupModal2())
+      row_count$x <- row_count$x + 1
+      mod_df$x <- rbind(mod_df$x,
+        data.frame(
          Group_Name = NA,
-         Sample_Size = NA
+         Sample_Size = NA,
+         Shape = NA,
+         Colour = NA
        )
     )
-  })
-  
-  shiny::observeEvent(input$add_group & input$plot_type == "scatterplot", {
-    shiny::showModal(popupModal1())
-    row_count$x <- row_count$x + 1
-    mod_df$x <- rbind(mod_df$x,
-                      data.frame(
-                        Group_Name = NA,
-                        Sample_Size = NA
-                      )
-    )
+    }else{
+      shiny::showModal(popupModal1()) 
+      row_count$x <- row_count$x + 1
+      mod_df$x <- rbind(mod_df$x,
+        data.frame(
+           Group_Name = NA,
+           Sample_Size = NA
+         )
+      )
+    }
+    
+
   })
 
   shiny::observeEvent(input$ok, {
@@ -789,6 +844,10 @@ shinyDigitise_server <- function(input, output, session){
         valpoints$y <- c(valpoints$y, input$plot_click2$y)
         valpoints$id <- c(valpoints$id, dat_mod[selected$row, 1])
         valpoints$n <- c(valpoints$n, dat_mod[selected$row, 2])
+        if(input$plot_type=="scatterplot"){
+          valpoints$pch <- c(valpoints$pch, dat_mod[selected$row, 3])
+          valpoints$col <- c(valpoints$col, dat_mod[selected$row, 4])
+        }
       }
       if (plotcounter$plotclicks == max_clicks) {
         add_mode$add <- FALSE
@@ -843,6 +902,10 @@ shinyDigitise_server <- function(input, output, session){
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
+        if(input$plot_type=="scatterplot"){
+          valpoints$pch <- values$raw_data$pch
+          valpoints$col <- values$raw_data$col
+        }
         mod_df$x <- mod_df$x[-selected$row, ]
       }
     # }
@@ -865,6 +928,14 @@ shinyDigitise_server <- function(input, output, session){
   # edit the data table with data from the modal poopup.
   shiny::observeEvent(input$group, {
     mod_df$x[row_count$x,1] <<- input$group
+  })
+
+  shiny::observeEvent(input$pch, {
+    mod_df$x[row_count$x,3] <<- as.numeric(input$pch)
+  })
+
+  shiny::observeEvent(input$col, {
+    mod_df$x[row_count$x,4] <<- input$col
   })
 
   #edit data with DT input
