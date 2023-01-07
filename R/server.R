@@ -160,7 +160,31 @@ shinyDigitise_server <- function(input, output, session){
 
   shiny::observeEvent(input$plot_type,{
     values$plot_type <<- input$plot_type
-    
+    print(length(valpoints$x))
+    if(length(valpoints$x)!=0){
+      values <<- shiny::reactiveValues(
+        image_name = details$name[counter$countervalue],
+        image_file = details$paths[counter$countervalue],
+        plot_type = NULL,
+        flip = FALSE,
+        rotate = 0,
+        calpoints = NULL,
+        variable = NULL,
+        point_vals = NULL,
+        log_axes = c(axes="n"),
+        raw_data = NULL,
+        # rotate_mode=FALSE,
+        error_type = NULL,
+        comment = NULL,
+        cex = input$cex,
+        pos = "right"
+      )
+       output$metaPlot <- shiny::renderPlot({
+        graphics::par(mar = c(0, 0, 0, 0))
+        plot_values <- shiny::reactiveValuesToList(values)
+        do.call(internal_redraw, c(plot_values, shiny=TRUE))
+      })
+    }
     #### update tick boxes
     output$plottype_check_text <- shiny::renderText({
       if(check_plottype(shiny::reactiveValuesToList(values))){
@@ -555,6 +579,7 @@ shinyDigitise_server <- function(input, output, session){
 
   shiny::observeEvent(extract_mode$extract, {
 print(values$raw_data)
+
     # if we are in extract mode
     if (extract_mode$extract) {
         #toggle calibrate mode and rotate mode off.
@@ -614,7 +639,9 @@ print(values$raw_data)
         # otherwise read in the data that already exists from the raw data but dont allow it to aggregate if youve deleted a row.
         raw_dat <- as.data.frame(values$raw_data)
         if(nrow(raw_dat)>0){
-        raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
+        raw_dat_sum <- raw_dat |>
+                        dplyr::group_by(id) |>
+                        dplyr::summarize(n = unique(n))
         names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
@@ -627,7 +654,9 @@ print(values$raw_data)
           if(input$plot_type=="scatterplot"){
            raw_dat <- as.data.frame(values$raw_data)
                    if(nrow(raw_dat)>0){
-          raw_dat_sum <- stats::aggregate(n ~ id + pch + col, raw_dat, unique)
+          raw_dat_sum <- raw_dat |>
+                        dplyr::group_by(id, pch, col) |>
+                        dplyr::summarize(n = unique(n))
           names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
@@ -642,7 +671,9 @@ print(values$raw_data)
       if(input$plot_type=="histogram"){
         raw_dat <- as.data.frame(values$raw_data)
         if(nrow(raw_dat)>0){
-        raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
+                raw_dat_sum <- raw_dat |>
+                        dplyr::group_by(id) |>
+                        dplyr::summarize(n = unique(n))
         names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
@@ -658,7 +689,7 @@ print(values$raw_data)
       output$group_table <- DT::renderDT({
         DT::datatable(
           mod_df$x,
-          editable = list(target = "cell", disable = list(columns = c(1))),
+          editable = list(target = "cell", disable = list(columns = c(1,2,3))),
           selection = "single",
           options = list(lengthChange = TRUE, dom = "t", pageLength = 100)
         )
@@ -806,10 +837,10 @@ print(selected$row)
     add_mode$add <- TRUE
 
     # if you click group without any row selected - return an error.
-    if(length(selected$row) == 0){
+    if(length(selected$row) == 0 | nrow(mod_df$x) == 0 ){
       shinyalert::shinyalert(
         title = "Select a group to plot",
-        text = "No group has been selected",
+        text = "No group has been selected or created",
         size = "s",
         closeOnEsc = TRUE,
         closeOnClickOutside = FALSE,
@@ -839,10 +870,24 @@ print(selected$row)
           valpoints$id <- values$raw_data$id
           valpoints$n <- values$raw_data$n
           if(input$plot_type=="scatterplot"){
+          values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
+          remove_string <-  as.character(mod_df$x[selected$row,1])
+          values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
+          valpoints$x <- values$raw_data$x
+          valpoints$y <- values$raw_data$y
+          valpoints$id <- values$raw_data$id
+          valpoints$n <- values$raw_data$n
             valpoints$pch <- values$raw_data$pch
             valpoints$col <- values$raw_data$col
           }
           if(input$plot_type=="histogram"){
+          values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
+          remove_string <-  as.character(mod_df$x[selected$row,1])
+          values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
+          valpoints$x <- values$raw_data$x
+          valpoints$y <- values$raw_data$y
+          valpoints$id <- values$raw_data$id
+          valpoints$n <- values$raw_data$n
             valpoints$bar <- values$raw_data$bar
           }
         }else{
