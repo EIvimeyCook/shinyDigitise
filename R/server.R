@@ -554,7 +554,7 @@ shinyDigitise_server <- function(input, output, session){
 
 
   shiny::observeEvent(extract_mode$extract, {
-
+print(values$raw_data)
     # if we are in extract mode
     if (extract_mode$extract) {
         #toggle calibrate mode and rotate mode off.
@@ -580,19 +580,12 @@ shinyDigitise_server <- function(input, output, session){
       ################################################
 
       if (is.null(values$raw_data)) {
+
         # if values raw data is null/empty then create new data to show in the table.
          basic <- data.frame(
           Group_Name = NA,
           Sample_Size = NA
         )
-        
-        if(input$plot_type=="scatterplot"){
-          basic$Shape <- NA
-          basic$Colour <- NA
-
-          valpoints$pch <- NULL
-          valpoints$col <- NULL
-        }
        
         #this is so it doesnt immediately plot a new row.
         mod_df$x <- basic[-nrow(basic),]
@@ -609,35 +602,57 @@ shinyDigitise_server <- function(input, output, session){
           valpoints$bar <- NULL
         }
 
-      } else {
-        # otherwise read in the data that already exists from the raw data.
-        raw_dat <- as.data.frame(values$raw_data)
+         if(input$plot_type=="scatterplot"){
+          basic$Shape <- NA
+          basic$Colour <- NA
 
-        if(input$plot_type=="scatterplot"){
-          valpoints$pch <- values$raw_data$pch
-          valpoints$col <- values$raw_data$col
-          raw_dat_sum <- stats::aggregate(n ~ id + pch + col, raw_dat, unique)
-          names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
-
-        }else{
-          raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
-          names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+          valpoints$pch <- NULL
+          valpoints$col <- NULL
         }
 
-           
-
+      } else {
+        # otherwise read in the data that already exists from the raw data but dont allow it to aggregate if youve deleted a row.
+        raw_dat <- as.data.frame(values$raw_data)
+        if(nrow(raw_dat)>0){
+        raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
+        names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
         valpoints$x <- values$raw_data$x
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
-       
-        if(input$plot_type=="histogram"){
-          valpoints$bar <- values$raw_data$bar
-        }  
+        }else{}
 
-      }
+          if(input$plot_type=="scatterplot"){
+           raw_dat <- as.data.frame(values$raw_data)
+                   if(nrow(raw_dat)>0){
+          raw_dat_sum <- stats::aggregate(n ~ id + pch + col, raw_dat, unique)
+          names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
+        mod_df$x <- raw_dat_sum
+        row_count$x <- nrow(raw_dat_sum)
+        valpoints$x <- values$raw_data$x
+        valpoints$y <- values$raw_data$y
+        valpoints$id <- values$raw_data$id
+        valpoints$n <- values$raw_data$n
+         valpoints$pch <- values$raw_data$pch
+          valpoints$col <- values$raw_data$col   
+      } else{}}
+
+      if(input$plot_type=="histogram"){
+        raw_dat <- as.data.frame(values$raw_data)
+        if(nrow(raw_dat)>0){
+        raw_dat_sum <- stats::aggregate(n ~ id, raw_dat, unique)
+        names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+        mod_df$x <- raw_dat_sum
+        row_count$x <- nrow(raw_dat_sum)
+        valpoints$x <- values$raw_data$x
+        valpoints$y <- values$raw_data$y
+        valpoints$id <- values$raw_data$id
+        valpoints$n <- values$raw_data$n
+          valpoints$bar <- values$raw_data$bar
+} else{}}
+    }
 
       # this is then rendered in a DT table.
       output$group_table <- DT::renderDT({
@@ -784,7 +799,7 @@ shinyDigitise_server <- function(input, output, session){
 
 
   shiny::observeEvent(input$click_group, {
-
+print(selected$row)
     plotcounter$plotclicks <- 0
 
     # add mode becomes T
