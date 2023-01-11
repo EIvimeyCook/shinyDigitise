@@ -60,11 +60,12 @@ shinyDigitise_server <- function(input, output, session){
         )
                 })
     shiny::observeEvent(input$take_screenshot, {
-    shinyscreenshot::screenshot(filename = paste0(details$name[counter$countervalue]))
+    shinyscreenshot::screenshot(selector = "plot",
+      filename = paste0(details$name[counter$countervalue]),
+       id = "metaPlot", scale = 2)
   })
 
 }
-
       # update
       shiny::updateSliderInput(session, "cex", value = values$cex)
       shinyWidgets::updatePrettyRadioButtons(session, "pos", selected = values$pos)
@@ -186,7 +187,7 @@ shinyDigitise_server <- function(input, output, session){
   # record the plot type for the data file - influences clicking and hints, resets all data if plto type changes
 
   shiny::observeEvent(input$plot_type,{
-    if (!file.exists(counter$caldat)) {
+    if (!file.exists(counter$caldat)|input$plot_type != values$plot_type) {
     if(input$plot_type == "mean_error"){
       output$plothintmean <- shiny::renderUI({ 
         shiny::strong("Click on Error Bar, followed by the Mean")
@@ -252,8 +253,6 @@ shinyDigitise_server <- function(input, output, session){
       valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, bar=NULL)
 
     }
-
-    values$plot_type <<- input$plot_type
 
       values <<- shiny::reactiveValues(
         image_name = details$name[counter$countervalue],
@@ -1192,6 +1191,45 @@ print(selected$row)
         animation = TRUE
       )
     }
+  })
+
+    shiny::observeEvent(input$next_review, {
+    plot_values <- shiny::reactiveValuesToList(values)
+      cv <- counter$countervalue + 1
+
+      if (cv > counter_total) {
+        counter$countervalue <- counter_total
+        shinyalert::shinyalert(
+          title = "Congratulations!",
+          text = "You've finished reviewing!",
+          size = "s",
+          closeOnEsc = TRUE,
+          closeOnClickOutside = FALSE,
+          html = FALSE,
+          type = "success",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#AEDEF4",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE)
+        
+      } else {
+        counter$countervalue <- cv
+      }
+  })
+
+     shiny::observeEvent(input$prev_review, {
+    plot_values <- shiny::reactiveValuesToList(values)
+      cv <- counter$countervalue - 1
+
+      if (cv <1) {
+        counter$countervalue <- 1
+    shinyjs::disable("prev_review")
+      } else {
+        counter$countervalue <- cv
+      }
   })
   
   shiny::observeEvent(input$exit, {

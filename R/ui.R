@@ -370,7 +370,12 @@ actionButton("zoom", "Zoom")
             shiny::div(id = "rev_well",
             DT::DTOutput("review_data"),
             br(),
-            shiny::actionButton("take_screenshot", "Download Extraction Report"),
+            shiny::actionButton("take_screenshot", "Download Extraction Figure"),
+            br(),
+            br(),
+            splitLayout(
+              shiny::actionButton("prev_review", "Previous"),
+              shiny::actionButton("next_review", "Next"))
         )
           )
         )),
