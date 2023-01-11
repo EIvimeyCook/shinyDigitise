@@ -187,7 +187,7 @@ shinyDigitise_server <- function(input, output, session){
   # record the plot type for the data file - influences clicking and hints, resets all data if plto type changes
 
   shiny::observeEvent(input$plot_type,{
-    if (!file.exists(counter$caldat)|input$plot_type != values$plot_type) {
+    if (!file.exists(counter$caldat)|input$plot_type != values$plot_type && !is.null(values$plot_type)) {
     if(input$plot_type == "mean_error"){
       output$plothintmean <- shiny::renderUI({ 
         shiny::strong("Click on Error Bar, followed by the Mean")
