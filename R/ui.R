@@ -11,7 +11,7 @@ shinyDigitise_UI <- function(){
       shiny::column(
         width = 4,
         shiny::titlePanel(
-          title=shiny::splitLayout(cellWidths = c("15%","85%"),
+          title=shiny::splitLayout(cellWidths = c("15%","70%"),
           shiny::imageOutput(
             "shinylogo",
             height = "60px"
@@ -56,11 +56,9 @@ actionButton("zoom", "Zoom")
       )
     ),
     
-    
-    
     # Sidebar with a slider input for number of bins
     shiny::sidebarLayout(
-      shiny::sidebarPanel( 
+      shiny::sidebarPanel(
         width = 4,
         id = "tPanel",
         style = "overflow-y:scroll; max-height: 800px; position:relative;",
@@ -361,8 +359,21 @@ actionButton("zoom", "Zoom")
               style = "padding:4px"
             )
           )
-        )))
-      ),
+        ))),
+
+        ####------------------ 
+        ### review panel
+        ####------------------
+          shiny::wellPanel(
+          shiny::strong("Reviewing Mode:"),
+          shinyjs::hidden(
+            shiny::div(id = "rev_well",
+            DT::DTOutput("review_data"),
+            br(),
+            shiny::actionButton("take_screenshot", "Download Extraction Report"),
+        )
+          )
+        )),
       
       ####------------------ 
       ### Plot panel

@@ -5,8 +5,7 @@
 #' @param image_name Vector of specific images for shinyDigitise to plot. defaults to NULL, i.e. all or only not completed images are input. If specified, overrides import_all
 #' @export
 
-shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
-
+shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL, review_mode=FALSE){
 
 	emojifont::load.emojifont('OpenSansEmoji.ttf')
 
@@ -20,11 +19,17 @@ shinyDigitise <- function(dir, import_all=FALSE, image_name=NULL){
 	if(is.null(image_name)){
 	  if(import_all){
 	  	details <- metaDigitise::dir_details(dir)
+	  	review <<- FALSE
+	  }else if(review_mode){
+	  	details <- metaDigitise::dir_details(dir)
+	  	review <<- TRUE
 	  }else{
 			details <- metaDigitise::get_notDone_file_details(dir) 	
+			review <<- FALSE
 	  }	
 	}else{
 		details <- metaDigitise::dir_details(dir)
+		review <<- FALSE
 
 		if(!image_name %in% details$name){
 			stop("image_name must refer to images within the directory")

@@ -24,16 +24,46 @@ shinyDigitise_server <- function(input, output, session){
     shinyjs::hide("calib_well")
     shinyjs::hide("comm_well")
     shinyjs::show("plot_well")
+    shinyjs::hide("rev_well")
 
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
 
     # if extracted/calibrated data already exists:
     if (file.exists(counter$caldat)) {
-      # plot_values <- readRDS(values$caldat)
 
       #read in that data.
       values <<- do.call("reactiveValues", readRDS(counter$caldat))
+
+
+ ################################################
+  # Reviewing mode
+  ################################################
+     #what happens if you only want to review
+    if(review){
+    shinyjs::hide("orient_well")
+    shinyjs::hide("extract_well")
+    shinyjs::hide("calib_well")
+    shinyjs::hide("comm_well")
+    shinyjs::hide("plot_well")
+    shinyjs::show("rev_well")
+    shinyjs::toggle("zoom")
+    shinyjs::disable("cex")
+    shinyjs::disable("pos")
+
+ output$review_data <- DT::renderDT({
+        DT::datatable(
+          values$processed_data,
+          editable = list(target = "cell", disable = list(columns = c(1,2,3,5))),
+          selection = "single",
+          options = list(lengthChange = TRUE, dom = "t", pageLength = 100)
+        )
+                })
+    shiny::observeEvent(input$take_screenshot, {
+    shinyscreenshot::screenshot(filename = paste0(details$name[counter$countervalue]))
+  })
+
+}
 
       # update
       shiny::updateSliderInput(session, "cex", value = values$cex)
@@ -44,9 +74,6 @@ shinyDigitise_server <- function(input, output, session){
       if (values$plot_type %in% c("mean_error","xy_mean_error")) {
         shinyWidgets::updatePrettyRadioButtons(session, "errortype", selected = values$error_type)
       }
-      # update
-
-
     } else {
       # if not then create a new values object that we can store data in.
       #  keeps flip/rotate and image details.
@@ -72,7 +99,6 @@ shinyDigitise_server <- function(input, output, session){
     shinyWidgets::updatePrettyRadioButtons(session, "errortype", selected = character(0))
     }
     
-
     shinyWidgets::updateSwitchInput(
       session = session,
       inputId = "flip",
@@ -151,17 +177,84 @@ shinyDigitise_server <- function(input, output, session){
     })
   })
 
+ 
 
   ################################################
-  # Plot type and cex
+  # Plot type and hints
   ################################################
 
-  # record the plot type for the data file - influences clicking etc.
+  # record the plot type for the data file - influences clicking and hints, resets all data if plto type changes
 
   shiny::observeEvent(input$plot_type,{
+    if (!file.exists(counter$caldat)) {
+    if(input$plot_type == "mean_error"){
+      output$plothintmean <- shiny::renderUI({ 
+        shiny::strong("Click on Error Bar, followed by the Mean")
+      })
+      shinyjs::hide("plothintxy")
+      shinyjs::hide("plothintbox")
+      shinyjs::hide("plothintscatter")
+      shinyjs::show("plothintmean")
+      shinyjs::hide("plothinthist")
+
+      #container for for plotting values
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+
+    }
+
+    if(input$plot_type == "xy_mean_error"){
+      output$plothintxy <- shiny::renderUI({ 
+        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
+      })
+      shinyjs::hide("plothintmean")
+      shinyjs::hide("plothintbox")
+      shinyjs::hide("plothintscatter")
+      shinyjs::show("plothintxy")
+      shinyjs::hide("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+    }
+  
+    if(input$plot_type == "boxplot"){
+      output$plothintbox <- shiny::renderUI({ 
+        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
+      })
+      shinyjs::hide("plothintxy")
+      shinyjs::hide("plothintscatter")
+      shinyjs::hide("plothintmean")
+      shinyjs::show("plothintbox")
+      shinyjs::hide("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
+
+    }
+    
+    if(input$plot_type == "scatterplot"){
+      output$plothintscatter <- shiny::renderUI({ 
+        shiny::strong("Click on points you want to add")
+      })
+      shinyjs::hide("plothintxy")
+      shinyjs::show("plothintscatter")
+      shinyjs::hide("plothintmean")
+      shinyjs::hide("plothintbox")
+      shinyjs::hide("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, pch=NULL, col=NULL)
+
+    }
+
+    if(input$plot_type == "histogram"){
+      output$plothinthist <- shiny::renderUI({ 
+        shiny::strong("Click on the left followed by the right upper corners of each bar")
+      })
+      shinyjs::hide("plothintxy")
+      shinyjs::hide("plothintscatter")
+      shinyjs::hide("plothintmean")
+      shinyjs::hide("plothintbox")
+      shinyjs::show("plothinthist")
+      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, bar=NULL)
+
+    }
+
     values$plot_type <<- input$plot_type
-    print(length(valpoints$x))
-    if(length(valpoints$x)!=0){
+
       values <<- shiny::reactiveValues(
         image_name = details$name[counter$countervalue],
         image_file = details$paths[counter$countervalue],
@@ -179,12 +272,42 @@ shinyDigitise_server <- function(input, output, session){
         cex = input$cex,
         pos = "right"
       )
+
+       basic <- data.frame(
+          Group_Name = NA,
+          Sample_Size = NA
+        )
+       
+        #this is so it doesnt immediately plot a new row.
+        mod_df$x <- basic[-nrow(basic),]
+        row_count$x <- 0
+        valpoints$x <- NULL
+        valpoints$y <- NULL
+        valpoints$id <- NULL
+        valpoints$n <- NULL
+
+        if(input$plot_type=="histogram"){
+          # basic$Bar <- NA
+          valpoints$bar <- NULL
+        }
+
+         if(input$plot_type=="scatterplot"){
+          basic$Shape <- NA
+          basic$Colour <- NA
+
+          valpoints$pch <- NULL
+          valpoints$col <- NULL
+        }
+
+        values$plot_type <<- input$plot_type
+
        output$metaPlot <- shiny::renderPlot({
         graphics::par(mar = c(0, 0, 0, 0))
         plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
-    }
+       } else{}
+
     #### update tick boxes
     output$plottype_check_text <- shiny::renderText({
       if(check_plottype(shiny::reactiveValuesToList(values))){
@@ -208,10 +331,6 @@ shinyDigitise_server <- function(input, output, session){
   shiny::observe(values$pos <<- input$pos)
 
   shiny::observe(values$error_type <<- input$errortype)
-
-  # shiny::observeEvent(input$errortype,{
-  #   values$error_type <<- input$errortype
-  #   })
 
   ################################################
   # zoom
@@ -484,75 +603,6 @@ shinyDigitise_server <- function(input, output, session){
   # Extraction
   ################################################
    #hint for extraction step
-  shiny::observeEvent(input$plot_type, {
-
-    if(input$plot_type == "mean_error"){
-      output$plothintmean <- shiny::renderUI({ 
-        shiny::strong("Click on Error Bar, followed by the Mean")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::hide("plothintbox")
-      shinyjs::hide("plothintscatter")
-      shinyjs::show("plothintmean")
-      shinyjs::hide("plothinthist")
-
-      #container for for plotting values
-      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
-
-    }
-
-    if(input$plot_type == "xy_mean_error"){
-      output$plothintxy <- shiny::renderUI({ 
-        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
-      })
-      shinyjs::hide("plothintmean")
-      shinyjs::hide("plothintbox")
-      shinyjs::hide("plothintscatter")
-      shinyjs::show("plothintxy")
-      shinyjs::hide("plothinthist")
-      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
-    }
-  
-    if(input$plot_type == "boxplot"){
-      output$plothintbox <- shiny::renderUI({ 
-        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::hide("plothintscatter")
-      shinyjs::hide("plothintmean")
-      shinyjs::show("plothintbox")
-      shinyjs::hide("plothinthist")
-      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
-
-    }
-    
-    if(input$plot_type == "scatterplot"){
-      output$plothintscatter <- shiny::renderUI({ 
-        shiny::strong("Click on points you want to add")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::show("plothintscatter")
-      shinyjs::hide("plothintmean")
-      shinyjs::hide("plothintbox")
-      shinyjs::hide("plothinthist")
-      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, pch=NULL, col=NULL)
-
-    }
-
-    if(input$plot_type == "histogram"){
-      output$plothinthist <- shiny::renderUI({ 
-        shiny::strong("Click on the left followed by the right upper corners of each bar")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::hide("plothintscatter")
-      shinyjs::hide("plothintmean")
-      shinyjs::hide("plothintbox")
-      shinyjs::show("plothinthist")
-      valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, bar=NULL)
-
-    }
-
-  })
 
   # for row count,
   row_count <- shiny::reactiveValues(x = NULL)
@@ -569,16 +619,14 @@ shinyDigitise_server <- function(input, output, session){
   #container for which row are clicked
   clicked<- shiny::reactiveValues(row = NULL)
 
-
-
   # container for extract T/F.
   extract_mode <- shiny::reactiveValues(extract = FALSE)
+
   # container for add T/F.
   add_mode <- shiny::reactiveValues(add = FALSE)
 
-
+#update switches
   shiny::observeEvent(extract_mode$extract, {
-print(values$raw_data)
 
     # if we are in extract mode
     if (extract_mode$extract) {
@@ -605,7 +653,6 @@ print(values$raw_data)
       ################################################
 
       if (is.null(values$raw_data)) {
-
         # if values raw data is null/empty then create new data to show in the table.
          basic <- data.frame(
           Group_Name = NA,
@@ -682,6 +729,7 @@ print(values$raw_data)
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
           valpoints$bar <- values$raw_data$bar
+
 } else{}}
     }
 
@@ -760,8 +808,8 @@ print(values$raw_data)
         data.frame(
          Group_Name = NA,
          Sample_Size = NA,
-         Shape = NA,
-         Colour = NA
+         Shape = 19,
+         Colour = "Orange"
        )
     )
     }else{
@@ -837,7 +885,9 @@ print(selected$row)
     add_mode$add <- TRUE
 
     # if you click group without any row selected - return an error.
-    if(length(selected$row) == 0 | nrow(mod_df$x) == 0 ){
+    if(is.null(selected$row)|length(selected$row) == 0 | nrow(mod_df$x) == 0 ){
+        shinyjs::disable("del_group")
+        shinyjs::disable("click_group")
       shinyalert::shinyalert(
         title = "Select a group to plot",
         text = "No group has been selected or created",
@@ -869,33 +919,20 @@ print(selected$row)
           valpoints$y <- values$raw_data$y
           valpoints$id <- values$raw_data$id
           valpoints$n <- values$raw_data$n
+
           if(input$plot_type=="scatterplot"){
-          values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
-          remove_string <-  as.character(mod_df$x[selected$row,1])
-          values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
-          valpoints$x <- values$raw_data$x
-          valpoints$y <- values$raw_data$y
-          valpoints$id <- values$raw_data$id
-          valpoints$n <- values$raw_data$n
             valpoints$pch <- values$raw_data$pch
             valpoints$col <- values$raw_data$col
           }
+
           if(input$plot_type=="histogram"){
-          values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
-          remove_string <-  as.character(mod_df$x[selected$row,1])
-          values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
-          valpoints$x <- values$raw_data$x
-          valpoints$y <- values$raw_data$y
-          valpoints$id <- values$raw_data$id
-          valpoints$n <- values$raw_data$n
             valpoints$bar <- values$raw_data$bar
           }
+
         }else{
           values$raw_data <<-NULL
         }
       }
-      ## ?? this seems problematic
-      # values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
     }
   })
 
@@ -908,6 +945,7 @@ print(selected$row)
   #  when you click to add points
 
   shiny::observeEvent(input$plot_click2, {
+
     if (add_mode$add) {
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
       dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
@@ -964,8 +1002,10 @@ print(selected$row)
   # however if one is, then search the data fro that cell and remove it from the df.
   # this will also cause the plot and raw data to update and remove anything with this group.
   shiny::observeEvent(input$del_group, {
-    # if (input$del_group) {
-      if(is.null(selected$row)){
+      if(is.null(selected$row)|length(selected$row) == 0 | nrow(mod_df$x) == 0 ){
+        shinyjs::disable("del_group")
+        shinyjs::disable("click_group")
+
         shinyalert::shinyalert(
           title = "Select a group to delete",
           text = "No group has been selected",
@@ -982,6 +1022,7 @@ print(selected$row)
           imageUrl = "",
           animation = TRUE
         )
+
       } else{
         row_count$x <- row_count$x - 1
         values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
@@ -999,6 +1040,10 @@ print(selected$row)
           valpoints$bar <- values$raw_data$bar
         }
         mod_df$x <- mod_df$x[-selected$row, ]
+            if(nrow(mod_df$x) == 0 ){
+        shinyjs::disable("del_group")
+        shinyjs::disable("click_group")
+      }
       }
     # }
 
@@ -1041,13 +1086,11 @@ print(selected$row)
 }
   })
   
-  
   shiny::observeEvent(input$group_table_row_last_clicked, {
     clicked$row <- c(clicked$row,input$group_table_row_last_clicked)
     print(values$raw_data)
     if(any(duplicated(clicked$row))){
       clicked$row <<- NULL
-      #selected$row <<- NULL
       DT::selectRows(proxy, selected = NULL)
     }
   })
@@ -1127,8 +1170,6 @@ print(selected$row)
           callbackJS = "function(x){
                  setTimeout(function(){window.close();}, 500);
                }")
-        # metaDigitise::getExtracted(dir)
-        # shiny::stopApp()
         
       } else {
         counter$countervalue <- cv
@@ -1159,18 +1200,6 @@ print(selected$row)
 
   })
 
-  # when next is pressed up the counter and check that its above 0
-  # shiny::observeEvent(input$previous, {
-  #   cv <- counter$countervalue - 1
-
-  #   if (cv == 0) {
-  #     counter$countervalue <- 1
-  #     # clickcounter$clickcount <- 0
-  #   } else {
-  #     counter$countervalue <- cv
-  #   }
-  # })
-
   #output the progress text
   output$progress <- shiny::renderText({
     paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
@@ -1179,11 +1208,7 @@ print(selected$row)
   ################################################
   # Previous/next step buttons
   ################################################
-  
-  # shiny::observeEvent(counter$countervalue, {
 
-  # })
-  
   shiny::observeEvent(input$plot_step, {
     if(is.null(values$plot_type)){
       shinyalert::shinyalert(
@@ -1246,13 +1271,7 @@ print(selected$row)
     extract_mode$extract <<- TRUE
     shinyjs::hide("comm_well")
   })
-  
-  # shiny::observeEvent(input$continue, {
     
-  # })
-  
-
-
   ################################################
   # What happens when you quit
   ################################################
