@@ -11,12 +11,21 @@ shinyDigitise_UI <- function(){
       shiny::column(
         width = 4,
         shiny::titlePanel(
-          title=shiny::splitLayout(cellWidths = c("15%","70%"),
+          title=shiny::splitLayout(cellWidths = c("20%","50%"),
           shiny::imageOutput(
             "shinylogo",
             height = "60px"
           ),
-          shiny::textOutput("shinytext")
+          #shiny::textOutput("shinytext")
+
+
+          shinyjs::hidden(shiny::div(id = "top_well7",shinyWidgets::switchInput(
+   inputId = "rev_mode",
+    labelWidth = "80px",
+    value = FALSE,
+    onLabel = "Review mode",
+    offLabel = "Edit Mode"
+)))
         ),
         windowTitle = "shinyDigitise")
       ),
@@ -26,18 +35,18 @@ shinyDigitise_UI <- function(){
         shiny::div(style="display: inline-block;vertical-align:top; width: 10%; font-size:x-large;",
            shiny::p(shiny::htmlOutput("progress", inline=TRUE)),
         ),
-        shiny::div(style="display: inline-block;vertical-align:top; width: 10%;",shiny::strong("Point size:")),
-        shiny::div(style="display: inline-block;vertical-align:top;  width: 20%;",
+        shinyjs::hidden(shiny::div(id = "top_well4", style="display: inline-block;vertical-align:top; width: 10%;",shiny::strong("Point size:"))),
+        shinyjs::hidden(shiny::div(id = "top_well5", style="display: inline-block;vertical-align:top;  width: 20%;",
         shiny::sliderInput(
            inputId = "cex",
            label = NULL,
            value = 1,
            min = 0.1,
            max = 3,
-           ticks  = FALSE)),
-        shiny::div(style="display: inline-block;vertical-align:top; width: 10% "),
-        shiny::div(style="display: inline-block;vertical-align:top; width: 20%;",shiny::strong("Group Name Position:")),
-        shiny::div(style="display: inline-block;vertical-align:top;  width: 20%;",
+           ticks  = FALSE))),        
+        shinyjs::hidden(shiny::div(id = "top_well1", style="display: inline-block;vertical-align:top; width: 10% ")),
+        shinyjs::hidden(shiny::div(id = "top_well2", style="display: inline-block;vertical-align:top; width: 20%;",shiny::strong("Group Name Position:"))),
+        shinyjs::hidden(shiny::div(id = "top_well3", style="display: inline-block;vertical-align:top;  width: 20%;",
            shinyWidgets::prettyRadioButtons(
              inputId = "pos",
              label = NULL,
@@ -49,10 +58,10 @@ shinyDigitise_UI <- function(){
              status = "info",
              animation = "jelly"
            )
-        ),
-        shiny::div(style="display: inline-block;vertical-align:top;  width: 2%;",
+        )),
+        shinyjs::hidden(shiny::div(id = "top_well6",style="display: inline-block;vertical-align:top;  width: 2%;",
 actionButton("zoom", "Zoom")
-                   )
+                   ))
       )
     ),
     
