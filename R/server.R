@@ -1,33 +1,255 @@
 
 shinyDigitise_server <- function(input, output, session){
 
+
+  ################################################
+  # Initial Startup
+  ################################################
+
+   # start counter at 1 - helps if this is before things
+  counter <<- shiny::reactiveValues(countervalue = 0)
+
+  #logo
   output$shinylogo <- shiny::renderImage({
-    list(src =base::system.file("logos/shinyDigitise.png", package="shinyDigitise"), height = 60)
+    list(src =base::system.file("www/shinyDigitise.png", package="shinyDigitise"), height = 60)
   },deleteFile=FALSE)
 
-  output$shinytext <- shiny::renderText({
-    "shinyDigitise"
+#take data quiery on startup in a popup modal including directory
+  data_modal <- shiny::modalDialog(
+    title = div("shinyDigitise", img(src=base::system.file("www/shinyDigitise.png", package="shinyDigitise"))),
+    br(),
+    shiny::div(style = "text-align: center", offset = 0, 
+      shinyFiles::shinyFilesButton("folder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
+        filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),
+    br(),
+    br(),
+    shinyjs::hidden(shiny::div(id = "data_import_title1", h5("Please select which graphs you'd like to import:", align = "center"))),
+    br(),
+    br(),
+    shinyjs::hidden(shiny::div(id = "data_okimport", style = "text-align: center", offset = 0,
+    shiny::radioButtons(
+   inputId = "import_mode",
+   label = NULL,
+   choices = c("All", "Unfinished"),
+   selected = character(0),
+   inline = TRUE, 
+))),
+br(),
+br(),
+shinyjs::hidden(shiny::div(id = "data_import_title2",h5("Alternatively, please select a specific graph from your chosen directory:", align = "center"))), 
+br(),
+shinyjs::hidden(shiny::div(id = "data_okpick",style = "text-align: center", offset = 0,
+  shinyWidgets::pickerInput(
+   inputId = "paths",
+    choices = c(""),
+    select = "",
+   options = list(
+      style = "btn-primary"),
+   inline = TRUE,
+   width = "auto"
+))), 
+br(),
+br(),
+shinyjs::hidden(shiny::div(id = "data_okbut", actionButton("data_ok", "Get Extracting!"),
+    easyClose = FALSE,
+    footer = NULL,
+    size = "xl",
+    fade = TRUE,
+    )))
+
+#hide all pnaels and call the modal on startup hide inital entry to stop spurious inputs
+  shinyjs::hide("metaPlot")
+  shinyjs::hide("tPanel")
+  shinyjs::hide("top_well")
+  shinyjs::hide("shinylogo")
+  shiny::showModal(data_modal)
+ 
+
+#image import container
+  image_import <<- shiny::reactiveValues(select = FALSE, multiple = FALSE)
+
+
+
+importDatapath <- reactive({
+   
+ shinyFiles::shinyFileChoose(input,'folder',roots = c(home = '~'), session = session)
+   req(input$folder)
+   if (is.null(input$folder))
+      return(NULL) 
+      return(paste0(sub("/[^/]+$", "", shinyFiles::parseFilePaths(c(home = '~'), input$folder)$datapath), "/"))
+})
+
+
+observe({
+if(!is.null(importDatapath()) & as.character(importDatapath()) != "/"){
+ print(importDatapath())
+  
+   #show the modal dialog
+  shinyjs::hide("folder")
+  shinyjs::show("data_import_title2")
+  shinyjs::show("data_import_title1")
+  shinyjs::show("data_okimport")
+  shinyjs::show("data_okpick")
+  shinyjs::show("data_okbut")
+
+metaDigitise::setup_calibration_dir(importDatapath())  
+details <<- metaDigitise::dir_details(importDatapath())
+counter$countervalue <<- 1
+
+  tags$div(style = "text-align: center", offset = 0,
+   shinyWidgets::updatePickerInput(
+    session = session,
+   inputId = "paths",
+    choices = c("",details$name),
+    select = "",
+   clearOptions = TRUE
+   ))
+}
+})
+
+#obsrve the import mode selection. If you want to import change the image_import object, if not then don't. Selection clears the select picker.
+shiny::observeEvent(input$import_mode, {
+
+  if(input$import_mode == "All"){
+  details <<- metaDigitise::dir_details(importDatapath())
+  counter_total <<- length(details$paths)
+  image_import$multiple <<- TRUE
+  image_import$select <<- FALSE
+
+  tags$div(style = "text-align: center", offset = 0,
+   shinyWidgets::updatePickerInput(
+    session = session,
+   inputId = "paths",
+    choices = c("",details$name),
+    select = "",
+   clearOptions = TRUE
+))
+
+  } 
+  else if(input$import_mode == "Unfinished"){
+    details <<- metaDigitise::get_notDone_file_details(importDatapath())
+    det_check <<- metaDigitise::dir_details(importDatapath())
+    counter_total <<- length(details$paths)
+    image_import$multiple <<- TRUE
+    image_import$select <<- FALSE
+
+  tags$div(style = "text-align: center", offset = 0,
+   shinyWidgets::updatePickerInput(
+    session = session,
+   inputId = "paths",
+    choices = c("",details$name),
+    select = "",
+   clearOptions = TRUE
+))
+
+     if(length(details$paths) == length(det_check$doneCalFiles)){
+       shinyalert::shinyalert(
+          title = "Congratulations!",
+          text = "You have none left to review",
+          size = "s",
+          closeOnEsc = TRUE,
+          closeOnClickOutside = FALSE,
+          html = FALSE,
+          type = "success",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#AEDEF4",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE)
+       }
+       } else {
+        image_import$multiple <<- FALSE
+       }
+       })
+
+
+#observe event for specific image selection
+shiny::observeEvent(input$paths, {
+
+  if(input$paths != ""){
+    image_import$select <<- TRUE
+    details <<- metaDigitise::dir_details(importDatapath())
+    image_name <<- input$paths
+    details$paths <<- details$paths[match(image_name,details$name)]
+    details$name <<- image_name
+    counter_total <<- length(details$paths)
+  tags$div(style = "text-align: center", offset = 0,
+   shiny::updateRadioButtons(
+   inputId = "import_mode",
+   label = NULL,
+   choices = c("All", "Unfinished"),
+   selected = character(0),
+   inline = TRUE
+))
+  image_import$multiple <<- FALSE
+} else {
+  image_import$select <<- FALSE
+}
+})
+
+#if you click ok, what happens - if nothing is true then error
+shiny::observeEvent(input$data_ok, {
+
+  if(image_import$multiple | image_import$select){
+
+  #output the progress text
+  output$progress <- shiny::renderText({
+    paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
   })
 
+ shiny::removeModal() 
+   shinyjs::show("tPanel")
+   shinyjs::show("metaPlot")
+   shinyjs::show("top_well1")
+   shinyjs::show("top_well2")
+   shinyjs::show("top_well3")
+   shinyjs::show("top_well4")
+   shinyjs::show("top_well5")
+   shinyjs::show("top_well6")
+   shinyjs::show("top_well7")
+   shinyjs::show("shinylogo")
+
+  } else if(image_import$multiple != TRUE & image_import$select != TRUE){
+          shinyalert::shinyalert(
+          title = "Warning",
+          text = "Please select graph(s) to import",
+          size = "s",
+          closeOnEsc = TRUE,
+          closeOnClickOutside = FALSE,
+          html = FALSE,
+          type = "warning",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#AEDEF4",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE)
+  }
+ })
   ################################################
   # Counter and initial plots
   ################################################
 
-  # start counter at 1.
-  counter <<- shiny::reactiveValues(countervalue = 1)
 
-  # when counter value is changed (either conitnue or previous is pressed):
+
+  # when counter value is changed (either conitnue or previous is pressed) (end on L366).
   shiny::observeEvent(counter$countervalue, {
 
+if(counter$countervalue>=1){
     shinyjs::hide("orient_well")
     shinyjs::hide("extract_well")
     shinyjs::hide("calib_well")
     shinyjs::hide("comm_well")
-    shinyjs::show("plot_well")
+     shinyjs::show("plot_well")
     shinyjs::hide("rev_well")
 
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
+    print(counter$caldat)
+    print(details)
 
     # if extracted/calibrated data already exists:
     if (file.exists(counter$caldat)) {
@@ -35,37 +257,6 @@ shinyDigitise_server <- function(input, output, session){
       #read in that data.
       values <<- do.call("reactiveValues", readRDS(counter$caldat))
 
-
- ################################################
-  # Reviewing mode
-  ################################################
-     #what happens if you only want to review
-    if(review){
-    shinyjs::hide("orient_well")
-    shinyjs::hide("extract_well")
-    shinyjs::hide("calib_well")
-    shinyjs::hide("comm_well")
-    shinyjs::hide("plot_well")
-    shinyjs::show("rev_well")
-    shinyjs::toggle("zoom")
-    shinyjs::disable("cex")
-    shinyjs::disable("pos")
-
- output$review_data <- DT::renderDT({
-        DT::datatable(
-          values$processed_data,
-          editable = list(target = "cell", disable = list(columns = c(1,2,3,5))),
-          selection = "single",
-          options = list(lengthChange = TRUE, dom = "t", pageLength = 100)
-        )
-                })
-    shiny::observeEvent(input$take_screenshot, {
-    shinyscreenshot::screenshot(selector = "plot",
-      filename = paste0(details$name[counter$countervalue]),
-       id = "metaPlot", scale = 2)
-  })
-
-}
       # update
       shiny::updateSliderInput(session, "cex", value = values$cex)
       shinyWidgets::updatePrettyRadioButtons(session, "pos", selected = values$pos)
@@ -176,17 +367,61 @@ shinyDigitise_server <- function(input, output, session){
       plot_values <- shiny::reactiveValuesToList(values)
       do.call(internal_redraw, c(plot_values, shiny=TRUE))
     })
+  }
   })
 
- 
-
+    ################################################
+  # Reviewing mode
   ################################################
+     #what happens if you only want to review
+ shiny::observeEvent(input$rev_mode, {
+  req(importDatapath())
+  if(input$rev_mode){
+    shinyjs::hide("orient_well")
+    shinyjs::hide("extract_well")
+    shinyjs::hide("calib_well")
+    shinyjs::hide("comm_well")
+    shinyjs::hide("plot_well")
+    shinyjs::show("rev_well")
+    shinyjs::hide("zoom")
+    shinyjs::disable("cex")
+    shinyjs::disable("pos")
+
+ output$review_data <- DT::renderDT({
+        DT::datatable(
+          values$processed_data,
+          editable = list(target = "cell", disable = list(columns = c(1,2,3,5))),
+          selection = "single",
+          options = list(lengthChange = TRUE, dom = "t", pageLength = 100)
+        )
+                })
+    shiny::observeEvent(input$take_screenshot, {
+    shinyscreenshot::screenshot(selector = "plot",
+      filename = paste0(details$name[counter$countervalue]),
+       id = "metaPlot", scale = 2)
+  })
+    } else {
+    shinyjs::hide("orient_well")
+    shinyjs::hide("extract_well")
+    shinyjs::hide("calib_well")
+    shinyjs::hide("comm_well")
+    shinyjs::show("plot_well")
+    shinyjs::hide("rev_well")
+    shinyjs::show("zoom")
+    shinyjs::enable("cex")
+    shinyjs::enable("pos")
+}
+
+})
+
+    ################################################
   # Plot type and hints
   ################################################
 
   # record the plot type for the data file - influences clicking and hints, resets all data if plto type changes
 
   shiny::observeEvent(input$plot_type,{
+    req(importDatapath())
     if (!file.exists(counter$caldat)|input$plot_type != values$plot_type && !is.null(values$plot_type)) {
     if(input$plot_type == "mean_error"){
       output$plothintmean <- shiny::renderUI({ 
@@ -324,12 +559,16 @@ shinyDigitise_server <- function(input, output, session){
     })
   })
 
+observe({
+if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$countervalue >=1){
   #record cex used (adjusted with slider)
   shiny::observe(values$cex <<- input$cex)
 
   shiny::observe(values$pos <<- input$pos)
 
   shiny::observe(values$error_type <<- input$errortype)
+}
+})
 
   ################################################
   # zoom
@@ -356,14 +595,13 @@ shinyDigitise_server <- function(input, output, session){
       shinyjs::enable("zoom")
     }
   })
-  
-
-  ################################################
+    ################################################
   # Flip
   ################################################
 
   # record whether we flip the image or not
   shiny::observeEvent(input$flip, {
+    req(importDatapath())
     values$flip <<- input$flip
 
     output$metaPlot <- shiny::renderPlot({
@@ -379,6 +617,7 @@ shinyDigitise_server <- function(input, output, session){
 
   # rotate the image using a slider. Text + slider gets displayed as you click rotate mode.
   shiny::observeEvent(input$rotate_mode, {
+      req(importDatapath())
     if (input$rotate_mode) {
 
       # if we are in rotate mode - toggle extract mode and calib mode off.
@@ -413,8 +652,6 @@ shinyDigitise_server <- function(input, output, session){
       })
     }
   })
-
-
   ################################################
   # Calibrate
   ################################################
@@ -427,6 +664,7 @@ shinyDigitise_server <- function(input, output, session){
 
   # if calib mode button pressed
   shiny::observeEvent(input$calib_mode, {
+    req(importDatapath())
     # resent click counter
     clickcounter$clickcount <- 0
     
@@ -555,8 +793,7 @@ shinyDigitise_server <- function(input, output, session){
       })
     }
   })
-
-  ################################################
+    ################################################
   # Calibrate labeling
   ################################################
 
@@ -598,6 +835,7 @@ shinyDigitise_server <- function(input, output, session){
   })
 
 
+
   ################################################
   # Extraction
   ################################################
@@ -626,7 +864,7 @@ shinyDigitise_server <- function(input, output, session){
 
 #update switches
   shiny::observeEvent(extract_mode$extract, {
-
+req(importDatapath())
     # if we are in extract mode
     if (extract_mode$extract) {
         #toggle calibrate mode and rotate mode off.
@@ -758,7 +996,6 @@ shinyDigitise_server <- function(input, output, session){
     }
 
   })
-
 
   ################################################
   #  Adding points
@@ -944,7 +1181,7 @@ print(selected$row)
   #  when you click to add points
 
   shiny::observeEvent(input$plot_click2, {
-
+req(importDatapath())
     if (add_mode$add) {
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
       dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
@@ -1001,6 +1238,7 @@ print(selected$row)
   # however if one is, then search the data fro that cell and remove it from the df.
   # this will also cause the plot and raw data to update and remove anything with this group.
   shiny::observeEvent(input$del_group, {
+    req(importDatapath())
       if(is.null(selected$row)|length(selected$row) == 0 | nrow(mod_df$x) == 0 ){
         shinyjs::disable("del_group")
         shinyjs::disable("click_group")
@@ -1125,6 +1363,7 @@ print(selected$row)
 
   # record comments
   shiny::observeEvent(input$comment,{
+    req(importDatapath())
     values$comment <<- input$comment
   })
 
@@ -1140,6 +1379,7 @@ print(selected$row)
   # modal box pops up when you've finished.
 
   shiny::observeEvent(input$continue, {
+    req(importDatapath())
     plot_values <- shiny::reactiveValuesToList(values)
     if(check_plottype(plot_values) & check_calibrate(plot_values) & check_extract(plot_values)){
       plot_values$processed_data <- process_data(plot_values)
@@ -1194,6 +1434,7 @@ print(selected$row)
   })
 
     shiny::observeEvent(input$next_review, {
+      req(importDatapath())
     plot_values <- shiny::reactiveValuesToList(values)
       cv <- counter$countervalue + 1
 
@@ -1221,6 +1462,7 @@ print(selected$row)
   })
 
      shiny::observeEvent(input$prev_review, {
+      req(importDatapath())
     plot_values <- shiny::reactiveValuesToList(values)
       cv <- counter$countervalue - 1
 
@@ -1233,14 +1475,10 @@ print(selected$row)
   })
   
   shiny::observeEvent(input$exit, {
-    shiny::stopApp(returnValue=metaDigitise::getExtracted(dir))
-    utils::write.csv(metaDigitise::getExtracted(dir), paste0(dir,"ExtractedData.csv"))
+    req(importDatapath())
+    shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath()))
+    utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv"))
 
-  })
-
-  #output the progress text
-  output$progress <- shiny::renderText({
-    paste0("<font color=\"#ff3333\"><b>", counter$countervalue, "/", counter_total, "</b></font>")
   })
 
   ################################################
@@ -1248,6 +1486,7 @@ print(selected$row)
   ################################################
 
   shiny::observeEvent(input$plot_step, {
+    req(importDatapath())
     if(is.null(values$plot_type)){
       shinyalert::shinyalert(
         title = "No plot type selected",
@@ -1316,8 +1555,9 @@ print(selected$row)
 
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
-    shiny::stopApp(returnValue=metaDigitise::getExtracted(dir))
-    utils::write.csv(metaDigitise::getExtracted(dir), paste0(dir,"ExtractedData.csv"))
+    isolate(shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath())))
+      isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv")))
 
   })
+
 }
