@@ -73,6 +73,25 @@ actionButton("zoom", "Zoom")
         style = "overflow-y:scroll; max-height: 800px; position:relative;",
         
         shiny::verbatimTextOutput("image_name"),
+
+        ####------------------ 
+        ### review panel
+        ####------------------
+          shiny::wellPanel(
+          shiny::strong("Reviewing Mode:"),
+          shinyjs::hidden(
+            shiny::div(id = "rev_well",
+            DT::DTOutput("review_data"),
+            br(),
+            shiny::actionButton("take_screenshot", "Download Extraction Figure"),
+            br(),
+            br(),
+            splitLayout(
+              shiny::actionButton("prev_review", "Previous"),
+              shiny::actionButton("next_review", "Next"))
+        )
+          )
+        ),
         ####------------------ 
         ### Plot Type Panel
         ####------------------
@@ -368,26 +387,7 @@ actionButton("zoom", "Zoom")
               style = "padding:4px"
             )
           )
-        ))),
-
-        ####------------------ 
-        ### review panel
-        ####------------------
-          shiny::wellPanel(
-          shiny::strong("Reviewing Mode:"),
-          shinyjs::hidden(
-            shiny::div(id = "rev_well",
-            DT::DTOutput("review_data"),
-            br(),
-            shiny::actionButton("take_screenshot", "Download Extraction Figure"),
-            br(),
-            br(),
-            splitLayout(
-              shiny::actionButton("prev_review", "Previous"),
-              shiny::actionButton("next_review", "Next"))
-        )
-          )
-        )),
+        )))),
       
       ####------------------ 
       ### Plot panel

@@ -238,14 +238,30 @@ shiny::observeEvent(input$data_ok, {
   # when counter value is changed (either conitnue or previous is pressed) (end on L366).
   shiny::observeEvent(counter$countervalue, {
 
+    if(counter$countervalue == 1){
+      rev_mode = FALSE
+    }
+    
 if(counter$countervalue>=1){
     shinyjs::hide("orient_well")
     shinyjs::hide("extract_well")
     shinyjs::hide("calib_well")
     shinyjs::hide("comm_well")
      shinyjs::show("plot_well")
-    shinyjs::hide("rev_well")
-
+     
+     if(rev_mode !=TRUE){
+       shinyjs::hide("rev_well")
+     } else {
+       shinyjs::hide("orient_well")
+       shinyjs::hide("extract_well")
+       shinyjs::hide("calib_well")
+       shinyjs::hide("comm_well")
+       shinyjs::hide("plot_well")
+       shinyjs::show("rev_well")
+       shinyjs::enable("rev_well")
+       shinyjs::hide("zoom")
+       shinyjs::disable("cex")
+       shinyjs::disable("pos")}
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
     print(counter$caldat)
@@ -383,6 +399,7 @@ if(counter$countervalue>=1){
     shinyjs::hide("comm_well")
     shinyjs::hide("plot_well")
     shinyjs::show("rev_well")
+    shinyjs::enable("rev_well")
     shinyjs::hide("zoom")
     shinyjs::disable("cex")
     shinyjs::disable("pos")
@@ -407,6 +424,7 @@ if(counter$countervalue>=1){
     shinyjs::hide("comm_well")
     shinyjs::show("plot_well")
     shinyjs::hide("rev_well")
+    shinyjs::disable("rev_well")
     shinyjs::show("zoom")
     shinyjs::enable("cex")
     shinyjs::enable("pos")
@@ -1434,7 +1452,9 @@ req(importDatapath())
   })
 
     shiny::observeEvent(input$next_review, {
-      req(importDatapath())
+      
+  rev_mode <<- TRUE 
+  
     plot_values <- shiny::reactiveValuesToList(values)
       cv <- counter$countervalue + 1
 
@@ -1463,6 +1483,9 @@ req(importDatapath())
 
      shiny::observeEvent(input$prev_review, {
       req(importDatapath())
+       
+       rev_mode <<- TRUE 
+       
     plot_values <- shiny::reactiveValuesToList(values)
       cv <- counter$countervalue - 1
 
