@@ -82,7 +82,6 @@ importDatapath <- reactive({
 
 observe({
 if(!is.null(importDatapath()) & as.character(importDatapath()) != "/"){
- print(importDatapath())
   
    #show the modal dialog
   shinyjs::hide("folder")
@@ -92,8 +91,11 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/"){
   shinyjs::show("data_okpick")
   shinyjs::show("data_okbut")
 
+#setup
 metaDigitise::setup_calibration_dir(importDatapath())  
 details <<- metaDigitise::dir_details(importDatapath())
+print("sEtup")
+print(details)
 counter$countervalue <<- 1
 
   tags$div(style = "text-align: center", offset = 0,
@@ -233,10 +235,8 @@ shiny::observeEvent(input$data_ok, {
   # Counter and initial plots
   ################################################
 
-
-
   # when counter value is changed (either conitnue or previous is pressed) (end on L366).
-  shiny::observeEvent(counter$countervalue, {
+  shiny::observeEvent(counter$countervalue|image_import$multiple|image_import$select, {
 
     if(counter$countervalue == 1){
       rev_mode = FALSE
@@ -262,10 +262,13 @@ if(counter$countervalue>=1){
        shinyjs::hide("zoom")
        shinyjs::disable("cex")
        shinyjs::disable("pos")}
+
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
-    print(counter$caldat)
+
+    print("import")
     print(details)
+    print(counter$caldat)
 
     # if extracted/calibrated data already exists:
     if (file.exists(counter$caldat)) {
@@ -406,10 +409,11 @@ if(counter$countervalue>=1){
 
  output$review_data <- DT::renderDT({
         DT::datatable(
-          values$processed_data,
-          editable = list(target = "cell", disable = list(columns = c(1,2,3,5))),
+          values$processed_data |>
+          dplyr::mutate_if(is.numeric,round,digits = 3),
+          editable = FALSE,
           selection = "single",
-          options = list(lengthChange = TRUE, dom = "t", pageLength = 100)
+          options = list(lengthChange = TRUE, dom = "t", pageLength = 100, scrollX = TRUE)
         )
                 })
     shiny::observeEvent(input$take_screenshot, {
@@ -1132,7 +1136,6 @@ req(importDatapath())
 
 
   shiny::observeEvent(input$click_group, {
-print(selected$row)
     plotcounter$plotclicks <- 0
 
     # add mode becomes T
@@ -1334,8 +1337,6 @@ req(importDatapath())
   shiny::observeEvent(input$group_table_cell_edit, {
     change_string <-  as.character(mod_df$x[selected$row,1])
     mod_df$x <-  DT::editData(mod_df$x, input$group_table_cell_edit)
-    print(change_string)
-    print(mod_df$x)
     if(is.null(values$raw_data)){
     } else {values$raw_data[grepl(change_string, values$raw_data[[2]]),][[3]] <- input$group_table_cell_edit$value
 }
@@ -1343,7 +1344,6 @@ req(importDatapath())
   
   shiny::observeEvent(input$group_table_row_last_clicked, {
     clicked$row <- c(clicked$row,input$group_table_row_last_clicked)
-    print(values$raw_data)
     if(any(duplicated(clicked$row))){
       clicked$row <<- NULL
       DT::selectRows(proxy, selected = NULL)
@@ -1397,6 +1397,8 @@ req(importDatapath())
   # modal box pops up when you've finished.
 
   shiny::observeEvent(input$continue, {
+    rev_mode <<- FALSE 
+
     req(importDatapath())
     plot_values <- shiny::reactiveValuesToList(values)
     if(check_plottype(plot_values) & check_calibrate(plot_values) & check_extract(plot_values)){
