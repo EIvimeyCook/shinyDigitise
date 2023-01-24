@@ -7,24 +7,22 @@ shinyDigitise_server <- function(input, output, session){
   ################################################
 
    # start counter at 1 - helps if this is before things
-  counter <<- shiny::reactiveValues(countervalue = 0)
+  counter <<- shiny::reactiveValues(countervalue = 0, next_count = 0)
 
   #logo
   output$shinylogo <- shiny::renderImage({
-    list(src =base::system.file("www/shinyDigitise.png", package="shinyDigitise"), height = 60)
+    list(src =base::system.file("inst/www/logos/shinyDigitise.png", package="shinyDigitise"), height = 60)
   },deleteFile=FALSE)
 
 #take data quiery on startup in a popup modal including directory
   data_modal <- shiny::modalDialog(
-    title = div("shinyDigitise", img(src=base::system.file("www/shinyDigitise.png", package="shinyDigitise"))),
+    title = shiny::div("shinyDigitise", shiny::img(src="inst/www/logos/shinyDigitise.png")),
     br(),
     shiny::div(style = "text-align: center", offset = 0, 
       shinyFiles::shinyFilesButton("folder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
         filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),
     br(),
-    br(),
     shinyjs::hidden(shiny::div(id = "data_import_title1", h5("Please select which graphs you'd like to import:", align = "center"))),
-    br(),
     br(),
     shinyjs::hidden(shiny::div(id = "data_okimport", style = "text-align: center", offset = 0,
     shiny::radioButtons(
@@ -34,7 +32,6 @@ shinyDigitise_server <- function(input, output, session){
    selected = character(0),
    inline = TRUE, 
 ))),
-br(),
 br(),
 shinyjs::hidden(shiny::div(id = "data_import_title2",h5("Alternatively, please select a specific graph from your chosen directory:", align = "center"))), 
 br(),
@@ -48,7 +45,6 @@ shinyjs::hidden(shiny::div(id = "data_okpick",style = "text-align: center", offs
    inline = TRUE,
    width = "auto"
 ))), 
-br(),
 br(),
 shinyjs::hidden(shiny::div(id = "data_okbut", actionButton("data_ok", "Get Extracting!"),
     easyClose = FALSE,
@@ -94,10 +90,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/"){
 #setup
 metaDigitise::setup_calibration_dir(importDatapath())  
 details <<- metaDigitise::dir_details(importDatapath())
-print("sEtup")
-print(details)
 counter$countervalue <<- 1
-
+counter$next_count <<- 1
   tags$div(style = "text-align: center", offset = 0,
    shinyWidgets::updatePickerInput(
     session = session,
@@ -238,7 +232,7 @@ shiny::observeEvent(input$data_ok, {
   # when counter value is changed (either conitnue or previous is pressed) (end on L366).
   shiny::observeEvent(counter$countervalue|image_import$multiple|image_import$select, {
 
-    if(counter$countervalue == 1){
+    if(counter$next_count == 1){
       rev_mode = FALSE
     }
     
@@ -265,10 +259,6 @@ if(counter$countervalue>=1){
 
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
-
-    print("import")
-    print(details)
-    print(counter$caldat)
 
     # if extracted/calibrated data already exists:
     if (file.exists(counter$caldat)) {
@@ -393,8 +383,19 @@ if(counter$countervalue>=1){
   # Reviewing mode
   ################################################
      #what happens if you only want to review
- shiny::observeEvent(input$rev_mode, {
+ shiny::observeEvent(input$rev_mode|input$next_review|input$prev_review, {
+
   req(importDatapath())
+
+      counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
+
+    # if extracted/calibrated data already exists:
+    if (file.exists(counter$caldat)) {
+
+      #read in that data.
+      values <<- do.call("reactiveValues", readRDS(counter$caldat))
+}
+
   if(input$rev_mode){
     shinyjs::hide("orient_well")
     shinyjs::hide("extract_well")
@@ -407,15 +408,34 @@ if(counter$countervalue>=1){
     shinyjs::disable("cex")
     shinyjs::disable("pos")
 
+if(counter$countervalue == 1){
+  shinyjs::disable("prev_review")
+}
+
+print(values$processed_data)
+
+if(!is.null(values$processed_data)){
+
+shinyjs::show("review_data")
+
+ df_review <- reactive({
+    req(values$processed_data)
+              df_review <- values$processed_data |>
+          dplyr::mutate_if(is.numeric,round,digits = 3)
+          })
+
  output$review_data <- DT::renderDT({
         DT::datatable(
-          values$processed_data |>
-          dplyr::mutate_if(is.numeric,round,digits = 3),
+          df_review(),
           editable = FALSE,
           selection = "single",
           options = list(lengthChange = TRUE, dom = "t", pageLength = 100, scrollX = TRUE)
         )
                 })
+ }
+ else{
+  shinyjs::hide("review_data")
+}
     shiny::observeEvent(input$take_screenshot, {
     shinyscreenshot::screenshot(selector = "plot",
       filename = paste0(details$name[counter$countervalue]),
@@ -1454,11 +1474,12 @@ req(importDatapath())
   })
 
     shiny::observeEvent(input$next_review, {
-      
+
   rev_mode <<- TRUE 
   
     plot_values <- shiny::reactiveValuesToList(values)
       cv <- counter$countervalue + 1
+      counter$next_count <- counter$next_count + 1
 
       if (cv > counter_total) {
         counter$countervalue <- counter_total
@@ -1477,6 +1498,8 @@ req(importDatapath())
           timer = 0,
           imageUrl = "",
           animation = TRUE)
+
+        shinyjs::disable("next_review")
         
       } else {
         counter$countervalue <- cv
@@ -1484,19 +1507,19 @@ req(importDatapath())
   })
 
      shiny::observeEvent(input$prev_review, {
-      req(importDatapath())
        
        rev_mode <<- TRUE 
        
     plot_values <- shiny::reactiveValuesToList(values)
       cv <- counter$countervalue - 1
+      counter$next_count <- counter$next_count + 1
 
       if (cv <1) {
         counter$countervalue <- 1
-    shinyjs::disable("prev_review")
       } else {
         counter$countervalue <- cv
       }
+
   })
   
   shiny::observeEvent(input$exit, {
