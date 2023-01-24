@@ -11,12 +11,12 @@ shinyDigitise_server <- function(input, output, session){
 
   #logo
   output$shinylogo <- shiny::renderImage({
-    list(src =base::system.file("inst/www/logos/shinyDigitise.png", package="shinyDigitise"), height = 60)
+    list(src =base::system.file("inst/logos/shinyDigitise.png", package="shinyDigitise"), height = 60)
   },deleteFile=FALSE)
 
 #take data quiery on startup in a popup modal including directory
   data_modal <- shiny::modalDialog(
-    title = shiny::div("shinyDigitise", shiny::img(src="inst/www/logos/shinyDigitise.png")),
+    title = shiny::div("shinyDigitise", shiny::img(src="inst/logos/shinyDigitise.png")),
     br(),
     shiny::div(style = "text-align: center", offset = 0, 
       shinyFiles::shinyFilesButton("folder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
