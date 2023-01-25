@@ -11,12 +11,12 @@ shinyDigitise_server <- function(input, output, session){
 
   #logo
   output$shinylogo <- shiny::renderImage({
-    list(src =base::system.file("inst/logos/shinyDigitise.png", package="shinyDigitise"), height = 60)
+    list(src =base::system.file("inst/www/logos/shinyDigitise.png", package="shinyDigitise"), height = 60)
   },deleteFile=FALSE)
 
 #take data quiery on startup in a popup modal including directory
   data_modal <- shiny::modalDialog(
-    title = shiny::div("shinyDigitise", shiny::img(src="inst/logos/shinyDigitise.png")),
+    title = shiny::div("shinyDigitise", shiny::img(src="inst/www/logos/shinyDigitise.png")),
     br(),
     shiny::div(style = "text-align: center", offset = 0, 
       shinyFiles::shinyFilesButton("folder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
@@ -412,8 +412,6 @@ if(counter$countervalue == 1){
   shinyjs::disable("prev_review")
 }
 
-print(values$processed_data)
-
 if(!is.null(values$processed_data)){
 
 shinyjs::show("review_data")
@@ -436,11 +434,6 @@ shinyjs::show("review_data")
  else{
   shinyjs::hide("review_data")
 }
-    shiny::observeEvent(input$take_screenshot, {
-    shinyscreenshot::screenshot(selector = "plot",
-      filename = paste0(details$name[counter$countervalue]),
-       id = "metaPlot", scale = 2)
-  })
     } else {
     shinyjs::hide("orient_well")
     shinyjs::hide("extract_well")
@@ -1403,6 +1396,15 @@ req(importDatapath())
   shiny::observeEvent(input$comment,{
     req(importDatapath())
     values$comment <<- input$comment
+  })
+  
+  ################################################
+  # Record extraction file
+  ################################################
+  shiny::observeEvent(input$take_screenshot, {
+    shinyscreenshot::screenshot(selector = "plot",
+                                filename = paste0("Extraction_imgrecord: ", details$name[counter$countervalue]),
+                                id = "metaPlot", scale = 2)
   })
 
 
