@@ -1,3 +1,4 @@
+
 shinyDigitise_UI <- function(){
   shiny::fluidPage(
     shinyjs::useShinyjs(),
@@ -12,19 +13,16 @@ shinyDigitise_UI <- function(){
         width = 4,
         shiny::titlePanel(
           title=shiny::splitLayout(cellWidths = c("20%","50%"),
-          shiny::imageOutput(
-            "shinylogo",
-            height = "60px"
-          ),
-          #shiny::textOutput("shinytext")
-
-
+                                   shiny::actionButton(
+                                     inputId = "citeme", 
+                                     style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
+                                     label =  img(src = "inst/logos/shinyDigitise.png", height = 60)),
           shinyjs::hidden(shiny::div(id = "top_well7",shinyWidgets::switchInput(
    inputId = "rev_mode",
     labelWidth = "80px",
     value = FALSE,
-    onLabel = "Review mode",
-    offLabel = "Edit Mode"
+    onLabel = "Review Mode",
+    offLabel = "Extract Mode"
 )))
         ),
         windowTitle = "shinyDigitise")
@@ -78,11 +76,8 @@ actionButton("zoom", "Zoom")
         ### review panel
         ####------------------
           shiny::wellPanel(
-          shiny::strong("Reviewing Mode:"),
           shinyjs::hidden(
             shiny::div(id = "rev_well",
-            DT::DTOutput("review_data"),
-            br(),
             shiny::actionButton("take_screenshot", "Download Extraction Figure"),
             br(),
             br(),
@@ -387,7 +382,8 @@ actionButton("zoom", "Zoom")
               style = "padding:4px"
             )
           )
-        )))),
+        )))
+        ),
       
       ####------------------ 
       ### Plot panel

@@ -14,5 +14,4 @@ shinyDigitise <- function(){
       server = shinyDigitise_server
   )
   shiny::runApp(app)
-
 	}
