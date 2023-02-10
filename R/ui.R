@@ -1,5 +1,6 @@
 
 shinyDigitise_UI <- function(){
+  #various starting functions with theme and fonts
   shiny::fluidPage(
     shinyjs::useShinyjs(),
     theme = bslib::bs_theme(
@@ -8,6 +9,8 @@ shinyDigitise_UI <- function(){
       base_font = bslib::font_collection(bslib::font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif"),
       code_font = bslib::font_collection(bslib::font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif")),
     
+    #header pnael, with SD logo as an action button that activates the citing function button
+    #contains a switch for review or extract
     shiny::fluidRow(
       shiny::column(
         width = 4,
@@ -17,6 +20,8 @@ shinyDigitise_UI <- function(){
                                      inputId = "citeme", 
                                      style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
                                      label =  img(src = "inst/logos/shinyDigitise.png", height = 60)),
+
+    #contains a switch for review or extract
           shinyjs::hidden(shiny::div(id = "top_well7",shinyWidgets::switchInput(
    inputId = "rev_mode",
     labelWidth = "80px",
@@ -28,11 +33,14 @@ shinyDigitise_UI <- function(){
         windowTitle = "shinyDigitise")
       ),
 
+#progress number based on counter and counter total
       shiny::column(width = 8,
         shiny::br(),
         shiny::div(style="display: inline-block;vertical-align:top; width: 10%; font-size:x-large;",
            shiny::p(shiny::htmlOutput("progress", inline=TRUE)),
         ),
+
+        #point size for plotting
         shinyjs::hidden(shiny::div(id = "top_well4", style="display: inline-block;vertical-align:top; width: 10%;",shiny::strong("Point size:"))),
         shinyjs::hidden(shiny::div(id = "top_well5", style="display: inline-block;vertical-align:top;  width: 20%;",
         shiny::sliderInput(
@@ -41,7 +49,9 @@ shinyDigitise_UI <- function(){
            value = 1,
            min = 0.1,
            max = 3,
-           ticks  = FALSE))),        
+           ticks  = FALSE))),  
+
+           #position of the label group name      
         shinyjs::hidden(shiny::div(id = "top_well1", style="display: inline-block;vertical-align:top; width: 10% ")),
         shinyjs::hidden(shiny::div(id = "top_well2", style="display: inline-block;vertical-align:top; width: 20%;",shiny::strong("Group Name Position:"))),
         shinyjs::hidden(shiny::div(id = "top_well3", style="display: inline-block;vertical-align:top;  width: 20%;",
@@ -57,24 +67,29 @@ shinyDigitise_UI <- function(){
              animation = "jelly"
            )
         )),
+
+        #zoom button, allows for zooming
         shinyjs::hidden(shiny::div(id = "top_well6",style="display: inline-block;vertical-align:top;  width: 2%;",
 actionButton("zoom", "Zoom")
                    ))
       )
     ),
     
-    # Sidebar with a slider input for number of bins
+    # Name of the sidebar
     shiny::sidebarLayout(
       shiny::sidebarPanel(
         width = 4,
         id = "tPanel",
         style = "overflow-y:scroll; max-height: 800px; position:relative;",
         
+
+        #image name
         shiny::verbatimTextOutput("image_name"),
 
         ####------------------ 
         ### review panel
         ####------------------
+        #take a screenshot, previous or next review.
           shiny::wellPanel(
           shinyjs::hidden(
             shiny::div(id = "rev_well",
@@ -90,6 +105,7 @@ actionButton("zoom", "Zoom")
         ####------------------ 
         ### Plot Type Panel
         ####------------------
+        #The various plot types
         shiny::wellPanel(
           shiny::splitLayout(
             cellWidths = c("80%","20%"),
@@ -123,6 +139,7 @@ actionButton("zoom", "Zoom")
         ####------------------ 
         ### Orientation Panel
         ####------------------
+        #Zoom or roation panels. 
         shiny::wellPanel(
           shiny::splitLayout(
                 cellWidths = c("80%","20%"),
@@ -186,6 +203,7 @@ actionButton("zoom", "Zoom")
         ####------------------ 
         ### Calibrate Panel
         ####------------------
+        #calibration panel with specific inputs based on plot type selected. 
         shiny::wellPanel(
           shiny::splitLayout(
             cellWidths = c("80%","20%"),
@@ -281,9 +299,10 @@ actionButton("zoom", "Zoom")
         ####------------------ 
         ### Extraction Panel
         ####------------------
-         # "1. Group names and sample size should be entered into the table on the sidebar before points are added. <br/>
-         #  2. To add points to a group, first click the group on the sidebar then click 'Add Points'. <br/>
+         #  1. Group names and sample size should be entered into the table on the sidebar before points are added.
+         #  2. To add points to a group, first click the group on the sidebar then click 'Add Points'.
          #  3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."
+         #  4. With appropriate error type for each model. 
 
         shiny::wellPanel(
           shiny::splitLayout(
@@ -361,6 +380,7 @@ actionButton("zoom", "Zoom")
         ####------------------ 
         ### comment panel
         ####------------------
+        #Comment panel w/ previous and conitnue buttons.
         shiny::wellPanel(
           shiny::strong("5. Comments:"),
           shinyjs::hidden(
@@ -388,6 +408,7 @@ actionButton("zoom", "Zoom")
       ####------------------ 
       ### Plot panel
       ####------------------
+      #click and brush have specific actions. Brush allows for zooming, click allows for clicking.
       shiny::mainPanel(
         shiny::plotOutput(
           "metaPlot",
