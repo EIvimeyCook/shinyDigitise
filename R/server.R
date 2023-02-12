@@ -120,7 +120,8 @@ shinyDigitise_server <- function(input, output, session){
     offStatus = "info"))),
     br(),
     shinyjs::hidden(shiny::div(id = "data_import_title2",
-     h5("Please select which graphs you'd like to import:", align = "center"))),
+     h5("Please select which graphs you'd like to import:", align = "center"), 
+      h6("Note if only 'All' is showing, there are no further images to extract!", align = "center"))),
     br(),
     shinyjs::hidden(shiny::div(id = "data_all_or_unfin",
      style = "text-align: center", offset = 0,
@@ -220,9 +221,19 @@ importDatapath <- reactive({
 #when the datapath is not null or simply a slash, then show the other options. Allows for the starting options to be shown. Also setups folders for metaDigitise to work. Creates a temporary dettails files for the dropdown.
 observe({
 if(!is.null(importDatapath()) & as.character(importDatapath()) != "/"){
-  
-  print(importDatapath())
+
   image_import$extract_rev <<- TRUE
+
+#setup the metadigitise folder and import the inital details from the datapath
+metaDigitise::setup_calibration_dir(importDatapath())  
+details <<- metaDigitise::dir_details(importDatapath())
+
+
+#hide unfinished if none left to finish
+  if(length(details$images)==length(details$doneCalFiles)){
+  shiny::updateRadioButtons(session = session, inputId = "all_or_unfin_but", choices = "All", selected = character(0))
+} else{}
+
   
   #hide and show relevant parts of the modal dialog
   shinyjs::hide("choosefolder")
@@ -233,10 +244,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/"){
   shinyjs::show("data_select_image")
   shinyjs::show("data_rev_or_extract")
   shinyjs::show("data_import_extract")
-
-#setup the metadigitise folder and import the inital details from the datapath
-metaDigitise::setup_calibration_dir(importDatapath())  
-details <<- metaDigitise::dir_details(importDatapath())
 
 #update the image with names of images.
   shiny::div(style = "text-align: center", offset = 0,
@@ -307,11 +314,9 @@ req(importDatapath())
 
   else if(input$all_or_unfin_but == "Unfinished"){
     details <<- metaDigitise::get_notDone_file_details(importDatapath())
-    det_check <<- metaDigitise::dir_details(importDatapath())
     counter_total <<- length(details$paths)
     image_import$multiple <<- TRUE
     image_import$select <<- FALSE
-
     #set counters and next values at 1
     counter$countervalue <<- 1
     counter$next_count <<- 1
@@ -324,25 +329,6 @@ req(importDatapath())
     select = "",
    clearOptions = TRUE
 ))
-
-  #if the lengths of the paths are the same as those done, then pop up an alert to sya theyve finished extracting.
-     if(length(det_check$paths) == length(details$doneCalFiles)){
-       shinyalert::shinyalert(
-          title = "Congratulations!",
-          text = "You have none left to extract",
-          size = "s",
-          closeOnEsc = TRUE,
-          closeOnClickOutside = FALSE,
-          html = FALSE,
-          type = "success",
-          showConfirmButton = TRUE,
-          showCancelButton = FALSE,
-          confirmButtonText = "OK",
-          confirmButtonCol = "#AEDEF4",
-          timer = 0,
-          imageUrl = "",
-          animation = TRUE)
-       }
        } else {
         image_import$multiple <<- FALSE
        }
@@ -847,7 +833,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   
   shiny::observeEvent(input$calib_mode,{
     if(input$calib_mode){
-    shinyjs::disable("zoom")
+   #shinyjs::disable("zoom")
     }
     if(input$calib_mode==F){
       shinyjs::enable("zoom")
@@ -1750,6 +1736,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     shinyjs::show("extract_well")
     extract_mode$extract <<- TRUE
     shinyjs::hide("calib_well")
+    shinyWidgets::updateSwitchInput(session, "calib_mode", value = FALSE)
   })
   
   shiny::observeEvent(input$extract_step, {
@@ -1767,6 +1754,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   shiny::observeEvent(input$calib_back, {
     shinyjs::show("orient_well")
     shinyjs::hide("calib_well")
+    shinyWidgets::updateSwitchInput(session, "calib_mode", value = FALSE)
   })
   
   shiny::observeEvent(input$extract_back, {
