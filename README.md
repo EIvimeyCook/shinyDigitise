@@ -24,6 +24,10 @@ library(shinyDigitise)
 
 df<-shinyDigitise(Folder where your images are located)
 
+or
+
+df<-shinyDigitise() - where you specify the folder through a menu system within SD.
+
 ## Basic workflow (the app will walk you through each stage):
 
 NB. you can adjust point size and group name positions on the fly.
