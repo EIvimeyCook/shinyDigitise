@@ -1,6 +1,6 @@
 Package: shinyDigitise
 Title: Extract and Summarise Data from Published Figures
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
      c(person("Ed", "Ivimey-Cook", email = "e.ivimeycook@gmail.com", role = c("aut", "cre")), 
      person("Joel", "Pick", email = "joel.l.pick@gmail.com", role = c("aut")))
