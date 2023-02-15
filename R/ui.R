@@ -16,19 +16,21 @@ shinyDigitise_UI <- function(){
         width = 4,
         shiny::titlePanel(
           title=shiny::splitLayout(cellWidths = c("20%","50%"),
-                                   shiny::actionButton(
+                                   tippy::with_tippy(shiny::actionButton(
                                      inputId = "citeme", 
                                      style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
-                                     label =  img(src = "inst/logos/shinyDigitise.png", height = 60)),
+                                     label =  img(src = "inst/logos/shinyDigitise.png", height = 60)),"Click me!"),
 
     #contains a switch for review or extract
-          shinyjs::hidden(shiny::div(id = "top_well7",shinyWidgets::switchInput(
+          shinyjs::hidden(shiny::div(id = "top_well7",
+            tippy::with_tippy(shinyWidgets::switchInput(
    inputId = "rev_mode",
     labelWidth = "80px",
     value = FALSE,
     onLabel = "Review Mode",
     offLabel = "Extract Mode"
-)))
+), "Click here to either review or extract data")
+            ))
         ),
         windowTitle = "shinyDigitise")
       ),
@@ -36,13 +38,13 @@ shinyDigitise_UI <- function(){
 #progress number based on counter and counter total
       shiny::column(width = 8,
         shiny::br(),
-        shiny::div(style="display: inline-block;vertical-align:top; width: 10%; font-size:x-large;",
+        shiny::div(style="display: inline-block;vertical-align:top; width: 7%; font-size:x-large;",
            shiny::p(shiny::htmlOutput("progress", inline=TRUE)),
         ),
 
         #point size for plotting
         shinyjs::hidden(shiny::div(id = "top_well4", style="display: inline-block;vertical-align:top; width: 10%;",shiny::strong("Point size:"))),
-        shinyjs::hidden(shiny::div(id = "top_well5", style="display: inline-block;vertical-align:top;  width: 20%;",
+        shinyjs::hidden(shiny::div(id = "top_well5", style="display: inline-block;vertical-align:top;  width: 15%;",
         shiny::sliderInput(
            inputId = "cex",
            label = NULL,
@@ -53,8 +55,8 @@ shinyDigitise_UI <- function(){
 
            #position of the label group name      
         shinyjs::hidden(shiny::div(id = "top_well1", style="display: inline-block;vertical-align:top; width: 10% ")),
-        shinyjs::hidden(shiny::div(id = "top_well2", style="display: inline-block;vertical-align:top; width: 20%;",shiny::strong("Group Name Position:"))),
-        shinyjs::hidden(shiny::div(id = "top_well3", style="display: inline-block;vertical-align:top;  width: 20%;",
+        shinyjs::hidden(shiny::div(id = "top_well2", style="display: inline-block;vertical-align:top; width: 15%;",shiny::strong("Group Name Position:"))),
+        shinyjs::hidden(shiny::div(id = "top_well3", style="display: inline-block;vertical-align:top;  width: 15%;",
            shinyWidgets::prettyRadioButtons(
              inputId = "pos",
              label = NULL,
@@ -69,9 +71,12 @@ shinyDigitise_UI <- function(){
         )),
 
         #zoom button, allows for zooming
-        shinyjs::hidden(shiny::div(id = "top_well6",style="display: inline-block;vertical-align:top;  width: 2%;",
-actionButton("zoom", "Zoom")
-                   ))
+        shinyjs::hidden(shiny::div(id = "top_well6",style="display: inline-block;vertical-align:top;  width: 20%;",
+        shiny::actionButton(
+        inputId = "zoom",
+         label = "Zoom"),
+        tippy::tippy_this("zoom", "Drag area to zoom then press here! To Reset, click here when no box is present")
+      )),
       )
     ),
     
@@ -316,15 +321,9 @@ actionButton("zoom", "Zoom")
            shinyjs::hidden(
             shiny::div(id = "group_data",
                 tags$br(),
-        shiny::strong("1. Click add groups to enter group names and sample size before adding points."), tags$br(),
-        shiny::strong("2. To add points click the group on the sidebar then click 'Click Points' and click points."), tags$br(),
-        shiny::strong("3. To delete a group, click on the desired group in the table on the sidebar then press 'Delete Group'."), tags$br(),
-        tags$br(),
-        shiny::uiOutput("plothintmean"),
-        shiny::uiOutput("plothintxy"),
-        shiny::uiOutput("plothintbox"),
-        shiny::uiOutput("plothintscatter"),
-        shiny::uiOutput("plothinthist"),
+        shiny::strong("1. Click add groups to enter group names and sample size before adding points (Remeber to doubleclick!)."), tags$br(),
+        shiny::strong("2. To add points, click the group in the table then press 'Click Points' and then prcoeed to click points."), tags$br(),
+        shiny::strong("3. To delete a group, click on the desired group in the table and then press 'Delete Group'."), tags$br(),
           tags$br(),
               shiny::splitLayout(
                 shiny::div(class = "buttonagency",
@@ -365,7 +364,7 @@ actionButton("zoom", "Zoom")
             shiny::actionButton(
               inputId = "extract_back",
               label = "Previous step",
-              style = "padding:4px; color: #fff; background-color: #337ab7; border-color: #2e6da4"
+              style = "padding:4px;"
             ),
             shiny::actionButton(
               inputId = "extract_step",
@@ -410,9 +409,20 @@ actionButton("zoom", "Zoom")
       ####------------------
       #click and brush have specific actions. Brush allows for zooming, click allows for clicking.
       shiny::mainPanel(
+                   shinyjs::hidden(
+            shiny::div(id = "hint_mean",shiny::uiOutput("plothintmean"))),
+                   shinyjs::hidden(
+            shiny::div(id = "hint_xy",shiny::uiOutput("plothintxy"))),
+                   shinyjs::hidden(
+            shiny::div(id = "hint_box",shiny::uiOutput("plothintbox"))),
+                   shinyjs::hidden(
+            shiny::div(id = "hint_scatter",shiny::uiOutput("plothintscatter"))),
+                    shinyjs::hidden(
+            shiny::div(id = "hint_hist",shiny::uiOutput("plothinthist"))),
+        tags$br(),
         shiny::plotOutput(
           "metaPlot",
-          click = "plot_click2",
+          dblclick = "plot_click2",
           brush = shiny::brushOpts(
             "plot_brush",
             resetOnNew=TRUE,

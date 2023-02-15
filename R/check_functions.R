@@ -28,8 +28,7 @@ check_extract <- function(x) {
     FALSE
   } else{
 
-  group_lengths <- table(x$raw_data$id)
-  print(group_lengths)
+  group_lengths <- table(x$raw_data$id) 
 
     if(length(group_lengths) < 1) {
       FALSE

@@ -116,8 +116,8 @@ shinyDigitise_server <- function(input, output, session){
     inline = TRUE,
     onLabel = "Review Mode",
     offLabel = "Extract Mode",
-    onStatus = "success",
-    offStatus = "info"))),
+    onStatus = "primary",
+    offStatus = "warning"))),
     br(),
     shinyjs::hidden(shiny::div(id = "data_import_title2",
      h5("Please select which graphs you'd like to import:", align = "center"), 
@@ -160,20 +160,24 @@ shinyjs::hidden(shiny::div(id = "data_import_extract",
 
   # Create modal
   popupModal1 <- function(failed = FALSE) {
-    shiny::modalDialog(
+    shinyjqui::jqui_draggable(shiny::modalDialog(
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
+      br(),
+      br(),
+      shiny::actionButton("cancel", "Cancel"),
+     shiny::actionButton("ok", "OK"),
       if (failed)
         shiny::div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
       footer = shiny::tagList(
-        shiny::actionButton("cancel", "Cancel"),
-        shiny::actionButton("ok", "OK")
+        shiny::tags$em("Note - This window is draggable")
       )
+    )
     )
   }
   
   popupModal2 <- function(failed = FALSE) {
-    shiny::modalDialog(
+    shinyjqui::jqui_draggable(shiny::modalDialog(
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
       shiny::selectInput("pch", "Shape", "Circle", choices = c("Circle" = 19,
@@ -182,12 +186,16 @@ shinyjs::hidden(shiny::div(id = "data_import_extract",
       shiny::selectInput("col", "Colour", "Orange", choices = c("Orange" = "orange",
                                                          "Purple" = "purple",
                                                          "Blue" = "blue")),
+      br(),
+      br(),
+      shiny::actionButton("cancel", "Cancel"),
+     shiny::actionButton("ok", "OK"),
       if (failed)
         shiny::div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
       footer = shiny::tagList(
-        shiny::actionButton("cancel", "Cancel"),
-        shiny::actionButton("ok", "OK")
+        shiny::tags$em("Note - This window is draggable")
       )
+    )
     )
   }
 
@@ -588,15 +596,6 @@ if(counter$countervalue == 1){
     if (!file.exists(counter$caldat)|input$plot_type != values$plot_type && !is.null(values$plot_type)) {
 
     if(input$plot_type == "mean_error"){
-      output$plothintmean <- shiny::renderUI({ 
-        shiny::strong("Click on Error Bar, followed by the Mean")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::hide("plothintbox")
-      shinyjs::hide("plothintscatter")
-      shinyjs::show("plothintmean")
-      shinyjs::hide("plothinthist")
-
       #container for for plotting values
       valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
 
@@ -816,7 +815,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   
   shiny::observeEvent(input$zoom,{
 
-   req(importDatapath())
+  req(importDatapath())
   req(input$all_or_unfin_but)
     
     if(input$zoom){
@@ -830,16 +829,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   shinyjs::runjs("document.getElementById('plot_brush').remove()")
     }
     })
-  
-  shiny::observeEvent(input$calib_mode,{
-    if(input$calib_mode){
-   #shinyjs::disable("zoom")
-    }
-    if(input$calib_mode==F){
-      shinyjs::enable("zoom")
-    }
-  })
-
 
   ################################################
   # Flip
@@ -1047,7 +1036,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       }else if(input$plot_type %in% c("histogram")){
         values$variable <<- input$x_var
       }else{
-        values$variable <<- c(y=input$y_var,y=input$x_var)
+        values$variable <<- c(y=input$y_var,x=input$x_var)
       }
 
       output$metaPlot <- shiny::renderPlot({
@@ -1100,6 +1089,61 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       )
       #show the group_data ovject (the table for clicking/groups and sample sizes)
       shinyjs::show("group_data")
+
+      if(input$plot_type == "mean_error"){
+      output$plothintmean <- shiny::renderUI({ 
+        shiny::strong("Click on Error Bar, followed by the Mean")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hint_mean")
+      shinyjs::hide("hint_hist")
+      }
+
+    if(input$plot_type == "xy_mean_error"){
+      output$plothintxy <- shiny::renderUI({ 
+        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
+      })
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hin_xy")
+      shinyjs::hide("hint_hist")
+    }
+  
+    if(input$plot_type == "boxplot"){
+      output$plothintbox <- shiny::renderUI({ 
+        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::show("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "scatterplot"){
+      output$plothintscatter <- shiny::renderUI({ 
+        shiny::strong("Click on points you want to add")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::show("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+
+    if(input$plot_type == "histogram"){
+      output$plothinthist <- shiny::renderUI({ 
+        shiny::strong("Click on the left followed by the right upper corners of each bar")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::show("hint_hist")
+    }
 
       # show the error type select input (ofr mean_error).
       if (input$plot_type %in% c("mean_error","xy_mean_error")) {
@@ -1371,6 +1415,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   shiny::observeEvent(input$plot_click2, {
      req(importDatapath())
      req(input$all_or_unfin_but)
+
     if (add_mode$add & extract_mode$extract & !is.null(selected$row)) {
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
       dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
@@ -1581,6 +1626,15 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         inputId = "rev_mode",
         value = FALSE
       )
+
+    shinyjs::hide("comm_well")
+    shinyjs::show("plot_well")
+    shinyjs::reset("y_var_input")
+    shinyjs::reset("x_var_input")
+    shinyjs::reset("y_coord_input")
+    shinyjs::reset("y_coord_input")
+    updateTextInput(session,"comment", value="")
+
 
     req(importDatapath())
     plot_values <- shiny::reactiveValuesToList(values)
