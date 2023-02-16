@@ -121,28 +121,6 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	}
 }
 
-
-#' @title internal_redraw
-#' @description Redraws figure and extraction data
-#' @param image_file Image filename
-#' @param flip whether to flip figure
-#' @param rotate how much to rotate figure
-#' @param plot_type plot_type
-#' @param variable variable
-#' @param cex relative size of points and text
-#' @param calpoints The calibration points
-#' @param point_vals The point values
-#' @param raw_data The raw data
-#' @param rotation logical, should figure be rotated
-#' @param rotate_mode logical, is plotting in rotation mode
-#' @param calibration logical, should calibration be redrawn
-#' @param pos where group names should be plotted (either "right" or "top")
-#' @param points logical, should points be redrawn
-#' @param shiny logical, is plotting occuring in shiny app?
-#' @param zoom_coords x and y coords for zoom function
-#' @param ... further arguments passed to or from other methods.
-#' @export
-
 internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE, zoom_coords=NULL, ...){
 
 	if(!shiny){
