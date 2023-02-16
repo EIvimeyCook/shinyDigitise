@@ -1,6 +1,6 @@
 Package: shinyDigitise
 Title: Extract and Summarise Data from Published Figures
-Version: 0.2.0
+Version: 0.1.0
 Authors@R: 
      c(person("Ed", "Ivimey-Cook", email = "e.ivimeycook@gmail.com", role = c("aut", "cre")), 
      person("Joel", "Pick", email = "joel.l.pick@gmail.com", role = c("aut")))
@@ -8,9 +8,8 @@ Description: User-friendly shiny app for the metaDigitise package, which facilit
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
-Imports: methods,
-    shiny,
+RoxygenNote: 7.1.2
+Imports: shiny,
     shinyWidgets,
     shinyjs,
     magick,
@@ -21,10 +20,6 @@ Imports: methods,
     DT,
     bslib,
     shinyFiles,
-    fresh,
-    shinythemes,
-    tidyr,
-    RColorBrewer,
     scales,
     dplyr,
     shinyjqui,
