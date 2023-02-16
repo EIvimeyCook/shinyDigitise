@@ -9,7 +9,7 @@ shinyDigitise_server <- function(input, output, session){
 #reactive objects and counters.
 
    # start counter at 1 - helps if this is before things
-  counter <<- shiny::reactiveValues(countervalue = 0, next_count = 0)
+  counter <- shiny::reactiveValues(countervalue = 0, next_count = 0)
 
     # for row count,
   row_count <- shiny::reactiveValues(x = NULL)
@@ -33,7 +33,7 @@ shinyDigitise_server <- function(input, output, session){
   add_mode <- shiny::reactiveValues(add = FALSE)
 
   #image import container
-  image_import <<- shiny::reactiveValues(select = FALSE, multiple = FALSE, extract_rev = NULL)
+  image_import <- shiny::reactiveValues(select = FALSE, multiple = FALSE, extract_rev = NULL)
 
   # create empty clikc counter for plotclicks.
   clickcounter <- shiny::reactiveValues(clickcount = 0)
@@ -64,30 +64,30 @@ shinyDigitise_server <- function(input, output, session){
 
 
   #praising action button + logo leads to citations
-  observeEvent(input$citeme, {
+  shiny::observeEvent(input$citeme, {
     shinyalert::shinyalert(
       title = "shinyDigitise",
-      text = paste(h5("Made by Ed Ivimey-Cook and Joel Pick"),
-                   br(),
+      text = paste(shiny::tags$h5("Made by Ed Ivimey-Cook and Joel Pick"),
+                   shiny::tags$br(),
                    "<b> To cite, please reference both this package:</b>",
-                   br(),
-                   br(),
+                   shiny::tags$br(),
+                   shiny::tags$br(),
                    "<p><a href= https://ecoevorxiv.org/repository/view/4814/> Ivimey-Cook, E. R., Noble, D. W., Nakagawa, S., Lajeunesse, M. J., & Pick, J. L. (2022). A framework for improving the reproducibility of data extraction for meta-analysis.</a></p>",
-                   br(),
+                   shiny::tags$br(),
                    "<b> and metaDigitise:</b>", 
-                   br(),
-                   br(),
-                   "<p><a href= https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13118 >Pick, J. L., Nakagawa, S., & Noble, D. W. (2019). Reproducible, flexible and high‐throughput data extraction from primary literature: The metaDigitise r package. Methods in Ecology and Evolution, 10(3), 426-431.</a></p>"),
+                   shiny::tags$br(),
+                   shiny::tags$br(),
+                   "<p><a href= https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13118 >Pick, J. L., Nakagawa, S., & Noble, D. W. (2019). Reproducible, flexible and high-throughput data extraction from primary literature: The metaDigitise r package. Methods in Ecology and Evolution, 10(3), 426-431.</a></p>"),
       size = "l", 
       closeOnClickOutside = FALSE,
-      html = T,
+      html = TRUE,
       type = "",
       showConfirmButton = TRUE,
       showCancelButton = FALSE,
       confirmButtonText = "OK",
       confirmButtonCol = "#AEDEF4",
       animation = TRUE,
-      imageUrl = "inst/logos/shinyDigitise.png"
+      imageUrl = "logos/shinyDigitise.png"
     )
   })
 
@@ -98,15 +98,15 @@ shinyDigitise_server <- function(input, output, session){
 #then click a button to start
   data_modal <- shiny::modalDialog(
     title = 
-    shiny::div("shinyDigitise", shiny::img(src="inst/logos/shinyDigitise.png")),
-    br(),
+    shiny::div("shinyDigitise", shiny::img(src="logos/shinyDigitise.png")),
+    shiny::tags$br(),
     shiny::div(style = "text-align: center", offset = 0, 
     shinyFiles::shinyFilesButton("choosefolder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
         filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),
-    br(),
+    shiny::tags$br(),
     shinyjs::hidden(shiny::div(id = "data_import_title1",
-     h5("Please select whether you want to review or extract:", align = "center"))),
-    br(),
+                               shiny::tags$h5("Please select whether you want to review or extract:", align = "center"))),
+    shiny::tags$br(),
     shinyjs::hidden(shiny::div(id = "data_rev_or_extract",
      style = "text-align: center", offset = -6,
       shinyWidgets::switchInput(
@@ -118,11 +118,11 @@ shinyDigitise_server <- function(input, output, session){
     offLabel = "Extract Mode",
     onStatus = "primary",
     offStatus = "warning"))),
-    br(),
+   shiny::tags$br(),
     shinyjs::hidden(shiny::div(id = "data_import_title2",
-     h5("Please select which graphs you'd like to import:", align = "center"), 
-      h6("Note if only 'All' is showing, there are no further images to extract!", align = "center"))),
-    br(),
+     shiny::tags$h5("Please select which graphs you'd like to import:", align = "center"), 
+     shiny::tags$h6("Note if only 'All' is showing, there are no further images to extract!", align = "center"))),
+   shiny::tags$br(),
     shinyjs::hidden(shiny::div(id = "data_all_or_unfin",
      style = "text-align: center", offset = 0,
                 shiny::radioButtons(
@@ -132,10 +132,10 @@ shinyDigitise_server <- function(input, output, session){
            selected = character(0),
            inline = TRUE, 
 ))),
-br(),
+shiny::tags$br(),
 shinyjs::hidden(shiny::div(id = "data_import_title3",
-  h5("Alternatively, please select a specific graph from your chosen directory:", align = "center"))), 
-br(),
+  shiny::tags$h5("Alternatively, please select a specific graph from your chosen directory:", align = "center"))), 
+shiny::tags$br(),
 shinyjs::hidden(shiny::div(id = "data_select_image",style = "text-align: center", offset = 0,
   shinyWidgets::pickerInput(
    inputId = "select_image_pick",
@@ -146,11 +146,11 @@ shinyjs::hidden(shiny::div(id = "data_select_image",style = "text-align: center"
    inline = TRUE,
    width = "auto"
 ))), 
-br(),
+shiny::tags$br(),
 shinyjs::hidden(shiny::div(id = "data_import_extract",
- actionButton("extract_but", "Get Extracting!"))),
+                           shiny::actionButton("extract_but", "Get Extracting!"))),
     shinyjs::hidden(shiny::div(id = "data_import_review", 
-      actionButton("review_but", "Get Reviewing!"))),
+                               shiny::actionButton("review_but", "Get Reviewing!"))),
                                    easyClose = FALSE,
                                footer = NULL,
                                size = "xl",
@@ -163,12 +163,12 @@ shinyjs::hidden(shiny::div(id = "data_import_extract",
     shinyjqui::jqui_draggable(shiny::modalDialog(
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
-      br(),
-      br(),
+      shiny::tags$br(),
+      shiny::tags$br(),
       shiny::actionButton("cancel", "Cancel"),
      shiny::actionButton("ok", "OK"),
       if (failed)
-        shiny::div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
+        shiny::div(shiny::tags$b("No group name or duplicated group name detected", style = "color: red;")),
       footer = shiny::tagList(
         shiny::tags$em("Note - This window is draggable")
       )
@@ -186,12 +186,12 @@ shinyjs::hidden(shiny::div(id = "data_import_extract",
       shiny::selectInput("col", "Colour", "Orange", choices = c("Orange" = "orange",
                                                          "Purple" = "purple",
                                                          "Blue" = "blue")),
-      br(),
-      br(),
+      shiny::tags$br(),
+      shiny::tags$br(),
       shiny::actionButton("cancel", "Cancel"),
      shiny::actionButton("ok", "OK"),
       if (failed)
-        shiny::div(tags$b("No group name or duplicated group name detected", style = "color: red;")),
+        shiny::div(shiny::tags$b("No group name or duplicated group name detected", style = "color: red;")),
       footer = shiny::tagList(
         shiny::tags$em("Note - This window is draggable")
       )
@@ -208,10 +208,10 @@ shinyjs::hidden(shiny::div(id = "data_import_extract",
  
 
 #importing data - if directory is missing take the user to a folderchoice, if it is provided then use that instead. Makes sure there is a / on the end
-importDatapath <- reactive({
+importDatapath <-  shiny::reactive({
    if(dir == "Missing"){
      shinyFiles::shinyFileChoose(input,'choosefolder',roots = c(home = '~'), session = session)
-   req(input$choosefolder)
+     shiny::req(input$choosefolder)
    if (is.null(input$choosefolder))
       return(NULL) 
       return(paste0(sub("/[^/]+$", "", shinyFiles::parseFilePaths(c(home = '~'), input$choosefolder)$datapath), "/"))
@@ -227,7 +227,7 @@ importDatapath <- reactive({
 })
 
 #when the datapath is not null or simply a slash, then show the other options. Allows for the starting options to be shown. Also setups folders for metaDigitise to work. Creates a temporary dettails files for the dropdown.
-observe({
+shiny::observe({
 if(!is.null(importDatapath()) & as.character(importDatapath()) != "/"){
 
   image_import$extract_rev <<- TRUE
@@ -269,7 +269,7 @@ details <<- metaDigitise::dir_details(importDatapath())
 #show or hide different buttons based on extraction/review choice then show or hide various panels + update the switch
 shiny::observeEvent(input$rev_or_extractbut, {
 
-req(importDatapath())
+  shiny::req(importDatapath())
 
   if(input$rev_or_extractbut == FALSE){
   shinyjs::show("data_import_extract")
@@ -298,7 +298,7 @@ req(importDatapath())
 #obsrve the import mode selection. Either All or unfinished. Changes the metadigitise import and updates the picker 
 shiny::observeEvent(input$all_or_unfin_but, {
 
-req(importDatapath())
+  shiny::req(importDatapath())
 
   if(input$all_or_unfin_but == "All"){
   details <<- metaDigitise::dir_details(importDatapath())
@@ -346,7 +346,7 @@ req(importDatapath())
 #observe event for specific image selection. If it doesnt equal nothing then import that specific photo. Also reset the choices buttons.
 shiny::observeEvent(input$select_image_pick, {
 
-req(importDatapath())
+shiny::req(importDatapath())
 
   if(input$select_image_pick != ""){
     image_import$select <<- TRUE
@@ -377,8 +377,8 @@ req(importDatapath())
 #if you click review or extract ok, update the counter, show the panels and remove the modal or show an error if you havent selected all or unfinished
 shiny::observeEvent(input$extract_but|input$review_but, {
 
-  req(importDatapath())
-  req(input$extract_but|input$review_but)
+  shiny::req(importDatapath())
+  shiny::req(input$extract_but|input$review_but)
 
   if(image_import$multiple | image_import$select){
 
@@ -430,8 +430,8 @@ shiny::observeEvent(input$extract_but|input$review_but, {
   # when counter value is changed changes - this changes when images are imported or all/unfinished are selected
   shiny::observeEvent(counter$countervalue, {
     
-  req(importDatapath())
-  req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
 
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
@@ -557,7 +557,7 @@ shiny::observeEvent(input$extract_but|input$review_but, {
 
    extract_mode$extract <<- FALSE
    
-  req(importDatapath())
+   shiny::req(importDatapath())
 
   if(input$rev_mode){
     shinyjs::hide("orient_well")
@@ -591,63 +591,30 @@ if(counter$countervalue == 1){
 
   shiny::observeEvent(input$plot_type,{
     
-    req(importDatapath())
+    shiny::req(importDatapath())
 
     if (!file.exists(counter$caldat)|input$plot_type != values$plot_type && !is.null(values$plot_type)) {
 
     if(input$plot_type == "mean_error"){
       #container for for plotting values
       valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
-
     }
 
     if(input$plot_type == "xy_mean_error"){
-      output$plothintxy <- shiny::renderUI({ 
-        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
-      })
-      shinyjs::hide("plothintmean")
-      shinyjs::hide("plothintbox")
-      shinyjs::hide("plothintscatter")
-      shinyjs::show("plothintxy")
-      shinyjs::hide("plothinthist")
       valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
     }
   
     if(input$plot_type == "boxplot"){
-      output$plothintbox <- shiny::renderUI({ 
-        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::hide("plothintscatter")
-      shinyjs::hide("plothintmean")
-      shinyjs::show("plothintbox")
-      shinyjs::hide("plothinthist")
       valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL)
 
     }
     
     if(input$plot_type == "scatterplot"){
-      output$plothintscatter <- shiny::renderUI({ 
-        shiny::strong("Click on points you want to add")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::show("plothintscatter")
-      shinyjs::hide("plothintmean")
-      shinyjs::hide("plothintbox")
-      shinyjs::hide("plothinthist")
       valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, pch=NULL, col=NULL)
 
     }
 
     if(input$plot_type == "histogram"){
-      output$plothinthist <- shiny::renderUI({ 
-        shiny::strong("Click on the left followed by the right upper corners of each bar")
-      })
-      shinyjs::hide("plothintxy")
-      shinyjs::hide("plothintscatter")
-      shinyjs::hide("plothintmean")
-      shinyjs::hide("plothintbox")
-      shinyjs::show("plothinthist")
       valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, bar=NULL)
 
     }
@@ -797,7 +764,7 @@ if(counter$countervalue == 1){
     })
 })
 
-observe({
+shiny::observe({
 if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$countervalue >=1){
   #record cex used (adjusted with slider)
 
@@ -815,13 +782,13 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   
   shiny::observeEvent(input$zoom,{
 
-  req(importDatapath())
-  req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
     
     if(input$zoom){
   values$zoom_coords <<- c(input$plot_brush$xmin,input$plot_brush$xmax,input$plot_brush$ymin,input$plot_brush$ymax)
    output$metaPlot <- shiny::renderPlot({
- par(mar = c(0, 0, 0, 0))
+     graphics::par(mar = c(0, 0, 0, 0))
   plot_values <- shiny::reactiveValuesToList(values)
   do.call(internal_redraw, c(plot_values, shiny = TRUE))
   })
@@ -837,8 +804,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   # record whether we flip the image or not
   shiny::observeEvent(input$flip, {
 
-     req(importDatapath())
-     req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
 
     values$flip <<- input$flip
 
@@ -856,8 +823,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   # rotate the image using a slider. Text + slider gets displayed as you click rotate mode.
   shiny::observeEvent(input$rotate_mode, {
      
-     req(importDatapath())
-     req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
 
     if (input$rotate_mode) {
 
@@ -896,8 +863,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   # if calib mode button pressed
   shiny::observeEvent(input$calib_mode, {
      
-     req(importDatapath())
-     req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
 
     # resent click counter
     clickcounter$clickcount <- 0
@@ -910,6 +877,9 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     shinyjs::reset("x_var_input")
     shinyjs::reset("y_coord_input")
     shinyjs::reset("y_coord_input")
+    
+    shiny::updateTextInput(session,"y_var_input", value="")
+    shiny::updateTextInput(session,"x_var_input", value="")
 
     if (input$calib_mode) {
       if(is.null(values$plot_type)){
@@ -1071,8 +1041,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 #update switches
   shiny::observeEvent(extract_mode$extract, {
  
- req(importDatapath())
-  req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
 
     # if we are in extract mode
     if (extract_mode$extract) {
@@ -1089,61 +1059,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       )
       #show the group_data ovject (the table for clicking/groups and sample sizes)
       shinyjs::show("group_data")
-
-      if(input$plot_type == "mean_error"){
-      output$plothintmean <- shiny::renderUI({ 
-        shiny::strong("Click on Error Bar, followed by the Mean")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_scatter")
-      shinyjs::show("hint_mean")
-      shinyjs::hide("hint_hist")
-      }
-
-    if(input$plot_type == "xy_mean_error"){
-      output$plothintxy <- shiny::renderUI({ 
-        shiny::strong("Click on Y Error Bar, followed by the Mean, followed by the X Error Bar")
-      })
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_scatter")
-      shinyjs::show("hin_xy")
-      shinyjs::hide("hint_hist")
-    }
-  
-    if(input$plot_type == "boxplot"){
-      output$plothintbox <- shiny::renderUI({ 
-        shiny::strong("Click on Max, Upper Q, Median, Lower Q, and Minimum in that order")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::show("hint_box")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "scatterplot"){
-      output$plothintscatter <- shiny::renderUI({ 
-        shiny::strong("Click on points you want to add")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::show("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_hist")
-    }
-
-    if(input$plot_type == "histogram"){
-      output$plothinthist <- shiny::renderUI({ 
-        shiny::strong("Click on the left followed by the right upper corners of each bar")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::show("hint_hist")
-    }
 
       # show the error type select input (ofr mean_error).
       if (input$plot_type %in% c("mean_error","xy_mean_error")) {
@@ -1274,14 +1189,42 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       shiny::showModal(popupModal2())
       row_count$x <- row_count$x + 1
       mod_df$x <- rbind(mod_df$x,
+                        if(row_count$x == 1){
         data.frame(
          Group_Name = NA,
          Sample_Size = NA,
          Shape = 19,
          Colour = "Orange"
        )
+                        }
+       else if(row_count$x == 2){
+       data.frame(
+         Group_Name = NA,
+         Sample_Size = NA,
+         Shape = 15,
+         Colour = "Purple"
+       )
+       }
+       else if(row_count$x == 3){
+         data.frame(
+           Group_Name = NA,
+           Sample_Size = NA,
+           Shape = 17,
+           Colour = "Blue"
+         )
+       }
     )
-    }else{
+    } else if(input$plot_type == "histogram"){
+      row_count$x <- row_count$x + 1
+      mod_df$x <- rbind(mod_df$x,
+                        data.frame(
+                          Group_Name = "Group1",
+                          Sample_Size = NA
+                        )
+      )
+      shinyjs::disable("add_group")
+    }
+    else{
       shiny::showModal(popupModal1()) 
       row_count$x <- row_count$x + 1
       mod_df$x <- rbind(mod_df$x,
@@ -1291,6 +1234,62 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
          )
       )
     }
+    
+    if(input$plot_type == "mean_error"){
+      output$plothintmean <- shiny::renderUI({ 
+        shiny::HTML("<b>Click on Error Bar, followed by the Mean</b>")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hint_mean")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "xy_mean_error"){
+      output$plothintxy <- shiny::renderUI({ 
+        shiny::HTML("<b>Click on Y Error Bar, followed by the Mean, followed by the X Error Bar</b>")
+      })
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hin_xy")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "boxplot"){
+      output$plothintbox <- shiny::renderUI({ 
+        shiny::HTML("<b>Click on Max, Upper Q, Median, Lower Q, and Minimum in that order</b>")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::show("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "scatterplot"){
+      output$plothintscatter <- shiny::renderUI({ 
+        shiny::HTML("<b>Click on points you want to add</b>")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::show("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "histogram"){
+      output$plothinthist <- shiny::renderUI({ 
+        shiny::HTML("<b>Click on the left followed by the right upper corners of each bar</b>")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::show("hint_hist")
+    }
+    
     
 
   })
@@ -1413,8 +1412,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   #  when you click to add points
 
   shiny::observeEvent(input$plot_click2, {
-     req(importDatapath())
-     req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
 
     if (add_mode$add & extract_mode$extract & !is.null(selected$row)) {
       plotcounter$plotclicks <- plotcounter$plotclicks + 1
@@ -1447,7 +1446,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       }
 
       values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
-
       if(!input$plot_type=="histogram" | is.even(plotcounter$plotclicks)){
 
 
@@ -1472,8 +1470,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   # however if one is, then search the data fro that cell and remove it from the df.
   # this will also cause the plot and raw data to update and remove anything with this group.
   shiny::observeEvent(input$del_group, {
-    req(importDatapath())
-     req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
       if(is.null(selected$row)|length(selected$row) == 0 | nrow(mod_df$x) == 0 ){
         shinyjs::disable("del_group")
         shinyjs::disable("click_group")
@@ -1510,6 +1508,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         }
         if(input$plot_type=="histogram"){
           valpoints$bar <- values$raw_data$bar
+            shinyjs::enable("add_group")
         }
         mod_df$x <- mod_df$x[-selected$row, ]
             if(nrow(mod_df$x) == 0 ){
@@ -1595,8 +1594,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
   # record comments
   shiny::observeEvent(input$comment,{
-   req(importDatapath())
-     req(input$all_or_unfin_but)
+    shiny::req(importDatapath())
+    shiny::req(input$all_or_unfin_but)
     values$comment <<- input$comment
   })
   
@@ -1633,10 +1632,12 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     shinyjs::reset("x_var_input")
     shinyjs::reset("y_coord_input")
     shinyjs::reset("y_coord_input")
-    updateTextInput(session,"comment", value="")
+    shiny::updateTextInput(session,"y_var_input", value="")
+    shiny::updateTextInput(session,"x_var_input", value="")
+    shiny::updateTextInput(session,"comment", value="")
 
 
-    req(importDatapath())
+    shiny::req(importDatapath())
     plot_values <- shiny::reactiveValuesToList(values)
     if(check_plottype(plot_values) & check_calibrate(plot_values) & check_extract(plot_values)){
       plot_values$processed_data <- process_data(plot_values)
@@ -1746,7 +1747,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   })
   
   shiny::observeEvent(input$exit, {
-    req(importDatapath())
+    shiny::req(importDatapath())
     shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath()))
     utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv"))
 
@@ -1757,7 +1758,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   ################################################
 
   shiny::observeEvent(input$plot_step, {
-    req(importDatapath())
+    shiny::req(importDatapath())
     if(is.null(values$plot_type)){
       shinyalert::shinyalert(
         title = "No plot type selected",
@@ -1798,6 +1799,11 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     shinyjs::hide("extract_well")
     extract_mode$extract <<- FALSE
     selected$row <<- NULL
+    shinyjs::hide("hint_xy")
+    shinyjs::hide("hint_scatter")
+    shinyjs::hide("hint_mean")
+    shinyjs::hide("hint_box")
+    shinyjs::hide("hint_hist")
   })
   
   shiny::observeEvent(input$orient_back, {
@@ -1816,6 +1822,11 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     shinyjs::hide("extract_well")
     extract_mode$extract <<- FALSE
     selected$row <<- NULL
+    shinyjs::hide("hint_xy")
+    shinyjs::hide("hint_scatter")
+    shinyjs::hide("hint_mean")
+    shinyjs::hide("hint_box")
+    shinyjs::hide("hint_hist")
   })
   
   shiny::observeEvent(input$comm_back, {
@@ -1831,8 +1842,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
-    isolate(shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath())))
-      isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv")))
+    shiny::isolate(shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath())))
+    shiny::isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv")))
 
   })
 

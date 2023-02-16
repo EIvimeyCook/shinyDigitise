@@ -4,7 +4,7 @@ shinyDigitise_UI <- function(){
   shiny::fluidPage(
     shinyjs::useShinyjs(),
     theme = bslib::bs_theme(
-      primary = "#66947A", secondary = "#66947A", 
+      primary = "#fe9807", secondary = "#7393B3", 
       info = "#E51C23", font_scale = NULL, bootswatch = "materia",
       base_font = bslib::font_collection(bslib::font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif"),
       code_font = bslib::font_collection(bslib::font_google("Atkinson Hyperlegible"), "Arial Narrow Bold", "sans-serif")),
@@ -19,7 +19,7 @@ shinyDigitise_UI <- function(){
                                    tippy::with_tippy(shiny::actionButton(
                                      inputId = "citeme", 
                                      style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
-                                     label =  img(src = "inst/logos/shinyDigitise.png", height = 60)),"Click me!"),
+                                     label =  shiny::img(src = "inst/logos/shinyDigitise.png", height = 60)),"Click me!"),
 
     #contains a switch for review or extract
           shinyjs::hidden(shiny::div(id = "top_well7",
@@ -37,7 +37,7 @@ shinyDigitise_UI <- function(){
 
 #progress number based on counter and counter total
       shiny::column(width = 8,
-        shiny::br(),
+                    shiny::tags$br(),
         shiny::div(style="display: inline-block;vertical-align:top; width: 7%; font-size:x-large;",
            shiny::p(shiny::htmlOutput("progress", inline=TRUE)),
         ),
@@ -99,9 +99,9 @@ shinyDigitise_UI <- function(){
           shinyjs::hidden(
             shiny::div(id = "rev_well",
             shiny::actionButton("take_screenshot", "Download Extraction Figure"),
-            br(),
-            br(),
-            splitLayout(
+            shiny::tags$br(),
+            shiny::tags$br(),
+            shiny::splitLayout(
               shiny::actionButton("prev_review", "Previous"),
               shiny::actionButton("next_review", "Next"))
         )
@@ -117,7 +117,7 @@ shinyDigitise_UI <- function(){
           
           shiny::strong("1. Choose Plot type:"),
           shiny::textOutput("plottype_check_text"),
-          tags$head(tags$style("#plottype_check_text{font-size: 20px;}"))
+          shiny::tags$head(shiny::tags$style("#plottype_check_text{font-size: 20px;}"))
 
           ),
           shinyjs::hidden(shiny::div(id = 'plot_well',
@@ -150,16 +150,16 @@ shinyDigitise_UI <- function(){
                 cellWidths = c("80%","20%"),
           shiny::strong("2. Orientate Figure:"),
           shiny::textOutput("orientation_check_text"),
-          tags$head(tags$style("#orientation_check_text{font-size: 20px;}"))
+          shiny::tags$head(shiny::tags$style("#orientation_check_text{font-size: 20px;}"))
           ),
           shinyjs::hidden(shiny::div(id = "orient_well",class = "buttonagency",
-                tags$br(),
-                shiny::strong("All graph types should be vertically orientated."), tags$br(),
-                shiny::strong("If they are not then chose flip to correct this."), tags$br(), 
-                shiny::strong("If figures are wonky, chose rotate."),tags$br(),
-                tags$br(),
-                shiny::strong("Otherwise press next."),tags$br(),
-              shiny::br(),
+                shiny::tags$br(),
+                shiny::strong("All graph types should be vertically orientated."), shiny::tags$br(),
+                shiny::strong("If they are not then chose flip to correct this."), shiny::tags$br(), 
+                shiny::strong("If figures are wonky, chose rotate."),shiny::tags$br(),
+                shiny::tags$br(),
+                shiny::strong("Otherwise press next."),shiny::tags$br(),
+              shiny::tags$br(),
               shiny::splitLayout(  
               shinyWidgets::switchInput(
                   inputId = "flip",
@@ -175,10 +175,10 @@ shinyDigitise_UI <- function(){
                 onLabel = "Yes",
                 offLabel = "No"
               )),
-              shiny::splitLayout(shiny::br(),
+              shiny::splitLayout(shiny::tags$br(),
               shiny::textOutput("rotation", inline=TRUE),
               ),
-              shiny::br(),
+              shiny::tags$br(),
               shinyjs::hidden(
                 shiny::div(id="togslide",
                     shinyWidgets::sliderTextInput(
@@ -214,7 +214,7 @@ shinyDigitise_UI <- function(){
             cellWidths = c("80%","20%"),
             shiny::strong("3. Calibrate Axes:"),
             shiny::textOutput("calibrate_check_text"),
-            tags$head(tags$style("#calibrate_check_text{font-size: 20px;}"))
+            shiny::tags$head(shiny::tags$style("#calibrate_check_text{font-size: 20px;}"))
           ),
           shinyjs::hidden(
             shiny::div(id = "calib_well",
@@ -314,17 +314,17 @@ shinyDigitise_UI <- function(){
             cellWidths = c("80%","20%"),
             shiny::strong("4. Extract Data:"),
             shiny::textOutput("extract_check_text"),
-            tags$head(tags$style("#extract_check_text{font-size: 20px;}"))
+            shiny::tags$head(shiny::tags$style("#extract_check_text{font-size: 20px;}"))
           ),
           shinyjs::hidden(
             shiny::div(id = "extract_well",
            shinyjs::hidden(
             shiny::div(id = "group_data",
-                tags$br(),
-        shiny::strong("1. Click add groups to enter group names and sample size before adding points (Remeber to doubleclick!)."), tags$br(),
-        shiny::strong("2. To add points, click the group in the table then press 'Click Points' and then prcoeed to click points."), tags$br(),
-        shiny::strong("3. To delete a group, click on the desired group in the table and then press 'Delete Group'."), tags$br(),
-          tags$br(),
+                       shiny::tags$br(),
+        shiny::strong("1. Click add groups to enter group names and sample size before adding points (Remember to doubleclick!)."), shiny::tags$br(),
+        shiny::strong("2. To add points, click the group in the table then press 'Click Points' and then prcoeed to click points."), shiny::tags$br(),
+        shiny::strong("3. To delete a group, click on the desired group in the table and then press 'Delete Group'."), shiny::tags$br(),
+        shiny::tags$br(),
               shiny::splitLayout(
                 shiny::div(class = "buttonagency",
                     shiny::actionButton(
@@ -341,10 +341,10 @@ shinyDigitise_UI <- function(){
                     )
                   )
                 ),
-        tags$br(),
+        shiny::tags$br(),
                 DT::DTOutput("group_table")
            )),
-        tags$br(),
+        shiny::tags$br(),
           shinyjs::hidden(
             shiny::div(id = "error_type_select",
               shinyWidgets::prettyRadioButtons(
@@ -419,7 +419,7 @@ shinyDigitise_UI <- function(){
             shiny::div(id = "hint_scatter",shiny::uiOutput("plothintscatter"))),
                     shinyjs::hidden(
             shiny::div(id = "hint_hist",shiny::uiOutput("plothinthist"))),
-        tags$br(),
+            shiny::tags$br(),
         shiny::plotOutput(
           "metaPlot",
           dblclick = "plot_click2",
