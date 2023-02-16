@@ -4,14 +4,10 @@
 \alias{shinyDigitise}
 \title{shinyDigitise}
 \usage{
-shinyDigitise(dir, import_all = FALSE, image_name = NULL)
+shinyDigitise(dir)
 }
 \arguments{
 \item{dir}{the path name to the directory / folder where the files are located}
-
-\item{import_all}{Logical - whether to import already completed files, defaults to FALSE (i.e. only import new files)}
-
-\item{image_name}{Vector of specific images for shinyDigitise to plot. defaults to NULL, i.e. all or only not completed images are input. If specified, overrides import_all}
 }
 \description{
 Single or batch processing of figures with .png, .jpg, .tiff, .pdf extensions within a set directory. metaDigitise() consolidates the data and exports the data for each image and image type. It can also summarise the data, provide the raw data (if scatterplots) and automatically imports previously finished data and merges it with newly digitised data. metaDigitise() also allows users to check their calibration along with editing previous digitisations.

@@ -122,26 +122,23 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 }
 
 
-#' @title internal_redraw
-#' @description Redraws figure and extraction data
-#' @param image_file Image filename
-#' @param flip whether to flip figure
-#' @param rotate how much to rotate figure
-#' @param plot_type plot_type
-#' @param variable variable
-#' @param cex relative size of points and text
-#' @param calpoints The calibration points
-#' @param point_vals The point values
-#' @param raw_data The raw data
-#' @param rotation logical, should figure be rotated
-#' @param rotate_mode logical, is plotting in rotation mode
-#' @param calibration logical, should calibration be redrawn
-#' @param pos where group names should be plotted (either "right" or "top")
-#' @param points logical, should points be redrawn
-#' @param shiny logical, is plotting occuring in shiny app?
-#' @param zoom_coords x and y coords for zoom function
-#' @param ... further arguments passed to or from other methods.
-#' @export
+## image_file: Image filename
+## flip: whether to flip figure
+## rotate: how much to rotate figure
+## plot_type: plot_type
+## variable: variable
+## cex: relative size of points and text
+## calpoints: The calibration points
+## point_vals: The point values
+## raw_data: The raw data
+## rotation: logical, should figure be rotated
+## rotate_mode: logical, is plotting in rotation mode
+## calibration: logical, should calibration be redrawn
+## pos: where group names should be plotted (either "right" or "top")
+## points: logical, should points be redrawn
+## shiny: logical, is plotting occuring in shiny app?
+## zoom_coords: x and y coords for zoom function
+## ...: further arguments passed to or from other methods.
 
 internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE, zoom_coords=NULL, ...){
 
