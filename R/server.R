@@ -64,7 +64,7 @@ shinyDigitise_server <- function(input, output, session){
 
 #logo
 shiny_logo <- shiny::reactive({ 
-  magick::image_read("R/www/shinyDigitise.png") 
+  magick::image_read("shinyDigitise.png") 
   }) 
 
 output$img_mod <- shiny::renderPlot({ 
