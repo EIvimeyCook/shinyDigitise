@@ -19,7 +19,7 @@ shinyDigitise_UI <- function(){
                                    tippy::with_tippy(shiny::actionButton(
                                      inputId = "citeme", 
                                      style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
-                                     label =  base::system.file("logos/shinyDigitise.png", package="shinyDigitise")),"Click me!"),
+                                     label =  shiny::tags$img(src = base::system.file("logos/shinyDigitise.png", package="shinyDigitise"))),"Click me!"),
 
     #contains a switch for review or extract
           shinyjs::hidden(shiny::div(id = "top_well7",
