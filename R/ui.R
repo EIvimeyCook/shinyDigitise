@@ -15,11 +15,11 @@ shinyDigitise_UI <- function(){
       shiny::column(
         width = 4,
         shiny::titlePanel(
-          title=shiny::splitLayout(cellWidths = c("20%","50%"),
+          title=shiny::splitLayout(cellWidths = c("40%","50%"),
                                    tippy::with_tippy(shiny::actionButton(
                                      inputId = "citeme", 
                                      style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
-                                     label =  shiny::img(src = "inst/logos/shinyDigitise.png", height = 60)),"Click me!"),
+                                     label =  shiny::imageOutput("img_ui", width = "80px", height = "88px")),"Click me!"),
 
     #contains a switch for review or extract
           shinyjs::hidden(shiny::div(id = "top_well7",
@@ -321,8 +321,8 @@ shinyDigitise_UI <- function(){
            shinyjs::hidden(
             shiny::div(id = "group_data",
                        shiny::tags$br(),
-        shiny::strong("1. Click add groups to enter group names and sample size before adding points (Remember to doubleclick!)."), shiny::tags$br(),
-        shiny::strong("2. To add points, click the group in the table then press 'Click Points' and then prcoeed to click points."), shiny::tags$br(),
+        shiny::strong("1. Click add groups to enter group names and sample size before adding points."), shiny::tags$br(),
+        shiny::strong("2. To add points, click the group in the table then press 'Click Points' and then proceed to double-Click points."), shiny::tags$br(),
         shiny::strong("3. To delete a group, click on the desired group in the table and then press 'Delete Group'."), shiny::tags$br(),
         shiny::tags$br(),
               shiny::splitLayout(

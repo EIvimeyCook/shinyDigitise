@@ -62,6 +62,22 @@ shinyDigitise_server <- function(input, output, session){
   # container for add T/F.
   add_mode <- shiny::reactiveValues(add = FALSE)
 
+#logo
+shiny_logo <- shiny::reactive({ 
+  magick::image_read("R/www/shinyDigitise.png") 
+  }) 
+
+output$img_mod <- shiny::renderPlot({ 
+  magick::image_ggplot(shiny_logo()) 
+  })
+
+output$img_head <- shiny::renderPlot({ 
+  magick::image_ggplot(shiny_logo()) 
+  })
+
+output$img_ui<- shiny::renderPlot({ 
+  magick::image_ggplot(shiny_logo()) 
+  })
 
   #praising action button + logo leads to citations
   shiny::observeEvent(input$citeme, {
@@ -86,8 +102,7 @@ shinyDigitise_server <- function(input, output, session){
       showCancelButton = FALSE,
       confirmButtonText = "OK",
       confirmButtonCol = "#AEDEF4",
-      animation = TRUE,
-      imageUrl = "logos/shinyDigitise.png"
+      animation = TRUE
     )
   })
 
@@ -97,9 +112,7 @@ shinyDigitise_server <- function(input, output, session){
 #or you can select a specific one
 #then click a button to start
   data_modal <- shiny::modalDialog(
-    title = 
-    shiny::div("shinyDigitise", img(src="logos/shinyDigitise.png")),
-    shiny::tags$br(),
+    title = shiny::div(shiny::imageOutput("img_head", width = "100px", height = "108px")),
     shiny::div(style = "text-align: center", offset = 0, 
     shinyFiles::shinyFilesButton("choosefolder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
         filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),
@@ -1237,7 +1250,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     
     if(input$plot_type == "mean_error"){
       output$plothintmean <- shiny::renderUI({ 
-        shiny::HTML("<b>Click on Error Bar, followed by the Mean</b>")
+        shiny::HTML("<b>Double-Click on the Error Bar, followed by the Mean</b>")
       })
       shinyjs::hide("hint_xy")
       shinyjs::hide("hint_box")
@@ -1248,7 +1261,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     
     if(input$plot_type == "xy_mean_error"){
       output$plothintxy <- shiny::renderUI({ 
-        shiny::HTML("<b>Click on Y Error Bar, followed by the Mean, followed by the X Error Bar</b>")
+        shiny::HTML("<b>Double-Click on the Y Error Bar, followed by the Mean, followed by the X Error Bar</b>")
       })
       shinyjs::hide("hint_mean")
       shinyjs::hide("hint_box")
@@ -1259,7 +1272,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     
     if(input$plot_type == "boxplot"){
       output$plothintbox <- shiny::renderUI({ 
-        shiny::HTML("<b>Click on Max, Upper Q, Median, Lower Q, and Minimum in that order</b>")
+        shiny::HTML("<b>Double-Click on the Max, Upper Q, Median, Lower Q, and Minimum in that order</b>")
       })
       shinyjs::hide("hint_xy")
       shinyjs::hide("hint_scatter")
@@ -1270,7 +1283,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     
     if(input$plot_type == "scatterplot"){
       output$plothintscatter <- shiny::renderUI({ 
-        shiny::HTML("<b>Click on points you want to add</b>")
+        shiny::HTML("<b>Double-Click on points you want to add</b>")
       })
       shinyjs::hide("hint_xy")
       shinyjs::show("hint_scatter")
@@ -1281,7 +1294,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     
     if(input$plot_type == "histogram"){
       output$plothinthist <- shiny::renderUI({ 
-        shiny::HTML("<b>Click on the left followed by the right upper corners of each bar</b>")
+        shiny::HTML("<b>Double-Click on the left followed by the right upper corners of each bar</b>")
       })
       shinyjs::hide("hint_xy")
       shinyjs::hide("hint_scatter")
