@@ -63,21 +63,20 @@ shinyDigitise_server <- function(input, output, session){
   add_mode <- shiny::reactiveValues(add = FALSE)
 
 #logo
-shiny_logo <- shiny::reactive({ 
-  magick::image_read("shinyDigitise.png") 
-  }) 
-
-output$img_mod <- shiny::renderPlot({ 
-  magick::image_ggplot(shiny_logo()) 
+ output$img_head <- shiny::renderText({
+      c('<img src="',
+        "https://github.com/EIvimeyCook/ShinyDigitise/blob/master/inst/logos/shiny.png",
+        'style=width:80px;height:88px;">'
+        )
   })
 
-output$img_head <- shiny::renderPlot({ 
-  magick::image_ggplot(shiny_logo()) 
+ output$img_mod <- shiny::renderText({
+          c('<img src="',
+        "https://github.com/EIvimeyCook/ShinyDigitise/blob/master/inst/logos/shiny.png",
+        'style=width:80px;height:88px;">'
+        )
   })
 
-output$img_ui<- shiny::renderPlot({ 
-  magick::image_ggplot(shiny_logo()) 
-  })
 
   #praising action button + logo leads to citations
   shiny::observeEvent(input$citeme, {
@@ -112,7 +111,7 @@ output$img_ui<- shiny::renderPlot({
 #or you can select a specific one
 #then click a button to start
   data_modal <- shiny::modalDialog(
-    title = shiny::div(shiny::imageOutput("img_head", width = "100px", height = "108px")),
+    title = shiny::div(shiny::htmlOutput("img_mod")),
     shiny::div(style = "text-align: center", offset = 0, 
     shinyFiles::shinyFilesButton("choosefolder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
         filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),
