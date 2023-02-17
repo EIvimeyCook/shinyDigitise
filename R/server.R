@@ -86,8 +86,8 @@ shinyDigitise_server <- function(input, output, session){
       confirmButtonText = "OK",
       confirmButtonCol = "#AEDEF4",
       animation = TRUE,
-      imageUrl = shiny::tags$img(src = "shinyDigitise.png")
-    )
+      imageUrl =  shiny::tags$img(src = base::system.file("shinyDigitise.png", package = "shinyDigitise"))
+      )
   })
 
 #take data quiery on startup in a popup modal including directory. This wont show if you've already selected a dir
@@ -96,7 +96,7 @@ shinyDigitise_server <- function(input, output, session){
 #or you can select a specific one
 #then click a button to start
   data_modal <- shiny::modalDialog(
-    title = shiny::div(shiny::tags$img(src = "shinyDigitise.png")),
+    title = shiny::div(shiny::tags$img(src = base::system.file("shinyDigitise.png", package = "shinyDigitise"))),
     shiny::div(style = "text-align: center", offset = 0, 
     shinyFiles::shinyFilesButton("choosefolder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
         filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),
