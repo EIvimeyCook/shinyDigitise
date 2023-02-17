@@ -19,7 +19,7 @@ shinyDigitise_UI <- function(){
                                    tippy::with_tippy(shiny::actionButton(
                                      inputId = "citeme", 
                                      style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
-                                     label =  shiny::tags$img(src = base::system.file("logos/shinyDigitise.png", package="shinyDigitise"))),"Click me!"),
+                                     label =  shiny::tags$img(src = base::system.file("inst/logos/shinyDigitise.png", package="shinyDigitise"))),"Click me!"),
 
     #contains a switch for review or extract
           shinyjs::hidden(shiny::div(id = "top_well7",
@@ -44,7 +44,7 @@ shinyDigitise_UI <- function(){
 
         #point size for plotting
         shinyjs::hidden(shiny::div(id = "top_well4", style="display: inline-block;vertical-align:top; width: 10%;",shiny::strong("Point size:"))),
-        shinyjs::hidden(shiny::div(id = "top_well5", style="display: inline-block;vertical-align:top;  width: 15%;",
+        shinyjs::hidden(shiny::div(id = "top_well5", style="display: inline-block;vertical-align:top; width: 15%;",
         shiny::sliderInput(
            inputId = "cex",
            label = NULL,
