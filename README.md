@@ -14,7 +14,7 @@ The main functions used in shinyDigitise are called from the [metaDigitise packa
 
 Importantly, both packages allows for replotting and checking of data extraction from graphs - which all contribute to increased reproducibility. 
 
-Introduced in this new preprint: [A framework for improving the reproducibility of data extraction for meta-analysis](https://ecoevorxiv.org/repository/view/4814/).
+Introduced in this new preprint: [A framework for improving the reproducibility of data extraction for meta-analysis. EcoEvoRxiv (2022)](https://ecoevorxiv.org/repository/view/4814/).
 
 ## To install:
 
