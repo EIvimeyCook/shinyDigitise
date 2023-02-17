@@ -62,22 +62,6 @@ shinyDigitise_server <- function(input, output, session){
   # container for add T/F.
   add_mode <- shiny::reactiveValues(add = FALSE)
 
-#logo
- output$img_head <- shiny::renderText({
-      c('<img src="',
-        "https://github.com/EIvimeyCook/ShinyDigitise/blob/master/inst/logos/shiny.png",
-        'style=width:80px;height:88px;">'
-        )
-  })
-
- output$img_mod <- shiny::renderText({
-          c('<img src="',
-        "https://github.com/EIvimeyCook/ShinyDigitise/blob/master/inst/logos/shiny.png",
-        'style=width:80px;height:88px;">'
-        )
-  })
-
-
   #praising action button + logo leads to citations
   shiny::observeEvent(input$citeme, {
     shinyalert::shinyalert(
@@ -111,7 +95,7 @@ shinyDigitise_server <- function(input, output, session){
 #or you can select a specific one
 #then click a button to start
   data_modal <- shiny::modalDialog(
-    title = shiny::div(shiny::htmlOutput("img_mod")),
+    title = shiny::div(base::system.file("logos/shinyDigitise.png", package="shinyDigitise")),
     shiny::div(style = "text-align: center", offset = 0, 
     shinyFiles::shinyFilesButton("choosefolder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
         filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),
