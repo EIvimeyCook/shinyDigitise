@@ -86,7 +86,9 @@ shinyDigitise_server <- function(input, output, session){
       confirmButtonText = "OK",
       confirmButtonCol = "#AEDEF4",
       animation = TRUE,
-      imageUrl =  shiny::tags$img("img/shinyDigitise.png")
+      imageUrl =  "img/shinyDigitise.png",
+      imageHeight = "88",
+      imageWidth = "80"
       )
   })
 
@@ -96,7 +98,7 @@ shinyDigitise_server <- function(input, output, session){
 #or you can select a specific one
 #then click a button to start
   data_modal <- shiny::modalDialog(
-    title = shiny::div(shiny::tags$img(src = "img/shinyDigitise.png")),
+    title = shiny::div(shiny::tags$img(src = "img/shinyDigitise.png", height = "88px", width = "80px")),
     shiny::div(style = "text-align: center", offset = 0, 
     shinyFiles::shinyFilesButton("choosefolder", "Please select an image file from within the folder of images", title = NULL, multiple = FALSE,
         filetype = list(picture = c("jpg", "png", "jpeg", "tiff")))),

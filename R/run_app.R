@@ -3,20 +3,36 @@
 #' @param dir the path name to the directory / folder where the files are located /can be left blank
 #' @export
 
+
 shinyDigitise <- function(dir=NULL){
 
 #if dir is missing then label the dir object as missing (important for SD initation).
 #load into the environment the dir object and assign the UIs and Server into the env.
   if(missing(dir)){
+  shiny_env <- new.env()
   dir <- "Missing"
-  runApp(appDir = system.file("app",
-                                package = "shinyDigitise"))
+  assign('dir', dir, shiny_env)
+  environment(shinyDigitise_UI) <- shiny_env
+  environment(shinyDigitise_server) <- shiny_env
+  app <- shiny::shinyApp(
+      ui = shinyDigitise_UI,
+      server = shinyDigitise_server
+  )
   } else {
 
 #else if dir is not missing then label the dir object as the provided datapath (important for SD initation). 
 #otherwise same as previous
    dir <- dir
-  runApp(appDir = system.file("app",
-                                package = "shinyDigitise"))
+   shiny_env <- new.env()
+  assign('dir', dir, shiny_env)
+  environment(shinyDigitise_UI) <- shiny_env
+  environment(shinyDigitise_server) <- shiny_env
+  app <- shiny::shinyApp(
+      ui = shinyDigitise_UI,
+      server = shinyDigitise_server
+  )
   }
-	}
+  shiny::runApp(app)
+
+  }
+
