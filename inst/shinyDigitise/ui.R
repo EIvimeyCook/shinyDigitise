@@ -15,11 +15,11 @@ ui <- function(){
       shiny::column(
         width = 4,
         shiny::titlePanel(
-          title=shiny::splitLayout(cellWidths = c("40%","50%"),
+          title=shiny::splitLayout(cellWidths = c("30%","70%"),
                                    tippy::with_tippy(shiny::actionButton(
                                      inputId = "citeme", 
                                      style="color: white; background-color: white; border-color: white; box-shadow: 0px 0px 0px 0px white;",
-                                     label =  shiny::tags$img(src = "img/shinyDigitise.png", height = "88px", width = "80px")),"Click me!"),
+                                     label =  shiny::tags$img(src = "img/shinyDigitise.png", height = "78px", width = "70px")),"Click me!"),
 
     #contains a switch for review or extract
           shinyjs::hidden(shiny::div(id = "top_well7",

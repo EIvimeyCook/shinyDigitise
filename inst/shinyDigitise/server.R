@@ -241,6 +241,26 @@ details <<- metaDigitise::dir_details(importDatapath())
   shiny::updateRadioButtons(session = session, inputId = "all_or_unfin_but", choices = "All", selected = character(0))
 } else{}
 
+#if length = 0, show a warning
+if(length(details$image)==0){
+            shinyalert::shinyalert(
+          title = "Warning",
+          text = "The folder you've selected has no images, please restart and provide an appropriate folder or leave this argument blank",
+          size = "s",
+          closeOnEsc = TRUE,
+          closeOnClickOutside = FALSE,
+          html = FALSE,
+          type = "warning",
+          showConfirmButton = TRUE,
+          showCancelButton = FALSE,
+          confirmButtonText = "OK",
+          confirmButtonCol = "#AEDEF4",
+          timer = 0,
+          imageUrl = "",
+          animation = TRUE)
+        shiny::stopApp()
+}
+
   
   #hide and show relevant parts of the modal dialog
   shinyjs::hide("choosefolder")
