@@ -8,9 +8,8 @@ Description: User-friendly shiny app for the metaDigitise package, which facilit
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
-Imports: methods,
-    shiny,
+RoxygenNote: 7.2.1
+Imports: shiny,
     shinyWidgets,
     shinyjs,
     magick,
@@ -21,9 +20,11 @@ Imports: methods,
     DT,
     bslib,
     shinyFiles,
-    fresh,
-    shinythemes,
-    tidyr,
-    RColorBrewer,
-    scales
+    scales,
+    dplyr,
+    shinyjqui,
+    shinyscreenshot,
+    tippy,
+    graphics,
+    stats
 BugReports: https://github.com/EIvimeyCook/ShinyDigitise/issues
