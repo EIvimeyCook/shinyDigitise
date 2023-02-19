@@ -12,12 +12,8 @@ shinyDigitise <- function(dir=NULL){
   shiny_env <- new.env()
   dir <- "Missing"
   assign('dir', dir, shiny_env)
-  environment(shinyDigitise_UI) <- shiny_env
-  environment(shinyDigitise_server) <- shiny_env
-  app <- shiny::shinyApp(
-      ui = shinyDigitise_UI,
-      server = shinyDigitise_server
-  )
+    shiny::shinyAppDir(appDir = base::system.file("app",
+                                     package = "shinyDigitise"))
   } else {
 
 #else if dir is not missing then label the dir object as the provided datapath (important for SD initation). 
@@ -25,14 +21,11 @@ shinyDigitise <- function(dir=NULL){
    dir <- dir
    shiny_env <- new.env()
   assign('dir', dir, shiny_env)
-  environment(shinyDigitise_UI) <- shiny_env
-  environment(shinyDigitise_server) <- shiny_env
-  app <- shiny::shinyApp(
-      ui = shinyDigitise_UI,
-      server = shinyDigitise_server
-  )
+    shiny::shinyAppDir(appDir = base::system.file("app",
+                                     package = "shinyDigitise"))
   }
-  shiny::runApp(app)
+shiny::runApp(app)
+
 
   }
 
