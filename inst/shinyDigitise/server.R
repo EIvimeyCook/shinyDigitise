@@ -127,7 +127,7 @@ server <- function(input, output, session){
                 shiny::radioButtons(
            inputId = "all_or_unfin_but",
            label = NULL,
-           choices = c("All", "Unfinished"),
+           choices = c("All", "Finished", "Unfinished"),
            selected = character(0),
            inline = TRUE, 
 ))),
@@ -181,10 +181,22 @@ shinyjs::hidden(shiny::div(id = "data_import_extract",
       shiny::numericInput("sample_size", "Sample Size", ""),
       shiny::selectInput("pch", "Shape", "Circle", choices = c("Circle" = 19,
                                                          "Square" = 15,
-                                                         "Triangle" = 17)),
+                                                         "Triangle" = 17,
+                                                         "Diamond" = 18,
+                                                         "Circle Cross" = 13,
+                                                         "Cross" = 4,
+                                                         "Asterisk" = 8,
+                                                         "Open Circle" = 1,
+                                                         "Open Square" = 0)),
       shiny::selectInput("col", "Colour", "Orange", choices = c("Orange" = "orange",
                                                          "Purple" = "purple",
-                                                         "Blue" = "blue")),
+                                                         "Blue" = "blue",
+                                                         "Green" = "green",
+                                                         "Black" = "black",
+                                                         "Grey" = "grey",
+                                                         "Red" = "red",
+                                                         "Brown" = "brown",
+                                                         "DarkGreen" = "darkgreen")),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::actionButton("cancel", "Cancel"),
@@ -238,8 +250,12 @@ details <<- metaDigitise::dir_details(importDatapath())
 
 #hide unfinished if none left to finish
   if(length(details$images)==length(details$doneCalFiles)){
-  shiny::updateRadioButtons(session = session, inputId = "all_or_unfin_but", choices = "All", selected = character(0))
+  shiny::updateRadioButtons(session = session, inputId = "all_or_unfin_but", choices = c("All", "Finished"), selected = character(0), inline = T)
 } else{}
+
+  if(length(details$calibrations) == 0){
+shiny::updateRadioButtons(session = session, inputId = "all_or_unfin_but", choices = c("All", "Unfinished"), selected = character(0), inline = T)
+  }
 
 #if length = 0, show a warning
 if(length(details$image)==0){
@@ -338,6 +354,32 @@ shiny::observeEvent(input$all_or_unfin_but, {
    clearOptions = TRUE
 ))
   } 
+    else if(input$all_or_unfin_but == "Finished"){
+  details <<- metaDigitise::dir_details(importDatapath())
+  done_figures <<- details$name %in% details$calibrations
+
+    # Remove the files that are already done.
+  details$images <<- details$images[done_figures]
+  details$name <<- details$name[done_figures]
+  details$paths <<- details$paths[done_figures]
+
+  counter_total <<- length(details$paths)
+  image_import$multiple <<- TRUE
+  image_import$select <<- FALSE
+  
+  #set counters and next values at 1
+  counter$countervalue <<- 1
+  counter$next_count <<- 1
+
+ shiny::div(style = "text-align: center", offset = 0,
+   shinyWidgets::updatePickerInput(
+    session = session,
+   inputId = "select_image_pick",
+    choices = c("",details$name),
+    select = "",
+   clearOptions = TRUE
+))
+  } 
 
   else if(input$all_or_unfin_but == "Unfinished"){
     details <<- metaDigitise::get_notDone_file_details(importDatapath())
@@ -383,7 +425,7 @@ shiny::req(importDatapath())
    shiny::updateRadioButtons(
    inputId = "all_or_unfin_but",
    label = NULL,
-   choices = c("All", "Unfinished"),
+   choices = c("All", "Finished", "Unfinished"),
    selected = character(0),
    inline = TRUE
 ))
@@ -1188,11 +1230,27 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
             options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
           )
         })
+                output$group_table2 <- DT::renderDT({
+          DT::datatable(
+            mod_df$x,
+            editable = list(target = "cell"),
+            selection = list(mode = 'single', selected = c(1)),
+            options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
+          )
+        })
       }else{
         output$group_table <- DT::renderDT({
           DT::datatable(
             mod_df$x,
             editable = list(target = "cell", disable = list(columns = c(1,2,3))),
+            selection = "single",
+            options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
+          )
+        })
+                output$group_table2 <- DT::renderDT({
+          DT::datatable(
+            mod_df$x,
+            editable = list(target = "cell"),
             selection = "single",
             options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
           )
@@ -1228,42 +1286,14 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       shiny::showModal(popupModal2())
       row_count$x <- row_count$x + 1
       mod_df$x <- rbind(mod_df$x,
-                        if(row_count$x == 1){
         data.frame(
          Group_Name = NA,
          Sample_Size = NA,
          Shape = 19,
          Colour = "Orange"
        )
-                        }
-       else if(row_count$x == 2){
-       data.frame(
-         Group_Name = NA,
-         Sample_Size = NA,
-         Shape = 15,
-         Colour = "Purple"
-       )
-       }
-       else if(row_count$x == 3){
-         data.frame(
-           Group_Name = NA,
-           Sample_Size = NA,
-           Shape = 17,
-           Colour = "Blue"
-         )
-       }
-    )
+        )
     } 
-    # else if(input$plot_type == "histogram"){
-    #   row_count$x <- row_count$x + 1
-    #   mod_df$x <- rbind(mod_df$x,
-    #                     data.frame(
-    #                       Group_Name = "Group1",
-    #                       Sample_Size = NA
-    #                     )
-    #   )
-    #   shinyjs::disable("add_group")
-    # }
     else{
       shiny::showModal(popupModal1()) 
       row_count$x <- row_count$x + 1
@@ -1274,66 +1304,10 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
          )
       )
     }
-    
-    if(input$plot_type == "mean_error"){
-      output$plothintmean <- shiny::renderUI({ 
-        shiny::HTML("<b>Double-Click on the Error Bar, followed by the Mean</b>")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_scatter")
-      shinyjs::show("hint_mean")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "xy_mean_error"){
-      output$plothintxy <- shiny::renderUI({ 
-        shiny::HTML("<b>Double-Click on the Y Error Bar, followed by the Mean, followed by the X Error Bar</b>")
-      })
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_scatter")
-      shinyjs::show("hin_xy")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "boxplot"){
-      output$plothintbox <- shiny::renderUI({ 
-        shiny::HTML("<b>Double-Click on the Max, Upper Q, Median, Lower Q, and Minimum in that order</b>")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::show("hint_box")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "scatterplot"){
-      output$plothintscatter <- shiny::renderUI({ 
-        shiny::HTML("<b>Double-Click on points you want to add</b>")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::show("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "histogram"){
-      output$plothinthist <- shiny::renderUI({ 
-        shiny::HTML("<b>Double-Click on the left followed by the right upper corners of each bar</b>")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::show("hint_hist")
-    }
-    
+    })
     
 
-  })
-
+#what happens when you press ok
   shiny::observeEvent(input$ok, {
 
     if (!is.null(input$group) && nzchar(input$group)){
@@ -1348,6 +1322,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     }
   })
 
+#what happens when you prss cancel
   shiny::observeEvent(input$cancel, {
       shiny::removeModal()
     row_count$x <- row_count$x - 1
@@ -1391,10 +1366,12 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     # add mode becomes T
     add_mode$add <- TRUE
 
+
     # if you click group without any row selected - return an error.
     if(is.null(selected$row)|length(selected$row) == 0 | nrow(mod_df$x) == 0 ){
         shinyjs::disable("del_group")
         shinyjs::disable("click_group")
+        shinyjs::disable("edit_group")
       shinyalert::shinyalert(
         title = "Select a group to plot",
         text = "No group has been selected or created",
@@ -1415,6 +1392,61 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     } else {
 
       if (add_mode$add) {
+
+          if(input$plot_type == "mean_error"){
+      output$plothintmean <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Error Bar, followed by the Mean")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hint_mean")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "xy_mean_error"){
+      output$plothintxy <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Y Error Bar, followed by the Mean, followed by the X Error Bar")
+      })
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hin_xy")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "boxplot"){
+      output$plothintbox <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Max, Upper Q, Median, Lower Q, and Minimum in that order")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::show("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "scatterplot"){
+      output$plothintscatter <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on points you want to add")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::show("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "histogram"){
+      output$plothinthist <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the left followed by the right upper corners of each bar")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::show("hint_hist")
+    }
 
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         # if(as.data.frame(shiny::reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
@@ -1625,6 +1657,40 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       mod_df$x <- mod_df$x[-nrow(mod_df$x), ]
     }
   })
+
+    ################################################
+  # Editing group info
+  ################################################
+
+    popupModal3 <- function(failed = FALSE) {
+    shinyjqui::jqui_draggable(shiny::modalDialog(
+     DT::DTOutput("group_table2"),
+      shiny::tags$br(),
+      shiny::tags$br(),
+     shiny::actionButton("close", "Close"),
+      footer = shiny::tagList(
+        shiny::tags$em("Note - This window is draggable")
+      )
+    )
+    )
+  }
+    shiny::observeEvent(input$edit_group, {
+      shiny::showModal(popupModal3())
+    })
+
+    shiny::observeEvent(input$close, {
+      shiny::removeModal()
+    })
+
+    shiny::observeEvent(input$group_table2_cell_edit, {
+      info = input$group_table2_cell_edit
+      i = info$row
+      j = info$col
+      v = info$value
+     mod_df$x[i, j] <<- DT::coerceValue(v, mod_df$x [i, j])
+     DT::replaceData(proxy, mod_df$x, resetPaging = FALSE, rownames = FALSE)
+    })
+
 
 
 

@@ -338,7 +338,7 @@ ui <- function(){
                     shiny::actionButton(
                       inputId = "del_group",
                       label = "Delete Group"
-                    )
+                    ),
                   )
                 ),
         shiny::tags$br(),
@@ -360,6 +360,13 @@ ui <- function(){
               )
             )
           ),
+          shiny::tags$br(),
+          shiny::actionButton(
+                      inputId = "edit_group",
+                      label = "Edit Group Info"
+                    ),
+          shiny::tags$br(),
+          shiny::tags$br(),
           shiny::splitLayout(
             shiny::actionButton(
               inputId = "extract_back",
