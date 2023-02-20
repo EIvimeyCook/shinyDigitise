@@ -1691,9 +1691,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
      DT::replaceData(proxy, mod_df$x, resetPaging = FALSE, rownames = FALSE)
     })
 
-
-
-
   ################################################
   # Comments
   ################################################

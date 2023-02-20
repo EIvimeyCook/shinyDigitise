@@ -337,7 +337,7 @@ ui <- function(){
                     ),
                     shiny::actionButton(
                       inputId = "del_group",
-                      label = "Delete Group"
+                      label = "Delete Entire Group"
                     ),
                   )
                 ),
