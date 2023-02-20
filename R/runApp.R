@@ -9,12 +9,16 @@ shinyDigitise <- function(dir=NULL){
 #load into the environment the dir object and assign the UIs and Server into the env.
   if(missing(dir)){
   dir <- "Missing"
-  assign("dir",dir,.GlobalEnv)
+shiny_env <- 1
+envir = as.environment(shiny_env)
+assign("dir", dir, envir = envir)
   } else {
 #else if dir is not missing then label the dir object as the provided datapath (important for SD initation). 
 #otherwise same as previous
-   dir <- dir
-   assign("dir",dir,.GlobalEnv)
+dir <- dir
+shiny_env <- 1
+envir = as.environment(shiny_env)
+assign("dir", dir, envir = envir)
   }
 
 appDir <- system.file("shinyDigitise", package = "shinyDigitise")
