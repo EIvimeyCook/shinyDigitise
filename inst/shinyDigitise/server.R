@@ -925,7 +925,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         )
       }else{
         output$calib_info <- shiny::renderUI({ shiny::HTML(paste0(
-        " <b> Click on known values on axes in this order: <br/>
+        " <b> <i>Double</i> click on known values on axes in this order: <br/>
             | <br/>
             2 <br/>
             | <br/>
@@ -1107,9 +1107,17 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         if(input$plot_type=="histogram"){
           # basic$Bar <- NA
           valpoints$bar <- NULL
+          shinyjs::disable("add_group")
+          row_count$x <- row_count$x + 1
+          mod_df$x <- rbind(mod_df$x,
+                            data.frame(
+                              Group_Name = "Group1",
+                              Sample_Size = NA
+                            )
+          )
         }
 
-         if(input$plot_type=="scatterplot"){
+        if(input$plot_type=="scatterplot"){
           basic$Shape <- NA
           basic$Colour <- NA
 
@@ -1119,65 +1127,77 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
       } else {
         # otherwise read in the data that already exists from the raw data but dont allow it to aggregate if youve deleted a row.
-          if(input$plot_type=="scatterplot"){
-           raw_dat <- as.data.frame(values$raw_data)
-                   if(nrow(raw_dat)>0){
-          raw_dat_sum <- raw_dat |>
+        if(input$plot_type=="scatterplot"){
+          raw_dat <- as.data.frame(values$raw_data)
+          if(nrow(raw_dat)>0){
+            raw_dat_sum <- raw_dat |>
                         dplyr::group_by(id, pch, col) |>
                         dplyr::summarize(n = unique(n))
-          names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
-        mod_df$x <- raw_dat_sum
-        row_count$x <- nrow(raw_dat_sum)
-        valpoints$x <- values$raw_data$x
-        valpoints$y <- values$raw_data$y
-        valpoints$id <- values$raw_data$id
-        valpoints$n <- values$raw_data$n
-         valpoints$pch <- values$raw_data$pch
-          valpoints$col <- values$raw_data$col   
-      }
-      } 
-      if(input$plot_type=="histogram"){
-        raw_dat <- as.data.frame(values$raw_data)
-        if(nrow(raw_dat)>0){
-                raw_dat_sum <- raw_dat |>
-                        dplyr::group_by(id) |>
-                        dplyr::summarize(n = unique(n))
-        names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
-        mod_df$x <- raw_dat_sum
-        row_count$x <- nrow(raw_dat_sum)
-        valpoints$x <- values$raw_data$x
-        valpoints$y <- values$raw_data$y
-        valpoints$id <- values$raw_data$id
-        valpoints$n <- values$raw_data$n
-          valpoints$bar <- values$raw_data$bar
+            names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
+            mod_df$x <- raw_dat_sum
+            row_count$x <- nrow(raw_dat_sum)
+            valpoints$x <- values$raw_data$x
+            valpoints$y <- values$raw_data$y
+            valpoints$id <- values$raw_data$id
+            valpoints$n <- values$raw_data$n
+            valpoints$pch <- values$raw_data$pch
+            valpoints$col <- values$raw_data$col   
+          } 
+        } 
+        if(input$plot_type=="histogram"){
+          shinyjs::disable("add_group")
 
-}
-}  else {raw_dat <- as.data.frame(values$raw_data)
-        if(nrow(raw_dat)>0){
-        raw_dat_sum <- raw_dat |>
-                        dplyr::group_by(id) |>
-                        dplyr::summarize(n = unique(n))
-        names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
-        mod_df$x <- raw_dat_sum
-        row_count$x <- nrow(raw_dat_sum)
-        valpoints$x <- values$raw_data$x
-        valpoints$y <- values$raw_data$y
-        valpoints$id <- values$raw_data$id
-        valpoints$n <- values$raw_data$n
+          raw_dat <- as.data.frame(values$raw_data)
+          if(nrow(raw_dat)>0){
+              raw_dat_sum <- raw_dat |>
+                  dplyr::group_by(id) |>
+                  dplyr::summarize(n = unique(n))
+            names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+            mod_df$x <- raw_dat_sum
+            row_count$x <- nrow(raw_dat_sum)
+            valpoints$x <- values$raw_data$x
+            valpoints$y <- values$raw_data$y
+            valpoints$id <- values$raw_data$id
+            valpoints$n <- values$raw_data$n
+            valpoints$bar <- values$raw_data$bar
+          }
+        }else{
+          raw_dat <- as.data.frame(values$raw_data)
+          if(nrow(raw_dat)>0){
+            raw_dat_sum <- raw_dat |>
+                            dplyr::group_by(id) |>
+                            dplyr::summarize(n = unique(n))
+            names(raw_dat_sum) <- c("Group_Name", "Sample_Size")
+            mod_df$x <- raw_dat_sum
+            row_count$x <- nrow(raw_dat_sum)
+            valpoints$x <- values$raw_data$x
+            valpoints$y <- values$raw_data$y
+            valpoints$id <- values$raw_data$id
+            valpoints$n <- values$raw_data$n
+          }
         }
-    }
-  }
+      }
 
       # this is then rendered in a DT table.
-      output$group_table <- DT::renderDT({
-        DT::datatable(
-          mod_df$x,
-          editable = list(target = "cell", disable = list(columns = c(1,2,3))),
-          selection = "single",
-          options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
-        )
-      })
-    
+      if(input$plot_type=="histogram"){
+        output$group_table <- DT::renderDT({
+          DT::datatable(
+            mod_df$x,
+            editable = list(target = "cell", disable = list(columns = c(1,2,3))),
+            selection = list(mode = 'single', selected = c(1)),
+            options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
+          )
+        })
+      }else{
+        output$group_table <- DT::renderDT({
+          DT::datatable(
+            mod_df$x,
+            editable = list(target = "cell", disable = list(columns = c(1,2,3))),
+            selection = "single",
+            options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
+          )
+        })
+      }
     }else{
 
       ## hide
@@ -1233,16 +1253,17 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
          )
        }
     )
-    } else if(input$plot_type == "histogram"){
-      row_count$x <- row_count$x + 1
-      mod_df$x <- rbind(mod_df$x,
-                        data.frame(
-                          Group_Name = "Group1",
-                          Sample_Size = NA
-                        )
-      )
-      shinyjs::disable("add_group")
-    }
+    } 
+    # else if(input$plot_type == "histogram"){
+    #   row_count$x <- row_count$x + 1
+    #   mod_df$x <- rbind(mod_df$x,
+    #                     data.frame(
+    #                       Group_Name = "Group1",
+    #                       Sample_Size = NA
+    #                     )
+    #   )
+    #   shinyjs::disable("add_group")
+    # }
     else{
       shiny::showModal(popupModal1()) 
       row_count$x <- row_count$x + 1
