@@ -1,24 +1,15 @@
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
-#' @export
 
 
 #various functions
 
 is.even <- function(x) x %% 2 == 0
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
-#' @export
 
 filename <- function(x) {
 	y <- strsplit(x,"/")
 	sapply(y, function(z) z[length(z)], USE.NAMES = FALSE)
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
-#' @export
 
 redraw_rotation <- function(image, flip, rotate){
 	if(flip) image <- magick::image_flop(magick::image_rotate(image,270))
@@ -26,9 +17,6 @@ redraw_rotation <- function(image, flip, rotate){
 	return(image)
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
-#' @export
 
 redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_details,cex){
 	x_shift <- image_details["width"]/30
@@ -54,9 +42,6 @@ redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_d
 	}
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
-#' @export
 
 redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	image_width <- image_details["width"]
@@ -138,9 +123,6 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	}
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
-#' @export
 
 internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE, zoom_coords=NULL, ...){
 
@@ -187,9 +169,6 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
-#' @export
 
 calibrate <- function(raw_data, calpoints, point_vals, log_axes, ...) {
 	
