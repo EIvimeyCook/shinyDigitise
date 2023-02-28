@@ -9,22 +9,8 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
-Imports: shiny,
-    shinyWidgets,
-    shinyjs,
-    magick,
-    metaDigitise,
-    shinyalert,
-    emojifont,
-    stringr,
-    DT,
-    bslib,
-    shinyFiles,
-    scales,
-    dplyr,
-    shinyjqui,
-    shinyscreenshot,
-    tippy,
-    graphics,
-    stats
+Imports: 
+     magick,
+     scales,
+     shiny
 BugReports: https://github.com/EIvimeyCook/ShinyDigitise/issues

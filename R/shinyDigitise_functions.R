@@ -1,6 +1,3 @@
-#' @title shinyDigitise_functions
-#' @description Various shinyDigitise functions
-#' @export
 
 
 #check plottype if its not null
@@ -8,18 +5,10 @@ check_plottype <- function(x){
 	!is.null(x$plot_type)
 }
 
-#' @title shinyDigitise_functions
-#' @description Various shinyDigitise functions
-#' @export
-
 #check orinetation if its TRUE
 check_orientation <- function(x){
 	TRUE
 }
-
-#' @title shinyDigitise_functions
-#' @description Various shinyDigitise functions
-#' @export
 
 #check calibration and whether parts are filled in. And whether enough calpoints are specified. Depending on plot type
 check_calibrate <- function(x){
@@ -33,10 +22,6 @@ check_calibrate <- function(x){
 		TRUE
 	}
 }
-
-#' @title shinyDigitise_functions
-#' @description Various shinyDigitise functions
-#' @export
 
 #check the extraction is complete. If it's null = FALSE. Otherwsie if the group lengths are not suitable length i.e. enough points for means/boxplots etc. Scatterplot doesnt need any.
 check_extract <- function(x) {
