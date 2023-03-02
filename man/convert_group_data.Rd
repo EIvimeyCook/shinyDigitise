@@ -2,10 +2,18 @@
 % Please edit documentation in R/metaDigitise_functions.R
 \name{convert_group_data}
 \alias{convert_group_data}
-\title{metaDigitise_functions}
+\title{convert group data}
 \usage{
 convert_group_data(cal_data, plot_type)
 }
+\arguments{
+\item{cal_data}{Calibration data}
+
+\item{plot_type}{The type of plot used}
+}
+\value{
+converted data
+}
 \description{
-Various metaDigitise functions
+Conversion of group data by metaDigitise
 }

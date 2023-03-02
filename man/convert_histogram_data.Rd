@@ -2,10 +2,16 @@
 % Please edit documentation in R/metaDigitise_functions.R
 \name{convert_histogram_data}
 \alias{convert_histogram_data}
-\title{metaDigitise_functions}
+\title{convert histogram data}
 \usage{
 convert_histogram_data(cal_data)
 }
+\arguments{
+\item{cal_data}{Calibration data}
+}
+\value{
+converted histogram data
+}
 \description{
-Various metaDigitise functions
+Conversion of histogram data by metaDigitise
 }

@@ -2,10 +2,16 @@
 % Please edit documentation in R/metaDigitise_functions.R
 \name{process_data}
 \alias{process_data}
-\title{metaDigitise_functions}
+\title{process data}
 \usage{
 process_data(object)
 }
+\arguments{
+\item{object}{object data with plot type and variables}
+}
+\value{
+processed data
+}
 \description{
-Various metaDigitise functions
+Processing data by metaDigitise
 }
