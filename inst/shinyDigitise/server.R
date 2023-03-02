@@ -1680,7 +1680,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
     shiny::observeEvent(input$close, {
     values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
-    print(values$raw_data)
       output$metaPlot <- shiny::renderPlot({
       graphics::par(mar = c(0, 0, 0, 0))
       plot_values <- shiny::reactiveValuesToList(values)
@@ -1703,7 +1702,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
           valpoints$pch <- dat_mod[i, 3]
           valpoints$col <- dat_mod[i, 4]
         }
-        print(dat_mod)
 DT::replaceData(proxy, mod_df$x)
     })
 
