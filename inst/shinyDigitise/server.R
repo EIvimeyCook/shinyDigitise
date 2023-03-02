@@ -1,6 +1,6 @@
+#shinyDigitise UI function
 
 server <- function(input, output, session){
-
 
   ################################################
   # Initial Startup
