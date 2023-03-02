@@ -1,3 +1,4 @@
+#shinyDigitise UI function
 
 ui <- function(){
   #various starting functions with theme and fonts
