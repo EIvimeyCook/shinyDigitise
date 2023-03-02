@@ -1618,7 +1618,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     mod_df$x[row_count$x,4] <<- input$col
   })
 
-  #edit data with DT input
+  #edit data with DT input (not using)
   shiny::observeEvent(input$group_table_cell_edit, {
     change_string <-  as.character(mod_df$x[selected$row,1])
     mod_df$x <-  DT::editData(mod_df$x, input$group_table_cell_edit)
@@ -1679,16 +1679,32 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     })
 
     shiny::observeEvent(input$close, {
+    values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
+    print(values$raw_data)
+      output$metaPlot <- shiny::renderPlot({
+      graphics::par(mar = c(0, 0, 0, 0))
+      plot_values <- shiny::reactiveValuesToList(values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
+    })
       shiny::removeModal()
     })
 
     shiny::observeEvent(input$group_table2_cell_edit, {
-      info = input$group_table2_cell_edit
-      i = info$row
-      j = info$col
-      v = info$value
+      info <- input$group_table2_cell_edit
+      i <- info$row
+      j <- info$col
+      v <- info$value
      mod_df$x[i, j] <<- DT::coerceValue(v, mod_df$x [i, j])
-     DT::replaceData(proxy, mod_df$x, resetPaging = FALSE, rownames = FALSE)
+  #update mod_df data with edited info
+      dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
+        valpoints$id <- dat_mod[i, 1]
+        valpoints$n <- dat_mod[i, 2]
+     if(input$plot_type=="scatterplot"){
+          valpoints$pch <- dat_mod[i, 3]
+          valpoints$col <- dat_mod[i, 4]
+        }
+        print(dat_mod)
+DT::replaceData(proxy, mod_df$x)
     })
 
   ################################################
