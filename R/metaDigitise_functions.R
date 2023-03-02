@@ -17,6 +17,7 @@ redraw_rotation <- function(image, flip, rotate){
 	return(image)
 }
 
+#edited for sDigitise
 
 redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_details,cex){
 	x_shift <- image_details["width"]/30
@@ -25,8 +26,8 @@ redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_d
 	line_width <- 2*cex
 	cal_col <- "blue"
 
-	graphics::points(calpoints, pch=3, col=cal_col, lwd=line_width)
-	graphics::lines(calpoints[1:2,], col=cal_col, lwd=line_width)
+	graphics::points(calpoints$y~calpoints$x, pch=3, col=cal_col, lwd=line_width)
+	graphics::lines(x = calpoints$x[1:2], y = calpoints$y[1:2], col=cal_col, lwd=line_width)
 	graphics::text(calpoints$x[1:2] - rep(x_shift, 2), calpoints$y[1:2], point_vals[1:2], col=cal_col, cex=text_cex)
 
 	if(plot_type=="histogram"){
@@ -36,7 +37,7 @@ redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_d
 		}
 
 	if(!plot_type %in% c("mean_error","boxplot")){
-		graphics::lines(calpoints[3:4,], col=cal_col, lwd=line_width)
+		graphics::lines(x = calpoints$x[3:4], y = calpoints$y[3:4], col=cal_col, lwd=line_width)
 		graphics::text(calpoints$x[3:4], calpoints$y[3:4] - rep(y_shift, 2), point_vals[3:4], col=cal_col, cex=text_cex)
 		graphics::text(mean(calpoints$x[3:4]), mean(calpoints$y[3:4]) - y_shift*1.5, variable[2], col=cal_col, cex=text_cex)
 	}
