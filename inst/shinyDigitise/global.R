@@ -1,2 +1,2 @@
-#create gloabl variables for storing
+#create global variables for storing
 utils::globalVariables(c("details", "counter_total", "image_name", "id", "pch", "n"))
