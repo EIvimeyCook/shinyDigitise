@@ -12,5 +12,21 @@ RoxygenNote: 7.2.1
 Imports: 
      magick,
      scales,
-     shiny
+     shiny,
+     utils,
+     dplyr,
+     DT,
+     emojifont,
+     graphics,
+     metaDigitise,
+     shiny,
+     shinyalert,
+     shinyFiles,
+     shinyjqui,
+     shinyscreenshot,
+     stringr,
+     bslib,
+     shinyWidgets,
+     tippy,
+     stats
 BugReports: https://github.com/EIvimeyCook/ShinyDigitise/issues
