@@ -38,7 +38,7 @@ NB. you can adjust point size and group name positions on the fly aswell as zoom
 1. Choose plot type - mean/error + boxplot + xy mean/error + histogram + scatterplot
 2. Orientate figure - flip or rotate the graph (rotation angle is shown on screen)
 3. Calibrate axes - click calibrate mode on, and, depending on the plot type shown, doublick click on the axes in the relevant order and add the variable name+values. These will then appear on the plot (the size will depend on the point size slider).
-4. Add groups - Clicking add group will cause a pop up to appear to enter data (name + sample size). This will then appear in the table. Clicking the group will allow you to either doubleclickclick points on the graph (you have to press the click points button first) or delete the group. Lastly, you can select the type of error show (if mean/error graph)
+4. Add groups - Clicking add group will cause a pop up to appear to enter data (name + sample size). This will then appear in the table. Clicking the group will allow you to either doubleclick points on the graph (you have to press the click points button first) or delete the group. Lastly, you can select the type of error show (if mean/error graph)
 5. Comments - add a comment to your data.
 6. Finished! The app will close when you've reached the end of your graphs.
 
