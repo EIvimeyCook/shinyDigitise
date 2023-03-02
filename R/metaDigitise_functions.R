@@ -1,6 +1,6 @@
 
 
-#various functions
+#various functions form metaDigitise
 
 is.even <- function(x) x %% 2 == 0
 
@@ -197,8 +197,11 @@ calibrate <- function(raw_data, calpoints, point_vals, log_axes, ...) {
 	return(raw_data)
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
+#' @title convert group data
+#' @description Conversion of group data by metaDigitise
+#' @param cal_data Calibration data
+#' @param plot_type The type of plot used
+#' @returns converted data
 #' @export
 
 convert_group_data <- function(cal_data, plot_type){
@@ -222,8 +225,10 @@ convert_group_data <- function(cal_data, plot_type){
 	return(convert_data)
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
+#' @title convert histogram data
+#' @description Conversion of histogram data by metaDigitise
+#' @param cal_data Calibration data
+#' @returns converted histogram data
 #' @export
 
 convert_histogram_data <- function(cal_data){
@@ -236,8 +241,10 @@ convert_histogram_data <- function(cal_data){
 	return(convert_data)
 }
 
-#' @title metaDigitise_functions
-#' @description Various metaDigitise functions
+#' @title process data
+#' @description Processing data by metaDigitise
+#' @param object object data with plot type and variables
+#' @returns processed data
 #' @export
 
 process_data <- function(object){
