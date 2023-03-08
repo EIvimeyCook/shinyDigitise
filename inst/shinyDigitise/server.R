@@ -933,14 +933,13 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     # show the calib_data object (where we enter names and values for axis).
     # shinyjs::toggle(id = "calib_data")
 
-    # clears any previously entered text
-    shinyjs::reset("y_var_input")
-    shinyjs::reset("x_var_input")
-    shinyjs::reset("y_coord_input")
-    shinyjs::reset("y_coord_input")
-    
-    shiny::updateTextInput(session,"y_var_input", value="")
-    shiny::updateTextInput(session,"x_var_input", value="")
+    shiny::updateTextInput(session,"y_var", value="")
+    shiny::updateTextInput(session,"x_var", value="")
+    shiny::updateNumericInput(session,"x1", value="")
+    shiny::updateNumericInput(session,"x2", value="")
+    shiny::updateNumericInput(session,"y1", value="")
+    shiny::updateNumericInput(session,"y2", value="")
+
 
     if (input$calib_mode) {
       if(is.null(values$plot_type)){
@@ -1135,7 +1134,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
           Group_Name = NA,
           Sample_Size = NA
         )
-       
+        shinyjs::enable("add_group")
         #this is so it doesnt immediately plot a new row.
         mod_df$x <- basic[-nrow(basic),]
 
@@ -1160,6 +1159,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         }
 
         if(input$plot_type=="scatterplot"){
+          shinyjs::enable("add_group")
           basic$Shape <- NA
           basic$Colour <- NA
 
@@ -1170,6 +1170,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       } else {
         # otherwise read in the data that already exists from the raw data but dont allow it to aggregate if youve deleted a row.
         if(input$plot_type=="scatterplot"){
+           shinyjs::enable("add_group")
           raw_dat <- as.data.frame(values$raw_data)
           if(nrow(raw_dat)>0){
             raw_dat_sum <- raw_dat |>
@@ -1204,6 +1205,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
             valpoints$bar <- values$raw_data$bar
           }
         }else{
+          shinyjs::enable("add_group")
           raw_dat <- as.data.frame(values$raw_data)
           if(nrow(raw_dat)>0){
             raw_dat_sum <- raw_dat |>
@@ -1392,61 +1394,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     } else {
 
       if (add_mode$add) {
-
-          if(input$plot_type == "mean_error"){
-      output$plothintmean <- shiny::renderUI({ 
-        shiny::tags$strong("Double-Click on the Error Bar, followed by the Mean")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_scatter")
-      shinyjs::show("hint_mean")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "xy_mean_error"){
-      output$plothintxy <- shiny::renderUI({ 
-        shiny::tags$strong("Double-Click on the Y Error Bar, followed by the Mean, followed by the X Error Bar")
-      })
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_scatter")
-      shinyjs::show("hin_xy")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "boxplot"){
-      output$plothintbox <- shiny::renderUI({ 
-        shiny::tags$strong("Double-Click on the Max, Upper Q, Median, Lower Q, and Minimum in that order")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::show("hint_box")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "scatterplot"){
-      output$plothintscatter <- shiny::renderUI({ 
-        shiny::tags$strong("Double-Click on points you want to add")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::show("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::hide("hint_hist")
-    }
-    
-    if(input$plot_type == "histogram"){
-      output$plothinthist <- shiny::renderUI({ 
-        shiny::tags$strong("Double-Click on the left followed by the right upper corners of each bar")
-      })
-      shinyjs::hide("hint_xy")
-      shinyjs::hide("hint_scatter")
-      shinyjs::hide("hint_mean")
-      shinyjs::hide("hint_box")
-      shinyjs::show("hint_hist")
-    }
 
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         # if(as.data.frame(shiny::reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
@@ -1909,6 +1856,60 @@ DT::replaceData(proxy, mod_df$x)
     extract_mode$extract <<- TRUE
     shinyjs::hide("calib_well")
     shinyWidgets::updateSwitchInput(session, "calib_mode", value = FALSE)
+              if(input$plot_type == "mean_error"){
+      output$plothintmean <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Error Bar, followed by the Mean")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hint_mean")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "xy_mean_error"){
+      output$plothintxy <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Y Error Bar, followed by the Mean, followed by the X Error Bar")
+      })
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hint_xy")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "boxplot"){
+      output$plothintbox <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Max, Upper Q, Median, Lower Q, and Minimum in that order")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::show("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "scatterplot"){
+      output$plothintscatter <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on points you want to add")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::show("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "histogram"){
+      output$plothinthist <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the left followed by the right upper corners of each bar")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::show("hint_hist")
+    }
   })
   
   shiny::observeEvent(input$extract_step, {
@@ -1950,6 +1951,60 @@ DT::replaceData(proxy, mod_df$x)
     shinyjs::show("extract_well")
     extract_mode$extract <<- TRUE
     shinyjs::hide("comm_well")
+              if(input$plot_type == "mean_error"){
+      output$plothintmean <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Error Bar, followed by the Mean")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hint_mean")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "xy_mean_error"){
+      output$plothintxy <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Y Error Bar, followed by the Mean, followed by the X Error Bar")
+      })
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_scatter")
+      shinyjs::show("hint_xy")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "boxplot"){
+      output$plothintbox <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the Max, Upper Q, Median, Lower Q, and Minimum in that order")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::show("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "scatterplot"){
+      output$plothintscatter <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on points you want to add")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::show("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::hide("hint_hist")
+    }
+    
+    if(input$plot_type == "histogram"){
+      output$plothinthist <- shiny::renderUI({ 
+        shiny::tags$strong("Double-Click on the left followed by the right upper corners of each bar")
+      })
+      shinyjs::hide("hint_xy")
+      shinyjs::hide("hint_scatter")
+      shinyjs::hide("hint_mean")
+      shinyjs::hide("hint_box")
+      shinyjs::show("hint_hist")
+    }
   })
     
 
