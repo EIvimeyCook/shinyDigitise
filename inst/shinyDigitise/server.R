@@ -62,6 +62,9 @@ server <- function(input, output, session){
   # container for add T/F.
   add_mode <- shiny::reactiveValues(add = FALSE)
 
+   # container for add T/F.
+  scatterChoice <- shiny::reactiveValues(col_list = NULL, pch_list = NULL)
+
   #praising action button + logo leads to citations
   shiny::observeEvent(input$citeme, {
     shinyalert::shinyalert(
@@ -174,29 +177,60 @@ shinyjs::hidden(shiny::div(id = "data_import_extract",
     )
     )
   }
-  
+
+#starting choice for scatterplots colours and shapes
+  scatterDatShape <-  data.frame(
+    shape_name = c(
+      "Circle", 
+      "Square",
+      "Triangle" ,
+      "Diamond" ,
+      "Circle Cross",
+      "Cross",
+      "Asterisk" ,
+      "Open Circle",
+      "Open Square"))
+
+   scatterDatCol <- data.frame(
+    colour_name = c(
+      "Orange",
+      "Purple",
+      "Blue",
+      "Green",
+      "Black", 
+      "Grey", 
+      "Red",
+      "Brown",
+      "DarkGreen"))
+
+
+#dyanmic reactive dataframes
+scatterChoiceShape <- shiny::reactive({
+ if(!is.null(input$pch)){
+  scatterChoice$pch_list <- c(scatterChoice$pch_list, input$pch)
+    scatterDatShape <- subset(scatterDatShape, !(shape_name %in% scatterChoice$pch_list))
+    } else {
+      scatterDatShape <- scatterDatShape
+    }
+})
+
+scatterChoiceCol <- shiny::reactive({
+ if(!is.null(input$col)){
+  scatterChoice$col_list <- c(scatterChoice$col_list, input$col)
+    scatterDatCol<- subset(scatterDatCol, !(colour_name %in% scatterChoice$col_list))
+    } else {
+      scatterDatCol <- scatterDatCol
+    }
+})
+
+
+#popup for scatterlot
   popupModal2 <- function(failed = FALSE) {
     shinyjqui::jqui_draggable(shiny::modalDialog(
       shiny::textInput("group", "Group Name", ""),
       shiny::numericInput("sample_size", "Sample Size", ""),
-      shiny::selectInput("pch", "Shape", "Circle", choices = c("Circle" = 19,
-                                                         "Square" = 15,
-                                                         "Triangle" = 17,
-                                                         "Diamond" = 18,
-                                                         "Circle Cross" = 13,
-                                                         "Cross" = 4,
-                                                         "Asterisk" = 8,
-                                                         "Open Circle" = 1,
-                                                         "Open Square" = 0)),
-      shiny::selectInput("col", "Colour", "Orange", choices = c("Orange" = "orange",
-                                                         "Purple" = "purple",
-                                                         "Blue" = "blue",
-                                                         "Green" = "green",
-                                                         "Black" = "black",
-                                                         "Grey" = "grey",
-                                                         "Red" = "red",
-                                                         "Brown" = "brown",
-                                                         "DarkGreen" = "darkgreen")),
+      shiny::selectInput("pch", "Shape", scatterChoiceShape()$shape_name[1], choices = scatterChoiceShape()$shape_name),
+      shiny::selectInput("col", "Colour", scatterChoiceCol()$colour_name[1], choices = scatterChoiceCol()$colour_name),
       shiny::tags$br(),
       shiny::tags$br(),
       shiny::actionButton("cancel", "Cancel"),
@@ -1558,12 +1592,32 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   })
 
   shiny::observeEvent(input$pch, {
-    mod_df$x[row_count$x,3] <<- as.numeric(input$pch)
-  })
+    if(input$pch == "Circle"){
+      mod_df$x[row_count$x,3] <<- 19
+    } else if(input$pch == "Square"){
+      mod_df$x[row_count$x,3] <<- 15
+    } else if(input$pch == "Triangle"){
+      mod_df$x[row_count$x,3] <<- 17
+    } else if(input$pch == "Diamond"){
+      mod_df$x[row_count$x,3] <<- 18
+    } else if(input$pch == "Circle Cross"){
+      mod_df$x[row_count$x,3] <<- 13
+    } else if(input$pch == "Cross"){
+      mod_df$x[row_count$x,3] <<- 4
+    } else if(input$pch == "Asterisk"){
+      mod_df$x[row_count$x,3] <<- 8
+    } else if(input$pch == "Open Circle"){
+      mod_df$x[row_count$x,3] <<- 1
+    } else if(input$pch == "Open Square"){
+      mod_df$x[row_count$x,3] <<- 0
+    }
+})
 
   shiny::observeEvent(input$col, {
     mod_df$x[row_count$x,4] <<- input$col
   })
+
+
 
   #edit data with DT input (not using)
   shiny::observeEvent(input$group_table_cell_edit, {
@@ -1809,13 +1863,7 @@ DT::replaceData(proxy, mod_df$x)
       }
 
   })
-  
-  shiny::observeEvent(input$exit, {
-    shiny::req(importDatapath())
-    shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath()))
-    utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv"))
 
-  })
 
   ################################################
   # Previous/next step buttons
@@ -2015,7 +2063,7 @@ DT::replaceData(proxy, mod_df$x)
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
     shiny::isolate(shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath())))
-    shiny::isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv")))
+    shiny::isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),Sys.time(),"ExtractedData.csv")))
 
   })
 
