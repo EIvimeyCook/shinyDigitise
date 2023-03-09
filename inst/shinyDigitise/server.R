@@ -2063,7 +2063,7 @@ DT::replaceData(proxy, mod_df$x)
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
     shiny::isolate(shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath())))
-    shiny::isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),Sys.time(),"ExtractedData.csv")))
+    shiny::isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv")))
 
   })
 
