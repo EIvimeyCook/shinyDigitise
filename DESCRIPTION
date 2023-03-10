@@ -28,5 +28,6 @@ Imports:
      bslib,
      shinyWidgets,
      tippy,
-     stats
+     stats,
+     shinyjs
 BugReports: https://github.com/EIvimeyCook/ShinyDigitise/issues
