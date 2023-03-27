@@ -17,9 +17,18 @@ Introduced in this new preprint: [A framework for improving the reproducibility 
 
 devtools::install_github("EIvimeyCook/ShinyDigitise")
 
-library(shinyDigitise)
+<br>
+
+**If you plan on using shinyDigitise to extract data from xy mean graphs, you need the dev version of metaDigitise.**
+
+devtools::install_github("joelpick/metaDigitise")
+
+<br>
+There is a known bug with some versions of [R Studio](https://github.com/rstudio/rstudio/issues/12649). Be sure to update R Studio to the latest version.
 
 ## To use the shiny app:
+
+library(shinyDigitise)
 
 df<-shinyDigitise(Folder where your images are located)
 
