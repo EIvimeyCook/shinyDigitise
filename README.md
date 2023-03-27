@@ -24,7 +24,7 @@ devtools::install_github("EIvimeyCook/ShinyDigitise")
 devtools::install_github("joelpick/metaDigitise")
 
 <br>
-There is a known bug with some versions of [R Studio](https://github.com/rstudio/rstudio/issues/12649). Be sure to update R Studio to the latest version.
+There is a known bug with some versions of R Studio (https://github.com/rstudio/rstudio/issues/12649). Be sure to update R Studio to the latest version.
 
 ## To use the shiny app:
 
