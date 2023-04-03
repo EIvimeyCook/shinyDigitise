@@ -28,6 +28,10 @@ There is a known bug with some versions of R Studio (https://github.com/rstudio/
 
 ## To use the shiny app:
 
+Video tutorial (https://www.youtube.com/watch?v=b9KvRsO8SPY)[here]
+
+<br>
+
 library(shinyDigitise)
 
 df<-shinyDigitise(Folder where your images are located)
