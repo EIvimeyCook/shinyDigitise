@@ -273,3 +273,13 @@ process_data <- function(object){
 
 	return(processed_data)
 }
+	
+#' @title convert se to sd
+#' @description Conversion of se to sd
+#' @param standard error with sample size
+#' @returns standard deviation 
+#' @export
+	       
+se_to_sd <- function(se, n) {
+  se * sqrt(as.numeric(as.character(n)))
+}
