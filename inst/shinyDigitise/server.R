@@ -255,11 +255,11 @@ scatterChoiceCol <- shiny::reactive({
 #importing data - if directory is missing take the user to a folderchoice, if it is provided then use that instead. Makes sure there is a / on the end
 importDatapath <-  shiny::reactive({
    if(dir == "Missing"){
-     shinyFiles::shinyFileChoose(input,'choosefolder',roots = c(home = '~'), session = session)
+     shinyFiles::shinyFileChoose(input,'choosefolder',roots = shinyFiles::getVolumes(), session = session)
      shiny::req(input$choosefolder)
    if (is.null(input$choosefolder))
       return(NULL) 
-      return(paste0(sub("/[^/]+$", "", shinyFiles::parseFilePaths(c(home = '~'), input$choosefolder)$datapath), "/"))
+      return(paste0(sub("/[^/]+$", "", shinyFiles::parseFilePaths(shinyFiles::getVolumes(), input$choosefolder)$datapath), "/"))
       } 
   else if(dir != "Missing"){
   if((substring(dir, nchar(dir)) == "/") == FALSE){
