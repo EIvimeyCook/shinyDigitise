@@ -1261,7 +1261,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         output$group_table <- DT::renderDT({
           DT::datatable(
             mod_df$x,
-            editable = list(target = "cell", disable = list(columns = c(1,2,3))),
+            editable = list(target = "cell", disable = list(columns = c(1,2,3,4))),
             selection = list(mode = 'single', selected = c(1)),
             options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
           )
@@ -1278,7 +1278,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         output$group_table <- DT::renderDT({
           DT::datatable(
             mod_df$x,
-            editable = list(target = "cell", disable = list(columns = c(1,2,3))),
+            editable = list(target = "cell", disable = list(columns = c(1,2,3,4))),
             selection = "single",
             options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
           )
@@ -1679,6 +1679,49 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       shiny::showModal(popupModal3())
     })
 
+   shiny::observeEvent(input$group_table2_cell_edit, {
+      info <- input$group_table2_cell_edit
+      i <- info$row
+      j <- info$col
+      v <- info$value
+
+      dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
+
+     if(j == 1){ 
+      print(mod_df$x)
+     mod_df$x[i, "NameChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
+     valpoints$id[valpoints$id==dat_mod$x.Group_Name[i]] <<- mod_df$x[i, "NameChange"]
+     mod_df$x[i, j] <- mod_df$x[i, "NameChange"]
+     mod_df$x <<- dplyr::select(mod_df$x, -c("NameChange"))
+     print(mod_df$x)
+   }
+        if(j == 2){ 
+          print(mod_df$x)
+     mod_df$x[i, "SampleChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
+     valpoints$n[valpoints$n==dat_mod$x.Sample_Size[i]] <<- mod_df$x[i, "SampleChange"]
+     mod_df$x[i, j] <- mod_df$x[i, "SampleChange"]
+     mod_df$x <<- dplyr::select(mod_df$x, -c("SampleChange"))
+     print(mod_df$x)
+   }
+           if(j == 3){ 
+            print(mod_df$x)
+     mod_df$x[i, "ShapeChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
+     valpoints$pch[valpoints$pch==dat_mod$x.Shape[i]] <<- mod_df$x[i, "ShapeChange"]
+     mod_df$x[i, j] <- mod_df$x[i, "ShapeChange"]
+     mod_df$x <<- dplyr::select(mod_df$x, -c("ShapeChange"))
+     print(mod_df$x)
+   }
+              if(j == 4){ 
+                print(mod_df$x)
+     mod_df$x[i, "ColChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
+     valpoints$col[valpoints$col==dat_mod$x.Colour[i]] <<- mod_df$x[i, "ColChange"]
+     mod_df$x[i, j] <- mod_df$x[i, "ColChange"]
+     mod_df$x <<- dplyr::select(mod_df$x, -c("ColChange"))
+     print(mod_df$x)
+   } 
+DT::replaceData(proxy, mod_df$x)
+    })
+
     shiny::observeEvent(input$close, {
     values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
       output$metaPlot <- shiny::renderPlot({
@@ -1689,22 +1732,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       shiny::removeModal()
     })
 
-    shiny::observeEvent(input$group_table2_cell_edit, {
-      info <- input$group_table2_cell_edit
-      i <- info$row
-      j <- info$col
-      v <- info$value
-     mod_df$x[i, j] <<- DT::coerceValue(v, mod_df$x [i, j])
-  #update mod_df data with edited info
-      dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
-        valpoints$id <- dat_mod[i, 1]
-        valpoints$n <- dat_mod[i, 2]
-     if(input$plot_type=="scatterplot"){
-          valpoints$pch <- dat_mod[i, 3]
-          valpoints$col <- dat_mod[i, 4]
-        }
-DT::replaceData(proxy, mod_df$x)
-    })
 
   ################################################
   # Comments
