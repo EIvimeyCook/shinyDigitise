@@ -22,6 +22,12 @@ server <- function(input, output, session){
 
   #container for which rows and cell are selected
   selected <- shiny::reactiveValues(row = NULL, cell=NULL)
+
+ #container for which rows and cell are selected to delete
+  selected2 <- shiny::reactiveValues(row = NULL, cell=NULL)
+
+   #container for which rows and cell are selected to delete
+  temp_plot <- shiny::reactiveValues(raw_data = NULL)
   
   #container for which row are clicked
   clicked<- shiny::reactiveValues(row = NULL)
@@ -142,7 +148,7 @@ shinyjs::hidden(shiny::div(id = "data_select_image",style = "text-align: center"
   shinyWidgets::pickerInput(
    inputId = "select_image_pick",
     choices = c(""),
-    select = "",
+    selected = "",
    options = list(
       style = "btn-primary"),
    inline = TRUE,
@@ -328,7 +334,7 @@ if(length(details$image)==0){
     session = session,
    inputId = "select_image_pick",
     choices = c("",details$name),
-    select = "",
+    selected = "",
    clearOptions = TRUE
    ))
 }
@@ -384,7 +390,7 @@ shiny::observeEvent(input$all_or_unfin_but, {
     session = session,
    inputId = "select_image_pick",
     choices = c("",details$name),
-    select = "",
+    selected = "",
    clearOptions = TRUE
 ))
   } 
@@ -410,7 +416,7 @@ shiny::observeEvent(input$all_or_unfin_but, {
     session = session,
    inputId = "select_image_pick",
     choices = c("",details$name),
-    select = "",
+    selected = "",
    clearOptions = TRUE
 ))
   } 
@@ -429,7 +435,7 @@ shiny::observeEvent(input$all_or_unfin_but, {
     session = session,
    inputId = "select_image_pick",
     choices = c("",details$name),
-    select = "",
+    selected = "",
    clearOptions = TRUE
 ))
        } else {
@@ -784,7 +790,7 @@ if(counter$countervalue == 1){
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
          valpoints$pch <- values$raw_data$pch
-          valpoints$col <- values$raw_data$col   
+          valpoints$col <- values$raw_data$col  
       }
       } 
       if(values$plot_type=="histogram"){
@@ -1194,6 +1200,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
         if(input$plot_type=="scatterplot"){
           shinyjs::enable("add_group")
+          shinyjs::show("del_point_button")
           basic$Shape <- NA
           basic$Colour <- NA
 
@@ -1266,7 +1273,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
             options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
           )
         })
-                output$group_table2 <- DT::renderDT({
+          output$group_table2 <- DT::renderDT({
           DT::datatable(
             mod_df$x,
             editable = list(target = "cell"),
@@ -1290,6 +1297,15 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
             selection = "single",
             options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
           )
+        })
+          output$group_table3 <- DT::renderDT({
+          DT::datatable(
+            as.data.frame(shiny::reactiveValuesToList(valpoints)),
+            editable = list(target = "cell", disable = list(columns = c(1,2,3,4))),
+            selection = list(mode = 'single', selected = c(1)),
+            options = list(scrollX = TRUE,lengthChange = TRUE, dom = "t", pageLength = 100)
+          ) |>
+          DT::formatRound(c(5,6), 2)
         })
       }
     }else{
@@ -1380,6 +1396,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
   shiny::observeEvent(counter$countervalue,{
     if(is.null(input$group_table_rows_selected)){
       shinyjs::disable("del_group")
+      shinyjs::disable("del_point_button")
     }
   })
 
@@ -1486,6 +1503,9 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         if(input$plot_type=="scatterplot"){
           valpoints$pch <- c(valpoints$pch, dat_mod[selected$row, 3])
           valpoints$col <- c(valpoints$col, dat_mod[selected$row, 4])
+          if(length(valpoints$pch) >0){
+          shinyjs::enable("del_point_button")
+          }
         }
         if(input$plot_type=="histogram"){
           valpoints$bar <- c(valpoints$bar, ceiling((plotcounter$plotclicks)/2))
@@ -1500,16 +1520,12 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
       values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
       if(!input$plot_type=="histogram" | is.even(plotcounter$plotclicks)){
-
-
        output$metaPlot <- shiny::renderPlot({
         graphics::par(mar = c(0, 0, 0, 0))
         plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
       }
-
-
     }
   })
 
@@ -1565,7 +1581,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         }
         mod_df$x <- mod_df$x[-selected$row, ]
             if(nrow(mod_df$x) == 0 ){
-        shinyjs::disable("del_group")
+        shinyjs::disable("del_group")      
+        shinyjs::disable("del_point_button")
         shinyjs::disable("click_group")
       }
       }
@@ -1578,6 +1595,61 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     })
   })
 
+#deleteing inidvudal points
+      popupModal4 <- function(failed = FALSE) {
+    shinyjqui::jqui_draggable(shiny::modalDialog(
+     DT::DTOutput("group_table3"),
+      shiny::tags$br(),
+      shiny::tags$br(),
+      shiny::actionButton("del_this", "Remove Point",class = "btn-warning"),
+      shiny::tags$br(),
+      shiny::tags$br(),
+     shiny::actionButton("close", "Close"),
+      footer = shiny::tagList(
+        shiny::tags$em("Note - This window is draggable")
+      )
+    )
+    )
+  }
+    shiny::observeEvent(input$del_point, {
+      shiny::showModal(popupModal4())
+    })
+
+  shiny::observeEvent(input$group_table3_rows_selected, {
+    selected2$row <- input$group_table3_rows_selected
+
+       temp_plot<<-values
+        temp_plot$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
+        temp_plot$raw_data <<- values$raw_data[selected2$row,]
+
+      output$metaPlot <- shiny::renderPlot({
+      graphics::par(mar = c(0, 0, 0, 0))
+      plot_values <- shiny::reactiveValuesToList(temp_plot)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
+    })
+  })
+
+      shiny::observeEvent(input$del_this, {
+
+        values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
+        values$raw_data <<- values$raw_data[-selected2$row,]
+        valpoints$x <- values$raw_data$x
+        valpoints$y <- values$raw_data$y
+        valpoints$id <- values$raw_data$id
+        valpoints$n <- values$raw_data$n
+        valpoints$pch <- values$raw_data$pch
+        valpoints$col <- values$raw_data$col
+
+      output$metaPlot <- shiny::renderPlot({
+      graphics::par(mar = c(0, 0, 0, 0))
+      plot_values <- shiny::reactiveValuesToList(values)
+      do.call(internal_redraw, c(plot_values, shiny=TRUE))
+    })
+      })
+    
+  ################################################
+  # Initial data table and modal edit
+  ################################################
   # this is necessary for DT to work.
   proxy <- DT::dataTableProxy("group_table")
 
@@ -1617,16 +1689,14 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     mod_df$x[row_count$x,4] <<- input$col
   })
 
-
-
-  #edit data with DT input (not using)
-  shiny::observeEvent(input$group_table_cell_edit, {
-    change_string <-  as.character(mod_df$x[selected$row,1])
-    mod_df$x <-  DT::editData(mod_df$x, input$group_table_cell_edit)
-    if(is.null(values$raw_data)){
-    } else {values$raw_data[grepl(change_string, values$raw_data[[2]]),][[3]] <- input$group_table_cell_edit$value
-}
-  })
+#   #edit data with DT input (not using)
+#   shiny::observeEvent(input$group_table_cell_edit, {
+#     change_string <-  as.character(mod_df$x[selected$row,1])
+#     mod_df$x <-  DT::editData(mod_df$x, input$group_table_cell_edit)
+#     if(is.null(values$raw_data)){
+#     } else {values$raw_data[grepl(change_string, values$raw_data[[2]]),][[3]] <- input$group_table_cell_edit$value
+# }
+#   })
   
   shiny::observeEvent(input$group_table_row_last_clicked, {
     clicked$row <- c(clicked$row,input$group_table_row_last_clicked)
@@ -1688,36 +1758,29 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
 
      if(j == 1){ 
-      print(mod_df$x)
      mod_df$x[i, "NameChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
      valpoints$id[valpoints$id==dat_mod$x.Group_Name[i]] <<- mod_df$x[i, "NameChange"]
      mod_df$x[i, j] <- mod_df$x[i, "NameChange"]
      mod_df$x <<- dplyr::select(mod_df$x, -c("NameChange"))
-     print(mod_df$x)
    }
         if(j == 2){ 
-          print(mod_df$x)
      mod_df$x[i, "SampleChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
      valpoints$n[valpoints$n==dat_mod$x.Sample_Size[i]] <<- mod_df$x[i, "SampleChange"]
      mod_df$x[i, j] <- mod_df$x[i, "SampleChange"]
      mod_df$x <<- dplyr::select(mod_df$x, -c("SampleChange"))
-     print(mod_df$x)
    }
            if(j == 3){ 
-            print(mod_df$x)
      mod_df$x[i, "ShapeChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
      valpoints$pch[valpoints$pch==dat_mod$x.Shape[i]] <<- mod_df$x[i, "ShapeChange"]
      mod_df$x[i, j] <- mod_df$x[i, "ShapeChange"]
      mod_df$x <<- dplyr::select(mod_df$x, -c("ShapeChange"))
-     print(mod_df$x)
    }
-              if(j == 4){ 
-                print(mod_df$x)
+            if(j == 4){ 
      mod_df$x[i, "ColChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
      valpoints$col[valpoints$col==dat_mod$x.Colour[i]] <<- mod_df$x[i, "ColChange"]
      mod_df$x[i, j] <- mod_df$x[i, "ColChange"]
      mod_df$x <<- dplyr::select(mod_df$x, -c("ColChange"))
-     print(mod_df$x)
+
    } 
 DT::replaceData(proxy, mod_df$x)
     })
