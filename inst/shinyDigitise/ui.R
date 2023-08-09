@@ -325,6 +325,7 @@ ui <- function(){
         shiny::strong("1. Click add groups to enter group names and sample size before adding points."), shiny::tags$br(),
         shiny::strong("2. To add points, click the group in the table then press 'Click Points' and then proceed to double-Click points."), shiny::tags$br(),
         shiny::strong("3. To delete a group, click on the desired group in the table and then press 'Delete Group'."), shiny::tags$br(),
+        shiny::strong("4. To delete a specific point, click 'Delete Points' and seelct from the list raw data to delete."), shiny::tags$br(),
         shiny::tags$br(),
               shiny::splitLayout(
                 shiny::div(class = "buttonagency",
@@ -336,12 +337,20 @@ ui <- function(){
                       inputId = "click_group",
                       label = "Click Points"
                     ),
-                    shiny::actionButton(
-                      inputId = "del_group",
-                      label = "Delete Entire Group"
-                    ),
                   )
                 ),
+        shiny::tags$br(),
+                    shiny::actionButton(
+                      inputId = "del_group",
+                      label = "Delete Group"
+                    ),
+                    shiny::tags$br(),
+                    shiny::tags$br(),
+ shinyjs::hidden(shiny::div(id = "del_point_button",
+                    shiny::actionButton(
+                      inputId = "del_point",
+                      label = "Delete Points"
+                    ))),
         shiny::tags$br(),
                 DT::DTOutput("group_table")
            )),
