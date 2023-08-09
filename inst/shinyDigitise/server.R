@@ -141,20 +141,21 @@ server <- function(input, output, session){
            inline = TRUE, 
 ))),
 shiny::tags$br(),
-shinyjs::hidden(shiny::div(id = "data_import_title3",
-  shiny::tags$h5("Alternatively, please select a specific graph from your chosen directory:", align = "center"))), 
-shiny::tags$br(),
-shinyjs::hidden(shiny::div(id = "data_select_image",style = "text-align: center", offset = 0,
-  shinyWidgets::pickerInput(
-   inputId = "select_image_pick",
-    choices = c(""),
-    selected = "",
-   options = list(
-      style = "btn-primary"),
-   inline = TRUE,
-   width = "auto"
-))), 
-shiny::tags$br(),
+#removed for now - select individual image
+# shinyjs::hidden(shiny::div(id = "data_import_title3",
+#   shiny::tags$h5("Alternatively, please select a specific graph from your chosen directory:", align = "center"))), 
+# shiny::tags$br(),
+# shinyjs::hidden(shiny::div(id = "data_select_image",style = "text-align: center", offset = 0,
+#   shinyWidgets::pickerInput(
+#    inputId = "select_image_pick",#
+#     choices = c(""),
+#     selected = "",
+#    options = list(
+#       style = "btn-primary"),
+#    inline = TRUE,
+#    width = "auto"
+# ))), 
+# shiny::tags$br(),
 shinyjs::hidden(shiny::div(id = "data_import_extract",
                            shiny::actionButton("extract_but", "Get Extracting!"))),
     shinyjs::hidden(shiny::div(id = "data_import_review", 
@@ -426,6 +427,7 @@ shiny::observeEvent(input$all_or_unfin_but, {
     counter_total <<- length(details$paths)
     image_import$multiple <<- TRUE
     image_import$select <<- FALSE
+
     #set counters and next values at 1
     counter$countervalue <<- 1
     counter$next_count <<- 1
@@ -440,12 +442,15 @@ shiny::observeEvent(input$all_or_unfin_but, {
 ))
        } else {
         image_import$multiple <<- FALSE
+
        }
        })
 
 
 #observe event for specific image selection. If it doesnt equal nothing then import that specific photo. Also reset the choices buttons.
 shiny::observeEvent(input$select_image_pick, {
+    counter$countervalue <<- 0
+    counter$next_count <<- 0
 
 shiny::req(importDatapath())
 
@@ -454,9 +459,10 @@ shiny::req(importDatapath())
     details <<- metaDigitise::dir_details(importDatapath())
     image_name <<- input$select_image_pick
     details$paths <<- details$paths[match(image_name,details$name)]
+    details$images <<- details$images[match(image_name,details$name)]
     details$name <<- image_name
     counter_total <<- length(details$paths)
-    
+
     #set counters and next values at 1
     counter$countervalue <<- 1
     counter$next_count <<- 1
@@ -464,10 +470,7 @@ shiny::req(importDatapath())
   shiny::div(style = "text-align: center", offset = 0,
    shiny::updateRadioButtons(
    inputId = "all_or_unfin_but",
-   label = NULL,
-   choices = c("All", "Finished", "Unfinished"),
    selected = character(0),
-   inline = TRUE
 ))
   image_import$multiple <<- FALSE
 } else {
@@ -536,7 +539,7 @@ shiny::observeEvent(input$extract_but|input$review_but, {
 
     # find previously extracted data:
     counter$caldat <- paste0(details$cal_dir, details$name[counter$countervalue])
-
+    
     # if extracted/calibrated data already exists:
     if (file.exists(counter$caldat)) {
 
