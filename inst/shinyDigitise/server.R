@@ -80,7 +80,7 @@ server <- function(input, output, session){
                    "<b> To cite, please reference both this package:</b>",
                    shiny::tags$br(),
                    shiny::tags$br(),
-                   "<p><a href= https://ecoevorxiv.org/repository/view/4814/> Ivimey-Cook, E. R., Noble, D. W., Nakagawa, S., Lajeunesse, M. J., & Pick, J. L. (2022). A framework for improving the reproducibility of data extraction for meta-analysis.</a></p>",
+                   "<p><a href= https://onlinelibrary.wiley.com/doi/full/10.1002/jrsm.1663/> Ivimey‐Cook, E. R., Noble, D. W., Nakagawa, S., Lajeunesse, M. J., & Pick, J. L. (2023). Advice for improving the reproducibility of data extraction in meta‐analysis. Research Synthesis Methods, 14(6), 911-915.</a></p>",
                    shiny::tags$br(),
                    "<b> and metaDigitise:</b>", 
                    shiny::tags$br(),
