@@ -440,7 +440,7 @@ ui <- function(){
         shiny::plotOutput(
           "metaPlot",
           dblclick = "plot_click2",
-         brush = shiny::brushOpts(
+          brush = shiny::brushOpts(
             "plot_brush",
             resetOnNew=TRUE,
           ),
