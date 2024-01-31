@@ -1,37 +1,33 @@
 Package: shinyDigitise
 Title: Extract and Summarise Data from Published Figures
 Version: 0.1.0
-Authors@R: c(
-    person("Ed", "Ivimey-Cook", , "e.ivimeycook@gmail.com", role = c("aut", "cre")),
-    person("Joel", "Pick", , "joel.l.pick@gmail.com", role = "aut")
-  )
-Description: User-friendly shiny app for the metaDigitise package, which
-    facilitates high-throughput, flexible and reproducible extraction of
-    data from figures in primary research papers. shinyDigitise() can
-    extract data and calculate summary statistics for users from box
-    plots, mean and error plots, scatter plots and histograms.
-License: MIT + file LICENSE
-BugReports: https://github.com/EIvimeyCook/ShinyDigitise/issues
-Imports: 
-    bslib,
-    dplyr,
-    DT,
-    emojifont,
-    graphics,
-    magick,
-    metaDigitise,
-    scales,
-    shiny,
-    shinyalert,
-    shinyFiles,
-    shinyjqui,
-    shinyjs,
-    shinyscreenshot,
-    shinyWidgets,
-    stats,
-    stringr,
-    tippy,
-    utils
+Authors@R: 
+     c(person("Ed", "Ivimey-Cook", email = "e.ivimeycook@gmail.com", role = c("aut", "cre")), 
+     person("Joel", "Pick", email = "joel.l.pick@gmail.com", role = c("aut")))
+Description: User-friendly shiny app for the metaDigitise package, which facilitates high-throughput, flexible and reproducible extraction of data from figures in primary research papers. shinyDigitise() can extract data and calculate summary statistics for users from box plots, mean and error plots, scatter plots and histograms.
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.2.1
+Imports: 
+     magick,
+     scales,
+     shiny,
+     utils,
+     dplyr,
+     DT,
+     emojifont,
+     graphics,
+     metaDigitise,
+     shiny,
+     shinyalert,
+     shinyFiles,
+     shinyjqui,
+     shinyscreenshot,
+     stringr,
+     bslib,
+     shinyWidgets,
+     tippy,
+     stats,
+     shinyjs
+BugReports: https://github.com/EIvimeyCook/ShinyDigitise/issues
