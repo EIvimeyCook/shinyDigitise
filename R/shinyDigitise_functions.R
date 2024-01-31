@@ -1,16 +1,25 @@
 
 
-#check plottype if its not null
+#' @title check_plottype
+#' @description Checks whether the plottype has been selected
+#' @param x list data created in sDigitise about the graph
+#' @noRd
 check_plottype <- function(x){
 	!is.null(x$plot_type)
 }
 
-#check orinetation if its TRUE
+#' @title check_orientation
+#' @description Checks whether a graph has been orientated
+#' @param x list data created in sDigitise about the graph
+#' @noRd
 check_orientation <- function(x){
 	TRUE
 }
 
-#check calibration and whether parts are filled in. And whether enough calpoints are specified. Depending on plot type
+#' @title check_calibration
+#' @description Checks whether a graph has been calibrated
+#' @param x list data created in sDigitise about the graph
+#' @noRd
 check_calibrate <- function(x){
   if( is.null(x$calpoints) || is.null(x$variable) || is.null(x$point_vals)|| is.null(x$log_axes) ){
 	  FALSE
@@ -23,7 +32,10 @@ check_calibrate <- function(x){
 	}
 }
 
-#check the extraction is complete. If it's null = FALSE. Otherwsie if the group lengths are not suitable length i.e. enough points for means/boxplots etc. Scatterplot doesnt need any.
+#' @title check_extract
+#' @description Checks whether a graph has been extracted
+#' @param x list data created in sDigitise about the graph
+#' @noRd
 check_extract <- function(x) {
   if(is.null(x$raw_data)) {
     FALSE
