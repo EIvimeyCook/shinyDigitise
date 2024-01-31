@@ -13,6 +13,8 @@ Importantly, both packages allows for replotting and checking of data extraction
 
 Introduced in this new preprint: [A framework for improving the reproducibility of data extraction for meta-analysis. EcoEvoRxiv (2022)](https://ecoevorxiv.org/repository/view/4814/).
 
+and now published in [Research Synthesis Methods](https://onlinelibrary.wiley.com/doi/full/10.1002/jrsm.1663).
+
 ## To install:
 
 devtools::install_github("EIvimeyCook/ShinyDigitise")
