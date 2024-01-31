@@ -6,12 +6,12 @@ server <- function(input, output, session){
   # Initial Startup
   ################################################
 
-#reactive objects and counters.
+  #reactive objects and counters.
 
    # start counter at 1 - helps if this is before things
   counter <- shiny::reactiveValues(countervalue = 0, next_count = 0)
 
-    # for row count,
+  # for row count,
   row_count <- shiny::reactiveValues(x = NULL)
 
   # dataframe containing group name etc
@@ -20,16 +20,16 @@ server <- function(input, output, session){
   # create empty click counter
   plotcounter <- shiny::reactiveValues(plotclicks = NULL)
 
-  #container for which rows and cell are selected
+  # container for which rows and cell are selected
   selected <- shiny::reactiveValues(row = NULL, cell=NULL)
 
- #container for which rows and cell are selected to delete
+  # container for which rows and cell are selected to delete
   selected2 <- shiny::reactiveValues(row = NULL, cell=NULL)
 
-   #container for which rows and cell are selected to delete
+  # container for which rows and cell are selected to delete
   temp_plot <- shiny::reactiveValues(raw_data = NULL)
   
-  #container for which row are clicked
+  # container for which row are clicked
   clicked<- shiny::reactiveValues(row = NULL)
 
   # container for extract T/F.
@@ -38,37 +38,16 @@ server <- function(input, output, session){
   # container for add T/F.
   add_mode <- shiny::reactiveValues(add = FALSE)
 
-  #image import container
+  # image import container
   image_import <- shiny::reactiveValues(select = FALSE, multiple = FALSE, extract_rev = NULL)
 
-  # create empty clikc counter for plotclicks.
+  # create empty click counter for plotclicks.
   clickcounter <- shiny::reactiveValues(clickcount = 0)
 
   # create a container for calibration points.
   calpoints <- shiny::reactiveValues(x = NULL, y = NULL)
 
-    # for row count,
-  row_count <- shiny::reactiveValues(x = NULL)
-
-  # dataframe containing group name etc
-  mod_df <- shiny::reactiveValues(x = NULL)
-
-  # create empty click counter
-  plotcounter <- shiny::reactiveValues(plotclicks = NULL)
-
-  #container for which rows and cell are selected
-  selected <- shiny::reactiveValues(row = NULL, cell=NULL)
-  
-  #container for which row are clicked
-  clicked<- shiny::reactiveValues(row = NULL)
-
-  # container for extract T/F.
-  extract_mode <- shiny::reactiveValues(extract = FALSE)
-
-  # container for add T/F.
-  add_mode <- shiny::reactiveValues(add = FALSE)
-
-   # container for add T/F.
+  # container for scatterchoice.
   scatterChoice <- shiny::reactiveValues(col_list = NULL, pch_list = NULL)
 
   #praising action button + logo leads to citations
