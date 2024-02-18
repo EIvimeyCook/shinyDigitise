@@ -1,4 +1,4 @@
-#shinyDigitise UI function
+#shinyDigitise server function
 
 server <- function(input, output, session){
 
