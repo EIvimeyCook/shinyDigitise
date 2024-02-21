@@ -2,15 +2,11 @@
 #' @title is.even
 #' @description Checks whether a integer is even (a metaDigitise function)
 #' @param x integer value
-#' @export
-#' @noRd
 is.even <- function(x) x %% 2 == 0
 
 #' @title filename
 #' @description extracts filename from filepath (a metaDigitise function)
 #' @param x filepath
-#' @export
-#' @noRd
 filename <- function(x) {
 	y <- strsplit(x,"/")
 	sapply(y, function(z) z[length(z)], USE.NAMES = FALSE)
@@ -21,8 +17,6 @@ filename <- function(x) {
 #' @param image Image object from magick::image_read
 #' @param flip whether to flip figure
 #' @param rotate how much to rotate figure
-#' @export
-#' @noRd
 redraw_rotation <- function(image, flip, rotate){
 	if(flip) image <- magick::image_flop(magick::image_rotate(image,270))
 	image <- magick::image_rotate(image, rotate)
@@ -37,8 +31,6 @@ redraw_rotation <- function(image, flip, rotate){
 #' @param point_vals The point values
 #' @param image_details image_details
 #' @param cex relative size of points and text
-#' @export
-#' @noRd
 redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_details,cex){
 	x_shift <- image_details["width"]/30
 	y_shift <- image_details["height"]/30
@@ -70,8 +62,6 @@ redraw_calibration <- function(plot_type, variable, calpoints,point_vals,image_d
 #' @param image_details image_details
 #' @param cex relative size of points and text
 #' @param pos legend position
-#' @export
-#' @noRd
 redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 	image_width <- image_details["width"]
 	image_height <- image_details["height"]
@@ -170,8 +160,6 @@ redraw_points <- function(plot_type, raw_data, image_details, cex, pos){
 #' @param shiny logical if using Shiny or not
 #' @param zoom_coords the cordinates for zooming
 #' @param ... further arguments passed to or from other methods.
-#' @export
-#' @noRd
 internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, variable=NULL, cex=NULL, calpoints=NULL, point_vals=NULL, raw_data=NULL, rotation=TRUE, calibration=TRUE, points=TRUE, rotate_mode=FALSE, pos=NULL, shiny=FALSE, zoom_coords=NULL, ...){
 
 	if(!shiny){
@@ -224,8 +212,6 @@ internal_redraw <- function(image_file, flip=FALSE, rotate=0, plot_type=NULL, va
 #' @param point_vals The point values
 #' @param log_axes whether x or y is logged
 #' @param ... further arguments passed to or from other methods
-#' @export
-#' @noRd
 calibrate <- function(raw_data, calpoints, point_vals, log_axes, ...) {
 	
 	ylog <- "y" %in% log_axes["axes"]
@@ -257,8 +243,6 @@ calibrate <- function(raw_data, calpoints, point_vals, log_axes, ...) {
 #' @description Conversion of group data (a metaDigitise function)
 #' @param cal_data Calibration data
 #' @param plot_type The type of plot used
-#' @export
-#' @noRd
 convert_group_data <- function(cal_data, plot_type){
 	convert_data <- data.frame()
 
@@ -283,8 +267,6 @@ convert_group_data <- function(cal_data, plot_type){
 #' @title convert histogram data
 #' @description Conversion of histogram data (a metaDigitise function)
 #' @param cal_data Calibration data
-#' @export
-#' @noRd
 convert_histogram_data <- function(cal_data){
 	convert_data <- data.frame()
 
@@ -298,8 +280,6 @@ convert_histogram_data <- function(cal_data){
 #' @title process data
 #' @description Processing data (a metaDigitise function)
 #' @param object object data with plot type and variables
-#' @export
-#' @noRd
 process_data <- function(object){
 
 	plot_type <- object$plot_type
@@ -329,8 +309,6 @@ process_data <- function(object){
 #' @title convert se to sd
 #' @description Conversion of se to sd
 #' @param standard error with sample size
-#' @export
-#' @noRd
 se_to_sd <- function(se, n) {
   se * sqrt(as.numeric(as.character(n)))
 }
