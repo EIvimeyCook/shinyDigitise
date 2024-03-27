@@ -17,13 +17,17 @@ Now published in [Research Synthesis Methods](https://onlinelibrary.wiley.com/do
 
 ## To install:
 
+```{r}
 devtools::install_github("EIvimeyCook/ShinyDigitise")
+```
 
 <br>
 
 **If you plan on using shinyDigitise to extract data from xy mean graphs, you need the dev version of metaDigitise.**
 
+```{r}
 devtools::install_github("joelpick/metaDigitise")
+```
 
 <br>
 There is a known bug with some versions of R Studio (https://github.com/rstudio/rstudio/issues/12649). Be sure to update R Studio to the latest version.
@@ -34,13 +38,16 @@ Video tutorial [here](https://www.youtube.com/watch?v=b9KvRsO8SPY)
 
 <br>
 
+```{r}
 library(shinyDigitise)
-
 df<-shinyDigitise(Folder where your images are located)
+```
 
-or
+or  - where you specify the folder through a menu system within SD.
 
-df<-shinyDigitise() - where you specify the folder through a menu system within SD.
+```{r}
+df<-shinyDigitise()
+```
 
 ## Basic workflow (the app will walk you through each stage):
 
@@ -54,7 +61,6 @@ NB. you can adjust point size and group name positions on the fly aswell as zoom
 4. Add groups - Clicking add group will cause a pop up to appear to enter data (name + sample size). This will then appear in the table. Clicking the group will allow you to either doubleclick points on the graph (you have to press the click points button first) or delete the group. Lastly, you can select the type of error show (if mean/error graph)
 5. Comments - add a comment to your data.
 6. Finished! The app will close when you've reached the end of your graphs.
-
 
 
 *To view the extracted data just simply call the object you've created or view the resulting .csv file (which will be saved into the same folder as the images).*
