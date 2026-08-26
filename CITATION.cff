@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Ivimey-Cook"
+    given-names: "Edward R."
+    orcid: "https://orcid.org/0000-0003-4910-0443"
+  - family-names: "Pick"
+    given-names: "Joel L."
+    orcid: "https://orcid.org/0000-0002-6295-3742"
+title: "shinyDigitise: A GUI for extracting data from figures with metaDigitise"
+abstract: "An interactive graphical interface to metaDigitise for extracting descriptive statistics from five plot types in published figures, with calibration data retained and replotting for verification."
+version: 0.1.0
+url: "https://github.com/EIvimeyCook/shinyDigitise"
+repository-code: "https://github.com/EIvimeyCook/shinyDigitise"
+license: MIT
+keywords:
+  - "meta-analysis"
+  - "data extraction"
+  - "figures"
+  - "reproducibility"
+  - "shiny"
+  - "R"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Ivimey-Cook"
+      given-names: "Edward R."
+      orcid: "https://orcid.org/0000-0003-4910-0443"
+    - family-names: "Noble"
+      given-names: "Daniel W. A."
+    - family-names: "Nakagawa"
+      given-names: "Shinichi"
+    - family-names: "Lajeunesse"
+      given-names: "Marc J."
+    - family-names: "Pick"
+      given-names: "Joel L."
+  title: "Advice for improving the reproducibility of data extraction in meta-analysis"
+  journal: "Research Synthesis Methods"
+  year: 2023
+  volume: 14
+  issue: 6
+  start: 911
+  end: 915
+  doi: 10.1002/jrsm.1663
