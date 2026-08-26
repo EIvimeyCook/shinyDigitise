@@ -3,9 +3,9 @@ Title: Extract and Summarise Data from Published Figures
 Version: 0.1.0
 Authors@R: c(
     person("Ed", "Ivimey-Cook", , "e.ivimeycook@gmail.com", role = c("aut", "cre"),
-       comment = c(ORCID = "0000-0003-4910-0443")),
-person("Joel", "Pick", , "joel.l.pick@gmail.com", role = "aut",
-       comment = c(ORCID = "0000-0002-6295-3742"))
+           comment = c(ORCID = "0000-0003-4910-0443")),
+    person("Joel", "Pick", , "joel.l.pick@gmail.com", role = "aut",
+           comment = c(ORCID = "0000-0002-6295-3742"))
   )
 Description: User-friendly shiny app for the metaDigitise package, which
     facilitates high-throughput, flexible and reproducible extraction of
@@ -13,8 +13,8 @@ Description: User-friendly shiny app for the metaDigitise package, which
     extract data and calculate summary statistics for users from box
     plots, mean and error plots, scatter plots and histograms.
 License: MIT + file LICENSE
-BugReports: https://github.com/EIvimeyCook/shinyDigitise/issues
 URL: https://github.com/EIvimeyCook/shinyDigitise
+BugReports: https://github.com/EIvimeyCook/shinyDigitise/issues
 Imports: 
     bslib,
     dplyr,
