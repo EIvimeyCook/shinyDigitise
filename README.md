@@ -127,6 +127,9 @@ Please file issues and feature requests at
 > meta-analysis. *Research Synthesis Methods*, 14(6), 911–915.
 > <https://doi.org/10.1002/jrsm.1663>
 
+A machine-readable [`CITATION.cff`](CITATION.cff) is included, so GitHub's
+"Cite this repository" button gives formatted APA and BibTeX.
+
 ## License
 
 Released under the [MIT License](LICENSE.md).
