@@ -7,8 +7,8 @@
 </div>
 
 <!-- badges: start -->
+[![DOI](https://img.shields.io/badge/DOI-10.1002%2Fjrsm.1663-blue)](https://doi.org/10.1002/jrsm.1663)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
-[![DOI](https://img.shields.io/badge/paper-10.1002%2Fjrsm.1663-blue)](https://doi.org/10.1002/jrsm.1663)
 <!-- badges: end -->
 
 shinyDigitise builds upon the popular metaDigitise package and provides users
