@@ -2,7 +2,7 @@ Package: shinyDigitise
 Title: A GUI for extracting data from figures with metaDigitise
 Version: 0.1.0
 Authors@R: c(
-    person("Edward R", "Ivimey-Cook", , "e.ivimeycook@gmail.com", role = c("aut", "cre"),
+    person("Edward R.", "Ivimey-Cook", , "e.ivimeycook@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-4910-0443")),
     person("Joel L.", "Pick", , "joel.l.pick@gmail.com", role = "aut",
            comment = c(ORCID = "0000-0002-6295-3742"))
