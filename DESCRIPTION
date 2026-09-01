@@ -1,5 +1,5 @@
 Package: shinyDigitise
-Title: Extract and Summarise Data from Published Figures
+Title: A GUI for extracting data from figures with metaDigitise
 Version: 0.1.0
 Authors@R: c(
     person("Edward R", "Ivimey-Cook", , "e.ivimeycook@gmail.com", role = c("aut", "cre"),
