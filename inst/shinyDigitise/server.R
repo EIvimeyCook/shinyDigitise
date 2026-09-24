@@ -1438,10 +1438,12 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
         # similar to above, if you click add points and add mode is T and there is data present for that selected cell then remove this selected group from the plot and plotcounter becomes zero after replotting.
         # if(as.data.frame(shiny::reactiveValuesToList(mod_df$x[selected$row,"Group_Name"]) %in% values$raw_data$id)){
-        if(length(stringr::str_detect(values$raw_data$id, as.character(mod_df$x[selected$row,1]))) != 0){
+        if(length(values$raw_data$id) != 0){
           values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
-          remove_string <-  as.character(mod_df$x[selected$row,1])
-          values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
+          # remove only this group's points (exact name match - a pattern match also
+          # removed any group whose name contains this one, e.g. "males" / "females")
+          remove_string <-  as.character(as.data.frame(mod_df$x)[selected$row,1])
+          values$raw_data <<- values$raw_data[as.character(values$raw_data$id) != remove_string,]
           valpoints$x <- values$raw_data$x
           valpoints$y <- values$raw_data$y
           valpoints$id <- values$raw_data$id
@@ -1555,8 +1557,9 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       } else{
         row_count$x <- row_count$x - 1
         values$raw_data <<- as.data.frame(shiny::reactiveValuesToList(valpoints))
-        remove_string <-  as.character(mod_df$x[selected$row,1])
-        values$raw_data <<- values$raw_data[!grepl(remove_string, values$raw_data$id),]
+        # exact name match, as above
+        remove_string <-  as.character(as.data.frame(mod_df$x)[selected$row,1])
+        values$raw_data <<- values$raw_data[as.character(values$raw_data$id) != remove_string,]
         valpoints$x <- values$raw_data$x
         valpoints$y <- values$raw_data$y
         valpoints$id <- values$raw_data$id
