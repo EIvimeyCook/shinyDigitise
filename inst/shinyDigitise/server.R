@@ -523,7 +523,15 @@ shiny::observeEvent(input$extract_but|input$review_but, {
     if (file.exists(counter$caldat)) {
 
       #read in that data.
-      values <<- do.call("reactiveValues", readRDS(counter$caldat))
+      prev_data <- readRDS(counter$caldat)
+      # files digitised with metaDigitise() (rather than shinyDigitise) do not store
+      # a per-point sample size (n) in raw_data for scatterplots/histograms - add it
+      # so previous extractions can be viewed and edited (issue #33).
+      if (!is.null(prev_data$raw_data)) {
+        prev_data$raw_data <- fill_missing_n(prev_data$raw_data, prev_data$plot_type, prev_data$knownN,
+          prev_data$processed_data)
+      }
+      values <<- do.call("reactiveValues", prev_data)
 
       # update
       shiny::updateSliderInput(session, "cex", value = values$cex)
@@ -763,7 +771,8 @@ if(counter$countervalue == 1){
                    if(nrow(raw_dat)>0){
           raw_dat_sum <- raw_dat |>
                         dplyr::group_by(id, pch, col) |>
-                        dplyr::summarize(n = unique(n))
+                        dplyr::summarize(n = unique(n), .groups = "drop") |>
+                        dplyr::select(id, n, pch, col)
           names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
         mod_df$x <- raw_dat_sum
         row_count$x <- nrow(raw_dat_sum)
@@ -772,10 +781,9 @@ if(counter$countervalue == 1){
         valpoints$id <- values$raw_data$id
         valpoints$n <- values$raw_data$n
          valpoints$pch <- values$raw_data$pch
-          valpoints$col <- values$raw_data$col  
+          valpoints$col <- values$raw_data$col
       }
-      } 
-      if(values$plot_type=="histogram"){
+      } else if(values$plot_type=="histogram"){
               valpoints <<- shiny::reactiveValues(x = NULL, y = NULL, id = NULL, n = NULL, bar=NULL)
         raw_dat <- as.data.frame(values$raw_data)
         if(nrow(raw_dat)>0){
@@ -1198,7 +1206,8 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
           if(nrow(raw_dat)>0){
             raw_dat_sum <- raw_dat |>
                         dplyr::group_by(id, pch, col) |>
-                        dplyr::summarize(n = unique(n))
+                        dplyr::summarize(n = unique(n), .groups = "drop") |>
+                        dplyr::select(id, n, pch, col)
             names(raw_dat_sum) <- c("Group_Name", "Sample_Size", "Shape", "Colour")
             mod_df$x <- raw_dat_sum
             row_count$x <- nrow(raw_dat_sum)
@@ -1207,10 +1216,9 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
             valpoints$id <- values$raw_data$id
             valpoints$n <- values$raw_data$n
             valpoints$pch <- values$raw_data$pch
-            valpoints$col <- values$raw_data$col   
-          } 
-        } 
-        if(input$plot_type=="histogram"){
+            valpoints$col <- values$raw_data$col
+          }
+        } else if(input$plot_type=="histogram"){
           shinyjs::disable("add_group")
 
           raw_dat <- as.data.frame(values$raw_data)
