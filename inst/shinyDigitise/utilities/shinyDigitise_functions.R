@@ -91,3 +91,57 @@ fill_missing_n <- function(raw_data, plot_type, knownN = NULL, processed_data = 
   }
   raw_data
 }
+
+#' @title typed_known_n
+#' @description For scatterplots and histograms, metaDigitise's exported sample size
+#'   comes from object$knownN if it is set, otherwise from the clicks (points per
+#'   group, or the total of the bar heights). This turns the sample sizes typed into
+#'   shinyDigitise's group table into knownN so the export uses them. Groups left
+#'   blank fall back to the clicked estimate.
+#' @param raw_data raw_data being saved
+#' @param plot_type plot type
+#' @param processed_data processed data (bar frequencies, for histograms)
+#' @return named vector of sample sizes by group, or NULL if none were typed
+typed_known_n <- function(raw_data, plot_type, processed_data = NULL) {
+  if (!plot_type %in% c("scatterplot", "histogram") || is.null(raw_data) ||
+      nrow(as.data.frame(raw_data)) == 0 || !"n" %in% names(raw_data)) {
+    return(NULL)
+  }
+  raw_data <- as.data.frame(raw_data)
+  ids <- unique(as.character(raw_data$id))
+  typed <- vapply(ids, function(g) {
+    v <- suppressWarnings(as.numeric(raw_data$n[as.character(raw_data$id) == g]))
+    v <- v[!is.na(v)]
+    if (length(v) == 0) NA_real_ else v[1]
+  }, numeric(1))
+  if (all(is.na(typed))) return(NULL)
+
+  # groups with no typed value: use the same estimate metaDigitise would
+  if (any(is.na(typed))) {
+    if (plot_type == "scatterplot") {
+      counts <- table(as.character(raw_data$id))
+      typed[is.na(typed)] <- as.numeric(counts[names(typed)[is.na(typed)]])
+    } else {
+      typed[is.na(typed)] <- sum(as.numeric(processed_data$frequency), na.rm = TRUE)
+    }
+  }
+  typed
+}
+
+#' @title fill_missing_comments
+#' @description Gives saved figures that have no comment field a comment of NA (what
+#'   metaDigitise stores when no comment is given), so the development version of
+#'   metaDigitise can export them. Only files with no comment field are re-saved;
+#'   nothing else in them is changed.
+#' @param cal_dir the caldat folder
+fill_missing_comments <- function(cal_dir) {
+  if (!dir.exists(cal_dir)) return(invisible(NULL))
+  for (f in list.files(cal_dir, full.names = TRUE)) {
+    obj <- tryCatch(readRDS(f), error = function(e) NULL)
+    if (is.list(obj) && !is.null(obj$plot_type) && !"comment" %in% names(obj)) {
+      obj["comment"] <- list(NA)
+      saveRDS(obj, f)
+    }
+  }
+  invisible(NULL)
+}

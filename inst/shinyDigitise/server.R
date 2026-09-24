@@ -1745,34 +1745,36 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       j <- info$col
       v <- info$value
 
-      dat_mod <- as.data.frame(shiny::reactiveValuesToList(mod_df))
+      # work on a plain data frame (after reloading a figure the table is a tibble,
+      # which turned the edited value into a data frame column)
+      tab <- as.data.frame(mod_df$x)
+      grp <- as.character(tab[i, 1])
+      # change only the points belonging to the edited group - matching on the old
+      # value instead changed every group that happened to share that value
+      in_grp <- as.character(valpoints$id) == grp
 
-     if(j == 1){ 
-     mod_df$x[i, "NameChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
-     valpoints$id[valpoints$id==dat_mod$x.Group_Name[i]] <<- mod_df$x[i, "NameChange"]
-     mod_df$x[i, j] <- mod_df$x[i, "NameChange"]
-     mod_df$x <<- dplyr::select(mod_df$x, -c("NameChange"))
-   }
-        if(j == 2){ 
-     mod_df$x[i, "SampleChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
-     valpoints$n[valpoints$n==dat_mod$x.Sample_Size[i]] <<- mod_df$x[i, "SampleChange"]
-     mod_df$x[i, j] <- mod_df$x[i, "SampleChange"]
-     mod_df$x <<- dplyr::select(mod_df$x, -c("SampleChange"))
-   }
-           if(j == 3){ 
-     mod_df$x[i, "ShapeChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
-     valpoints$pch[valpoints$pch==dat_mod$x.Shape[i]] <<- mod_df$x[i, "ShapeChange"]
-     mod_df$x[i, j] <- mod_df$x[i, "ShapeChange"]
-     mod_df$x <<- dplyr::select(mod_df$x, -c("ShapeChange"))
-   }
-            if(j == 4){ 
-     mod_df$x[i, "ColChange"] <<- DT::coerceValue(v, mod_df$x[i, j])
-     valpoints$col[valpoints$col==dat_mod$x.Colour[i]] <<- mod_df$x[i, "ColChange"]
-     mod_df$x[i, j] <- mod_df$x[i, "ColChange"]
-     mod_df$x <<- dplyr::select(mod_df$x, -c("ColChange"))
-
-   } 
-DT::replaceData(proxy, mod_df$x)
+      if (j == 1) {
+        new <- as.character(v)
+        valpoints$id[in_grp] <<- new
+        tab[i, 1] <- new
+      }
+      if (j == 2) {
+        new <- suppressWarnings(as.numeric(v))
+        valpoints$n[in_grp] <<- new
+        tab[i, 2] <- new
+      }
+      if (j == 3) {
+        new <- DT::coerceValue(v, tab[i, 3])
+        valpoints$pch[in_grp] <<- new
+        tab[i, 3] <- new
+      }
+      if (j == 4) {
+        new <- as.character(v)
+        valpoints$col[in_grp] <<- new
+        tab[i, 4] <- new
+      }
+      mod_df$x <<- tab
+      DT::replaceData(proxy, mod_df$x)
     })
 
     shiny::observeEvent(input$close, {
@@ -1839,6 +1841,13 @@ DT::replaceData(proxy, mod_df$x)
     plot_values <- shiny::reactiveValuesToList(values)
     if(check_plottype(plot_values) & check_calibrate(plot_values) & check_extract(plot_values)){
       plot_values$processed_data <- process_data(plot_values)
+      # scatterplots/histograms: use the sample sizes typed into the group table
+      # for the exported n (otherwise metaDigitise uses the clicked estimate)
+      typed_n <- typed_known_n(plot_values$raw_data, plot_values$plot_type, plot_values$processed_data)
+      if (!is.null(typed_n)) plot_values$knownN <- typed_n
+      # no comment typed: store NA (as metaDigitise does) rather than NULL - the
+      # development metaDigitise export fails on figures with no comment field
+      if (is.null(plot_values$comment)) plot_values$comment <- NA
       class(plot_values) <- 'metaDigitise'
       saveRDS(plot_values, paste0(details$cal_dir, details$name[counter$countervalue]))
 
@@ -2142,6 +2151,9 @@ DT::replaceData(proxy, mod_df$x)
 
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
+    # figures saved by earlier versions with no comment typed have no comment
+    # field, which makes the development metaDigitise export fail
+    shiny::isolate(fill_missing_comments(paste0(importDatapath(), "caldat/")))
     shiny::isolate(shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath())))
     shiny::isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv")))
 

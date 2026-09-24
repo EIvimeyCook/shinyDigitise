@@ -106,11 +106,17 @@ images).*
 > **Tip.** You can adjust point size and group name positions on the fly, as well
 > as zoom in on the image by clicking and dragging a box over the desired area.
 
-> **Note on sample sizes for scatterplots and histograms.** Always check the expected sample size versus the number of points clicked. For these plot
-> types, the exported `n` comes from the digitised data, not the sample size typed
-> when adding a group. For scatterplots it is the number of points clicked in each
-> group, so if some points overlap or are hidden, check `n` against the true sample
-> histograms showing counts.
+> **Note on sample sizes.** Always check the exported sample size against the
+> expected sample size. The sample size you type when adding a group is the
+> `n` in the exported data for every plot type. For scatterplots and histograms,
+> if you leave it blank, `n` is estimated from your clicks instead: the number of
+> points clicked in each group (scatterplots) or the total of the bar heights
+> (histograms). For both, the mean, SD (and r) always come from the digitised
+> points or bars; `n` only affects the `se` column. Histograms need counts on the y-axis
+> (not percentages, proportions or density).
+>
+> *Versions before September 2026 always used the clicked estimate for
+> scatterplots and histograms.*
 
 ## Bug reports and contributions
 
