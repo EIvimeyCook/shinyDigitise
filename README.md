@@ -42,7 +42,7 @@ Now published in
 - **Deliberately manual.** Semi-automated point detection makes users complacent
   and introduces errors that are hard to spot; extraction here is your judgement,
   recorded so others can check it.
-- **Output you can archive.** Results are returned as an object and saved as a
+- **Output you can archive.** Results are returned as a caldat object that saves the extraction process and saved as a
   `.csv` in the same folder as the images.
 
 ## Installation
