@@ -28,6 +28,8 @@ extraction over the original image so errors are visible rather than silent.
 Now published in
 [Research Synthesis Methods](https://onlinelibrary.wiley.com/doi/full/10.1002/jrsm.1663).
 
+> Note on sample sizes for scatterplots and histograms. Always check the expected sample size versus the number of points clicked. For these plot types, the exported n comes from the digitised data, not the sample size typed when adding a group. For scatterplots it is the number of points clicked in each group, so if some points overlap or are hidden, check n against the true sample histograms showing counts. This is changed in the development branch in order to avoid any issues with clicks and sample sizes.
+
 ## Features
 
 - **Five plot types.** Mean/error, boxplot, xy mean/error, histogram, and
@@ -105,8 +107,6 @@ images).*
 
 > **Tip.** You can adjust point size and group name positions on the fly, as well
 > as zoom in on the image by clicking and dragging a box over the desired area.
->
-> Note on sample sizes for scatterplots and histograms. Always check the expected sample size versus the number of points clicked. For these plot types, the exported n comes from the digitised data, not the sample size typed when adding a group. For scatterplots it is the number of points clicked in each group, so if some points overlap or are hidden, check n against the true sample histograms showing counts. This is changed in the development branch in order to avoid any issues with clicks and sample sizes.
 
 ## Bug reports and contributions
 
