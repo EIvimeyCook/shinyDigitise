@@ -1846,8 +1846,11 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       plot_values$processed_data <- process_data(plot_values)
       # scatterplots/histograms: use the sample sizes typed into the group table
       # for the exported n (otherwise metaDigitise uses the clicked estimate)
-      typed_n <- typed_known_n(plot_values$raw_data, plot_values$plot_type, plot_values$processed_data)
-      if (!is.null(typed_n)) plot_values$knownN <- typed_n
+      # (always replace knownN, so clearing every typed value falls back to the clicked estimate
+      # rather than keeping sample sizes from an earlier save)
+      if (plot_values$plot_type %in% c("scatterplot", "histogram")) {
+        plot_values["knownN"] <- list(typed_known_n(plot_values$raw_data, plot_values$plot_type, plot_values$processed_data))
+      }
       # no comment typed: store NA (as metaDigitise does) rather than NULL - the
       # development metaDigitise export fails on figures with no comment field
       if (is.null(plot_values$comment)) plot_values$comment <- NA

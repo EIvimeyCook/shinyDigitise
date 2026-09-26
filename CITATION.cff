@@ -10,7 +10,7 @@ authors:
     orcid: "https://orcid.org/0000-0002-6295-3742"
 title: "shinyDigitise: A GUI for extracting data from figures with metaDigitise"
 abstract: "An interactive graphical interface to metaDigitise for extracting descriptive statistics from five plot types in published figures, with calibration data retained and replotting for verification."
-version: 0.1.0
+version: 0.1.1
 url: "https://github.com/EIvimeyCook/shinyDigitise"
 repository-code: "https://github.com/EIvimeyCook/shinyDigitise"
 license: MIT

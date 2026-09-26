@@ -111,12 +111,16 @@ images).*
 > `n` in the exported data for every plot type. For scatterplots and histograms,
 > if you leave it blank, `n` is estimated from your clicks instead: the number of
 > points clicked in each group (scatterplots) or the total of the bar heights
-> (histograms). For both, the mean, SD (and r) always come from the digitised
-> points or bars; `n` only affects the `se` column. Histograms need counts on the y-axis
-> (not percentages, proportions or density).
+> (histograms). 
 >
-> *Versions before September 2026 always used the clicked estimate for
-> scatterplots and histograms.*
+> *Versions up to 0.1.0 always exported the clicked estimate for scatterplots and
+> histograms, even when a sample size was typed.* To correct an older extraction,
+> open that figure in version 0.1.1 or later, check the sample size in the group
+> table (scatterplot sample sizes typed when adding a group were saved and reappear;
+> histogram ones were not, so type them again) and press Continue.
+> Versions up to 0.1.0 also removed a group's points when you re-digitised or
+> deleted another group whose name contained it (e.g. "males" and "females"), so
+> please re-check extractions with group names like these.
 
 ## Bug reports and contributions
 

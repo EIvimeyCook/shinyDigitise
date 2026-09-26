@@ -59,6 +59,11 @@ check_extract <- function(x) {
 #'   created with metaDigitise() store scatterplot/histogram raw_data without a
 #'   per-point sample size column (n) - n instead lives in object$knownN, or is
 #'   estimated from the number of clicked points. It also stores id/col as factors.
+#'   Only KNOWN sample sizes are copied into n (the group table's "sample size" is
+#'   what the user typed). When none were entered, n is left blank (NA), so the
+#'   export keeps using metaDigitise's estimate from the clicks - also after the
+#'   points are re-clicked. (Filling n with the estimate made it look typed, so the
+#'   estimate was frozen when the figure was saved again.)
 #' @param raw_data raw_data from a saved metaDigitise/shinyDigitise object
 #' @param plot_type plot type of the saved object
 #' @param knownN known sample sizes saved by metaDigitise (NULL if not entered)
@@ -79,12 +84,6 @@ fill_missing_n <- function(raw_data, plot_type, knownN = NULL, processed_data = 
       raw_data$n <- as.numeric(knownN[ids])
     } else if (!is.null(knownN) && length(knownN) == 1) {
       raw_data$n <- rep(as.numeric(knownN), nrow(raw_data))
-    } else if (identical(plot_type, "scatterplot")) {
-      # metaDigitise's default for scatterplots: n = number of points per group
-      raw_data$n <- as.numeric(stats::ave(seq_along(ids), ids, FUN = length))
-    } else if (identical(plot_type, "histogram") && !is.null(processed_data$frequency)) {
-      # metaDigitise's default for histograms: n = total of the bar frequencies
-      raw_data$n <- rep(sum(as.numeric(processed_data$frequency), na.rm = TRUE), nrow(raw_data))
     } else {
       raw_data$n <- rep(NA_real_, nrow(raw_data))
     }
