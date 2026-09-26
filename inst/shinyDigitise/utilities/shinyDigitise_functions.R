@@ -81,7 +81,8 @@ fill_missing_n <- function(raw_data, plot_type, knownN = NULL, processed_data = 
     ids <- as.character(raw_data$id)
     if (!is.null(knownN) && !is.null(names(knownN)) && all(unique(ids) %in% names(knownN))) {
       # known sample sizes entered in metaDigitise, named by group
-      raw_data$n <- as.numeric(knownN[ids])
+      # match() rather than knownN[ids]: metaDigitise names a single unnamed group "" and knownN[""] is NA
+      raw_data$n <- as.numeric(knownN[match(ids, names(knownN))])
     } else if (!is.null(knownN) && length(knownN) == 1) {
       raw_data$n <- rep(as.numeric(knownN), nrow(raw_data))
     } else {
