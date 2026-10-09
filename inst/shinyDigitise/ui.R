@@ -291,8 +291,8 @@ ui <- function(){
                shinyWidgets::prettyRadioButtons(
                   inputId = "log_axes_sel",
                   label = shiny::strong("Are any axes on a log scale?"),
-                  choiceNames = c("No", "Y", "X", "X and Y"),
-                  choiceValues = c("n", "y", "x", "xy"),
+                  choiceNames = c("No", "Y axis", "X axis"),
+                  choiceValues = c("n", "y", "x"),
                   selected = "n",
                   inline = T,
                   icon = shiny::icon("check"),

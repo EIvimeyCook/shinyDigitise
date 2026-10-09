@@ -1019,13 +1019,18 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
           log_sel <- if(is.null(log_now) || !"axes" %in% names(log_now)) "n" else log_now[["axes"]]
           if(log_sel == "yx") log_sel <- "xy"
           if(input$plot_type == "boxplot"){
+            # boxplots only have a y axis, so this is a yes/no question
             shinyWidgets::updatePrettyRadioButtons(session, "log_axes_sel",
-              choiceNames = c("No", "Y"), choiceValues = c("n", "y"),
+              label = shiny::strong("Is the y axis on a log scale?"),
+              choiceNames = c("No", "Yes"), choiceValues = c("n", "y"),
               selected = if(log_sel == "n") "n" else "y", inline = TRUE,
               prettyOptions = list(icon = shiny::icon("check"), status = "info", animation = "jelly"))
           }else{
+            # no "both axes" option: metaDigitise treats x and y as linear when both are logged
             shinyWidgets::updatePrettyRadioButtons(session, "log_axes_sel",
-              choiceNames = c("No", "Y", "X", "X and Y"), choiceValues = c("n", "y", "x", "xy"),
+              label = shiny::strong("Are any axes on a log scale?"),
+              choiceNames = c("No", "Y axis", "X axis"),
+              choiceValues = c("n", "y", "x"),
               selected = log_sel, inline = TRUE,
               prettyOptions = list(icon = shiny::icon("check"), status = "info", animation = "jelly"))
           }

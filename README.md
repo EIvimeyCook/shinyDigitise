@@ -33,8 +33,9 @@ Now published in
 - **Five plot types.** Mean/error, boxplot, xy mean/error, histogram, and
   scatterplot. xy mean/error is only offered when the installed metaDigitise
   supports it (see [Installation](#installation)).
-- **Log axes.** Boxplots and scatterplots can have log-transformed or
-  log-stretched axes, in any base.
+- **Log axes.** Boxplots and scatterplots can have a log-transformed or
+  log-stretched axis, in any base. For scatterplots this is the x or the y axis,
+  not both.
 - **Guided, six-stage workflow.** The app walks you through each stage in order.
 - **Live orientation and calibration.** Flip or rotate a figure with the rotation
   angle shown on screen, then set the axes by double-clicking.
