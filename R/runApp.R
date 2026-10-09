@@ -41,20 +41,16 @@
 
 shinyDigitise <- function(dir=NULL){
 #if dir is missing then label the dir object as missing (important for SD initation).
-#load into the environment the dir object and assign the UIs and Server into the env.
-  if(missing(dir)){
-  dir <- "Missing"
-shiny_env <- 1
-envir = as.environment(shiny_env)
-assign("dir", dir, envir = envir)
+#the folder is passed to the app as an option (restored on exit) rather than being
+#written into the user's global environment.
+  if(missing(dir) || is.null(dir)){
+    dir <- "Missing"
   } else {
-#else if dir is not missing then label the dir object as the provided datapath (important for SD initation). 
-#otherwise same as previous
-dir <- dir
-shiny_env <- 1
-envir = as.environment(shiny_env)
-assign("dir", dir, envir = envir)
+    if(!is.character(dir) || length(dir) != 1 || is.na(dir)) stop("dir must be a single folder path", call. = FALSE)
+    if(!dir.exists(dir)) stop("The folder '", dir, "' does not exist", call. = FALSE)
   }
+  old <- options(shinyDigitise.dir = dir)
+  on.exit(options(old), add = TRUE)
 
 appDir <- system.file("shinyDigitise", package = "shinyDigitise")
 shiny::runApp(appDir, display.mode = "normal")

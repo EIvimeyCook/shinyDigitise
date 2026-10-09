@@ -19,7 +19,6 @@ Imports:
     bslib,
     dplyr,
     DT,
-    emojifont,
     graphics,
     magick,
     metaDigitise,
@@ -32,7 +31,6 @@ Imports:
     shinyscreenshot,
     shinyWidgets,
     stats,
-    stringr,
     tippy,
     utils
 Encoding: UTF-8

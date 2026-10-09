@@ -1,2 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^CITATION\.cff$
+^\.Rhistory$
+^LICENSE\.md$
+^\.gitignore$

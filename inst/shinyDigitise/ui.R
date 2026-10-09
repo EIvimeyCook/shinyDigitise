@@ -39,7 +39,7 @@ ui <- function(){
 #progress number based on counter and counter total
       shiny::column(width = 8,
                     shiny::tags$br(),
-        shiny::div(style="display: inline-block;vertical-align:top; width: 7%; font-size:x-large;",
+        shiny::div(style="display: inline-block;vertical-align:top; width: 7%; min-width: 50px; font-size:x-large;",
            shiny::p(shiny::htmlOutput("progress", inline=TRUE)),
         ),
 
@@ -86,7 +86,14 @@ ui <- function(){
       shiny::sidebarPanel(
         width = 4,
         id = "tPanel",
-        style = "overflow-y:scroll; max-height: 800px; position:relative;",
+        style = "overflow-y:auto; overflow-x:hidden; max-height: 800px; position:relative;",
+        # let sidebar rows and buttons wrap rather than being clipped on narrow screens
+        shiny::tags$head(shiny::tags$style(shiny::HTML(
+          "#tPanel .shiny-split-layout { display: flex; flex-wrap: wrap; white-space: normal; }
+           #tPanel .shiny-split-layout > div { overflow: visible; min-width: 0; }
+           #tPanel .btn { white-space: normal; max-width: 100%; }
+           #tPanel .dataTables_wrapper { max-width: 100%; overflow-x: auto; }"
+        ))),
         
 
         #image name
@@ -117,7 +124,7 @@ ui <- function(){
             cellWidths = c("80%","20%"),
           
           shiny::strong("1. Choose Plot type:"),
-          shiny::textOutput("plottype_check_text"),
+          shiny::uiOutput("plottype_check_text"),
           shiny::tags$head(shiny::tags$style("#plottype_check_text{font-size: 20px;}"))
 
           ),
@@ -125,8 +132,10 @@ ui <- function(){
           shinyWidgets::prettyRadioButtons(
             inputId = "plot_type",
             label = NULL,
-            choiceNames = c("Mean/error", "Boxplot", "XY Mean/Error", "Scatterplot", "Histogram"),
-            choiceValues = c("mean_error", "boxplot", "xy_mean_error", "scatterplot", "histogram"),
+            # XY Mean/Error is only offered if the installed metaDigitise can export it
+            # (metaDigitise 1.0.2 on CRAN cannot, and the whole export would fail)
+            choiceNames = c("Mean/error", "Boxplot", if (md_supports_plot_type("xy_mean_error")) "XY Mean/Error", "Scatterplot", "Histogram"),
+            choiceValues = c("mean_error", "boxplot", if (md_supports_plot_type("xy_mean_error")) "xy_mean_error", "scatterplot", "histogram"),
             selected = character(0),
             inline = T,
             icon = shiny::icon("check"),
@@ -150,7 +159,7 @@ ui <- function(){
           shiny::splitLayout(
                 cellWidths = c("80%","20%"),
           shiny::strong("2. Orientate Figure:"),
-          shiny::textOutput("orientation_check_text"),
+          shiny::uiOutput("orientation_check_text"),
           shiny::tags$head(shiny::tags$style("#orientation_check_text{font-size: 20px;}"))
           ),
           shinyjs::hidden(shiny::div(id = "orient_well",class = "buttonagency",
@@ -214,7 +223,7 @@ ui <- function(){
           shiny::splitLayout(
             cellWidths = c("80%","20%"),
             shiny::strong("3. Calibrate Axes:"),
-            shiny::textOutput("calibrate_check_text"),
+            shiny::uiOutput("calibrate_check_text"),
             shiny::tags$head(shiny::tags$style("#calibrate_check_text{font-size: 20px;}"))
           ),
           shinyjs::hidden(
@@ -246,45 +255,69 @@ ui <- function(){
           ),
           shinyjs::hidden(
             shiny::div(id="y_coord_input",
+                # label above each box (two equal cells) so they stay side by side when narrow
                 shiny::splitLayout(
-                  cellWidths = c("15%","35%","15%","35%"),
-                  "Y1",
+                  cellWidths = c("50%","50%"),
                   shiny::numericInput(inputId = "y1",
-                               label = NULL,
-                               value= NA),
-                  "Y2",
+                               label = "Y1",
+                               value= NA,
+                               width = "95%"),
                   shiny::numericInput(inputId = "y2",
-                               label= NULL,
-                               value= NA )
+                               label= "Y2",
+                               value= NA,
+                               width = "95%")
                 )
             )
           ),
           shinyjs::hidden(
             shiny::div(id="x_coord_input",
+                # label above each box (two equal cells) so they stay side by side when narrow
                 shiny::splitLayout(
-                  cellWidths = c("15%","35%","15%","35%"),
-                  "X1",
+                  cellWidths = c("50%","50%"),
                   shiny::numericInput(inputId = "x1",
-                               label = NULL,
-                               value= NA),
-                  "X2",
+                               label = "X1",
+                               value= NA,
+                               width = "95%"),
                   shiny::numericInput(inputId = "x2",
-                               label= NULL,
-                               value= NA )
+                               label= "X2",
+                               value= NA,
+                               width = "95%")
                 )
             )
           ),
           shinyjs::hidden(
+            # log axes (boxplots and scatterplots only, as in metaDigitise)
             shiny::div(id="log_input",
-               shinyWidgets::prettyCheckbox(
-                  inputId = "log_sp",
-                  label = "Logged values?",
-                  value = FALSE,
-                  status = "info"),
-                shiny::textInput(
-                  inputId = "nsamp_sp",
-                  placeholder = "Known sample size",
-                  label = NULL)
+               shinyWidgets::prettyRadioButtons(
+                  inputId = "log_axes_sel",
+                  label = shiny::strong("Are any axes on a log scale?"),
+                  choiceNames = c("No", "Y", "X", "X and Y"),
+                  choiceValues = c("n", "y", "x", "xy"),
+                  selected = "n",
+                  inline = T,
+                  icon = shiny::icon("check"),
+                  status = "info",
+                  animation = "jelly"),
+               shinyjs::hidden(
+                 shiny::div(id = "log_detail",
+                   shinyWidgets::prettyRadioButtons(
+                      inputId = "log_transformed",
+                      label = shiny::strong("Log axis is:"),
+                      choiceNames = c("Transformed", "Stretched"),
+                      choiceValues = c("t", "s"),
+                      selected = "t",
+                      inline = T,
+                      icon = shiny::icon("check"),
+                      status = "info",
+                      animation = "jelly"),
+                   shiny::helpText("Transformed: the axis labels are logged values.", shiny::tags$br(),
+                      "Stretched: the axis labels are raw values on a log-spaced axis."),
+                   shiny::textInput(
+                      inputId = "log_base",
+                      label = shiny::strong("Log base (e or a number):"),
+                      value = "10")
+                 )
+               )
             )
           ),
           shiny::splitLayout(
@@ -314,7 +347,7 @@ ui <- function(){
           shiny::splitLayout(
             cellWidths = c("80%","20%"),
             shiny::strong("4. Extract Data:"),
-            shiny::textOutput("extract_check_text"),
+            shiny::uiOutput("extract_check_text"),
             shiny::tags$head(shiny::tags$style("#extract_check_text{font-size: 20px;}"))
           ),
           shinyjs::hidden(

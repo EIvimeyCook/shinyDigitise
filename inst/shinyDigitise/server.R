@@ -6,6 +6,11 @@ server <- function(input, output, session){
   # Initial Startup
   ################################################
 
+  # folder of images given to shinyDigitise(dir=) (passed as an option rather than
+  # written into the global environment). "Missing" means the user chooses it.
+  dir <- getOption("shinyDigitise.dir", "Missing")
+  if (is.null(dir) || !is.character(dir) || length(dir) != 1 || is.na(dir) || !nzchar(dir)) dir <- "Missing"
+
   #reactive objects and counters.
 
    # start counter at 1 - helps if this is before things
@@ -531,6 +536,12 @@ shiny::observeEvent(input$extract_but|input$review_but, {
         prev_data$raw_data <- fill_missing_n(prev_data$raw_data, prev_data$plot_type, prev_data$knownN,
           prev_data$processed_data)
       }
+      # the saved image path is absolute - use the image in the current folder so
+      # figures still open after the folder has been moved or shared
+      prev_data$image_file <- details$paths[counter$countervalue]
+      # older shinyDigitise files saved image_name without the extension
+      prev_data$image_name <- details$images[counter$countervalue]
+      if (is.null(prev_data$log_axes)) prev_data$log_axes <- c(axes = "n")
       values <<- do.call("reactiveValues", prev_data)
 
       # update
@@ -548,7 +559,8 @@ shiny::observeEvent(input$extract_but|input$review_but, {
       #  keeps flip/rotate and image details.
 
       values <<- shiny::reactiveValues(
-        image_name = details$name[counter$countervalue],
+        # file name with extension, as metaDigitise saves it
+        image_name = details$images[counter$countervalue],
         image_file = details$paths[counter$countervalue],
         plot_type = NULL,
         flip = FALSE,
@@ -604,33 +616,17 @@ shiny::observeEvent(input$extract_but|input$review_but, {
     )
 
     #### update tick boxes
-    output$plottype_check_text <- shiny::renderText({
-      if(check_plottype(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$plottype_check_text <- shiny::renderUI({
+      check_icon(check_plottype(shiny::reactiveValuesToList(values)))
     })
-    output$orientation_check_text <- shiny::renderText({
-      if(check_orientation(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$orientation_check_text <- shiny::renderUI({
+      check_icon(check_orientation(shiny::reactiveValuesToList(values)))
     })
-    output$calibrate_check_text <- shiny::renderText({
-      if(check_calibrate(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$calibrate_check_text <- shiny::renderUI({
+      check_icon(check_calibrate(shiny::reactiveValuesToList(values)))
     })
-    output$extract_check_text <- shiny::renderText({
-      if(check_extract(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$extract_check_text <- shiny::renderUI({
+      check_icon(check_extract(shiny::reactiveValuesToList(values)))
     })
 
     output$metaPlot <- shiny::renderPlot({
@@ -711,7 +707,8 @@ if(counter$countervalue == 1){
     }
 
       values <<- shiny::reactiveValues(
-        image_name = details$name[counter$countervalue],
+        # file name with extension, as metaDigitise saves it
+        image_name = details$images[counter$countervalue],
         image_file = details$paths[counter$countervalue],
         plot_type = NULL,
         flip = FALSE,
@@ -819,33 +816,17 @@ if(counter$countervalue == 1){
   }
 
     #### update tick boxes
-    output$plottype_check_text <- shiny::renderText({
-      if(check_plottype(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$plottype_check_text <- shiny::renderUI({
+      check_icon(check_plottype(shiny::reactiveValuesToList(values)))
     })
-    output$orientation_check_text <- shiny::renderText({
-      if(check_orientation(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$orientation_check_text <- shiny::renderUI({
+      check_icon(check_orientation(shiny::reactiveValuesToList(values)))
     })
-    output$calibrate_check_text <- shiny::renderText({
-      if(check_calibrate(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$calibrate_check_text <- shiny::renderUI({
+      check_icon(check_calibrate(shiny::reactiveValuesToList(values)))
     })
-    output$extract_check_text <- shiny::renderText({
-      if(check_extract(shiny::reactiveValuesToList(values))){
-         emojifont::emoji('white_check_mark')
-      }else{
-        emojifont::emoji('warning')
-      }
+    output$extract_check_text <- shiny::renderUI({
+      check_icon(check_extract(shiny::reactiveValuesToList(values)))
     })
 
     output$metaPlot <- shiny::renderPlot({
@@ -1031,6 +1012,32 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
         shinyjs::show("y_coord_input")
 
+        # log axes can be set for boxplots and scatterplots (as in metaDigitise).
+        # Start from what is already stored (e.g. a figure digitised before).
+        if(input$plot_type %in% c("boxplot","scatterplot")){
+          log_now <- values$log_axes
+          log_sel <- if(is.null(log_now) || !"axes" %in% names(log_now)) "n" else log_now[["axes"]]
+          if(log_sel == "yx") log_sel <- "xy"
+          if(input$plot_type == "boxplot"){
+            shinyWidgets::updatePrettyRadioButtons(session, "log_axes_sel",
+              choiceNames = c("No", "Y"), choiceValues = c("n", "y"),
+              selected = if(log_sel == "n") "n" else "y", inline = TRUE,
+              prettyOptions = list(icon = shiny::icon("check"), status = "info", animation = "jelly"))
+          }else{
+            shinyWidgets::updatePrettyRadioButtons(session, "log_axes_sel",
+              choiceNames = c("No", "Y", "X", "X and Y"), choiceValues = c("n", "y", "x", "xy"),
+              selected = log_sel, inline = TRUE,
+              prettyOptions = list(icon = shiny::icon("check"), status = "info", animation = "jelly"))
+          }
+          if("transformed" %in% names(log_now)) shinyWidgets::updatePrettyRadioButtons(session, "log_transformed", selected = log_now[["transformed"]])
+          if("base" %in% names(log_now)) shiny::updateTextInput(session, "log_base", value = log_now[["base"]])
+          shinyjs::toggle("log_detail", condition = log_sel != "n")
+          shinyjs::show("log_input")
+        }else{
+          values$log_axes <<- c(axes = "n")
+          shinyjs::hide("log_input")
+        }
+
         # delete all previous data
         values$calpoints <<- NULL
         values$variable <<- NULL
@@ -1046,14 +1053,11 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       shinyjs::hide("x_var_input")
       shinyjs::hide("y_coord_input")
       shinyjs::hide("x_coord_input")
+      shinyjs::hide("log_input")
     output$calib_info <- shiny::renderUI({shiny::HTML("")})
-      output$calibrate_check_text <- shiny::renderText({
-        if(check_calibrate(shiny::reactiveValuesToList(values))){
-           emojifont::emoji('white_check_mark')
-        }else{
-          emojifont::emoji('warning')
-        }
-      })
+      output$calibrate_check_text <- shiny::renderUI({
+      check_icon(check_calibrate(shiny::reactiveValuesToList(values)))
+    })
     }
   })
 
@@ -1120,6 +1124,18 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         plot_values <- shiny::reactiveValuesToList(values)
         do.call(internal_redraw, c(plot_values, shiny=TRUE))
       })
+    }
+  })
+
+  # log axes - stored in the same format as metaDigitise: c(axes=, transformed=, base=)
+  shiny::observeEvent(c(input$log_axes_sel, input$log_transformed, input$log_base), {
+    if (isTRUE(input$calib_mode) && !is.null(values$plot_type) && values$plot_type %in% c("boxplot","scatterplot")) {
+      values$log_axes <<- make_log_axes(values$plot_type, input$log_axes_sel, input$log_transformed, input$log_base)
+      if (is.null(input$log_axes_sel) || input$log_axes_sel == "n") {
+        shinyjs::hide("log_detail")
+      } else {
+        shinyjs::show("log_detail")
+      }
     }
   })
 
@@ -1304,13 +1320,9 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
       shinyjs::hide("group_data")
       shinyjs::hide("error_type_select")
 
-      output$extract_check_text <- shiny::renderText({
-        if(check_extract(shiny::reactiveValuesToList(values))){
-           emojifont::emoji('white_check_mark')
-        }else{
-          emojifont::emoji('warning')
-        }
-      })
+      output$extract_check_text <- shiny::renderUI({
+      check_icon(check_extract(shiny::reactiveValuesToList(values)))
+    })
     }
 
   })
@@ -1829,20 +1841,39 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         value = FALSE
       )
 
-    shinyjs::hide("comm_well")
-    shinyjs::show("plot_well")
-    shinyjs::reset("y_var_input")
-    shinyjs::reset("x_var_input")
-    shinyjs::reset("y_coord_input")
-    shinyjs::reset("y_coord_input")
-    shiny::updateTextInput(session,"y_var_input", value="")
-    shiny::updateTextInput(session,"x_var_input", value="")
-    shiny::updateTextInput(session,"comment", value="")
-
-
     shiny::req(importDatapath())
     plot_values <- shiny::reactiveValuesToList(values)
-    if(check_plottype(plot_values) & check_calibrate(plot_values) & check_extract(plot_values)){
+    # what (if anything) still needs doing before this figure can be saved, and
+    # which step it belongs to (so the sidebar can go straight to that step)
+    problem_step <- NULL
+    problem <- if(!check_plottype(plot_values)) {
+      problem_step <- "plot"
+      "Please select a plot type."
+    } else {
+      cp <- calibrate_problem(plot_values)
+      if(!is.null(cp)) {
+        problem_step <- "calib"
+        paste("Calibration:", cp)
+      } else {
+        ep <- extract_problem(plot_values)
+        if(!is.null(ep)) problem_step <- "extract"
+        ep
+      }
+    }
+    if(is.null(problem)){
+      # figure is complete - reset the sidebar for the next figure
+      shinyjs::hide("comm_well")
+      shinyjs::show("plot_well")
+      shinyjs::reset("y_var_input")
+      shinyjs::reset("x_var_input")
+      shinyjs::reset("y_coord_input")
+      shinyjs::reset("x_coord_input")
+      shiny::updateTextInput(session,"y_var_input", value="")
+      shiny::updateTextInput(session,"x_var_input", value="")
+      shiny::updateTextInput(session,"comment", value="")
+
+      # fields metaDigitise needs to plot/edit the saved file (entered_N, scatterplot group)
+      plot_values <- add_metaDigitise_fields(plot_values)
       plot_values$processed_data <- process_data(plot_values)
       # scatterplots/histograms: use the sample sizes typed into the group table
       # for the exported n (otherwise metaDigitise uses the clicked estimate)
@@ -1887,7 +1918,7 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
     }else{
       shinyalert::shinyalert(
         title = "Warning!",
-        text = "You haven't completed this image.",
+        text = paste("You haven't completed this image.", problem),
         size = "s",
         closeOnEsc = TRUE,
         closeOnClickOutside = FALSE,
@@ -1901,6 +1932,20 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         imageUrl = "",
         animation = TRUE
       )
+      # stay on (or go to) the step that needs fixing rather than going back to step 1
+      if(problem_step == "extract"){
+        # same as pressing "Previous step" in the comments panel
+        shinyjs::click("comm_back")
+      }else{
+        shinyjs::hide("comm_well")
+        shinyjs::hide("extract_well")
+        extract_mode$extract <<- FALSE
+        if(problem_step == "calib"){
+          shinyjs::show("calib_well")
+        }else{
+          shinyjs::show("plot_well")
+        }
+      }
     }
   })
 
@@ -2157,12 +2202,24 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
 
   #the app stops when you exit - not sure what this does.
   session$onSessionEnded(function() {
-    # figures saved by earlier versions with no comment typed have no comment
-    # field, which makes the development metaDigitise export fail
-    shiny::isolate(fill_missing_comments(paste0(importDatapath(), "caldat/")))
-    shiny::isolate(shiny::stopApp(returnValue=metaDigitise::getExtracted(importDatapath())))
-    shiny::isolate(utils::write.csv(metaDigitise::getExtracted(importDatapath()), paste0(importDatapath(),"ExtractedData.csv")))
-
+    shiny::isolate({
+      # no folder chosen yet: importDatapath() stops with a silent error
+      data_dir <- tryCatch(importDatapath(), error = function(e) NULL)
+      extracted <- NULL
+      if (!is.null(data_dir) && data_dir != "/") {
+        # figures saved by earlier versions with no comment typed have no comment
+        # field, which makes the development metaDigitise export fail
+        fill_missing_comments(paste0(data_dir, "caldat/"))
+        # skips the export if nothing has been digitised, and skips (with a
+        # warning) any figure that cannot be exported rather than losing everything
+        extracted <- safe_extract(data_dir)
+        if (!is.null(extracted)) {
+          tryCatch(utils::write.csv(extracted, paste0(data_dir, "ExtractedData.csv")),
+            error = function(e) warning("shinyDigitise: could not write ExtractedData.csv: ", conditionMessage(e), call. = FALSE))
+        }
+      }
+      shiny::stopApp(returnValue = extracted)
+    })
   })
 
 

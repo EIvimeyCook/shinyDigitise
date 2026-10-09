@@ -31,19 +31,29 @@ Now published in
 ## Features
 
 - **Five plot types.** Mean/error, boxplot, xy mean/error, histogram, and
-  scatterplot.
+  scatterplot. xy mean/error is only offered when the installed metaDigitise
+  supports it (see [Installation](#installation)).
+- **Log axes.** Boxplots and scatterplots can have log-transformed or
+  log-stretched axes, in any base.
 - **Guided, six-stage workflow.** The app walks you through each stage in order.
 - **Live orientation and calibration.** Flip or rotate a figure with the rotation
   angle shown on screen, then set the axes by double-clicking.
-- **Zoom and adjust on the fly.** Click and drag a box over any area to zoom, and
-  adjust point size and group label positions as you work.
+- **Zoom and adjust on the fly.** Click and drag a box over any area and press
+  **Zoom** to zoom in, and adjust point size and group label positions as you
+  work.
 - **Replot and check.** Extractions can be redrawn over the source figure, so
   mistakes are caught rather than archived.
 - **Deliberately manual.** Semi-automated point detection makes users complacent
   and introduces errors that are hard to spot; extraction here is your judgement,
   recorded so others can check it.
-- **Output you can archive.** Results are returned as a caldat object that saves the extraction process and saved as a
-  `.csv` in the same folder as the images.
+- **Output you can archive.** Each figure's calibration and clicks are saved
+  (as `.RDS` files in a `caldat/` folder inside the image folder), so an
+  extraction can be reopened and checked later. The extracted values are returned
+  as a data frame and saved as `ExtractedData.csv` in the image folder.
+- **Compatible with metaDigitise.** The extracted values are identical to
+  metaDigitise's. Figures saved by shinyDigitise can be plotted, summarised and
+  edited in metaDigitise, and figures digitised in metaDigitise can be reopened
+  in shinyDigitise.
 
 ## Installation
 
@@ -52,7 +62,9 @@ devtools::install_github("EIvimeyCook/ShinyDigitise")
 ```
 
 **If you plan on using shinyDigitise to extract data from xy mean graphs, you
-need the dev version of metaDigitise.**
+need the dev version of metaDigitise.** The xy mean/error option only appears
+in the app when the installed metaDigitise can process it, because otherwise
+those figures could not be exported.
 
 ```r
 devtools::install_github("joelpick/metaDigitise")
@@ -80,8 +92,8 @@ df <- shinyDigitise()
 ## Basic workflow
 
 The app will walk you through each stage. If a directory is provided, you'll skip
-straight to the file selection phase. If not, you'll be asked to select a file
-from the image folder.
+straight to the file selection phase. If not, you'll be asked to select any
+image file inside the image folder, and that folder is then used.
 
 1. **Choose plot type** — mean/error, boxplot, xy mean/error, histogram, or
    scatterplot.
@@ -90,21 +102,41 @@ from the image folder.
 3. **Calibrate axes** — click calibrate mode on, and, depending on the plot type
    shown, double click on the axes in the relevant order and add the variable
    name and values. These will then appear on the plot (the size will depend on
-   the point size slider).
+   the point size slider). For boxplots and scatterplots, also say whether any
+   axis is on a log scale, whether it is transformed (the labels are logged
+   values) or stretched (the labels are raw values on a log-spaced axis), and
+   the log base.
 4. **Add groups** — clicking add group will cause a pop up to appear to enter data
    (name and sample size). This will then appear in the table. Clicking the group
    will allow you to either double click points on the graph (you have to press
-   the click points button first) or delete the group. Lastly, you can select the
-   type of error shown (if a mean/error graph).
+   the click points button first) or delete the group. For a mean/error graph,
+   select the type of error shown (SE, SD or 95% CI); this is required.
 5. **Comments** — add a comment to your data.
 6. **Finished!** The app will close when you've reached the end of your graphs.
 
+Before a figure is saved, the app checks it is complete. It checks that:
+
+- every axis value is a number;
+- each mean/error group has exactly 2 clicks (3 for xy mean/error) and an
+  error type is selected;
+- each boxplot group has 5 clicks;
+- each histogram has 2 clicks per bar.
+
+If anything is missing, the app tells you what and takes you back to that step.
+Nothing you have entered is lost.
+
+If you move or rename the image folder, figures you have already digitised
+still reopen from the new location.
+
 *To view the extracted data just simply call the object you've created or view
 the resulting `.csv` file (which will be saved into the same folder as the
-images).*
+images).* If a saved figure cannot be processed, it is skipped with a warning
+that names it, and the other figures are still exported. If you close the app
+without digitising anything, nothing is exported and `NULL` is returned.
 
 > **Tip.** You can adjust point size and group name positions on the fly, as well
-> as zoom in on the image by clicking and dragging a box over the desired area.
+> as zoom in on the image by clicking and dragging a box over the desired area
+> and pressing **Zoom** (press **Zoom** again with no box drawn to reset).
 
 > **Note on sample sizes.** Always check the exported sample size against the
 > expected sample size. The sample size you type when adding a group is the
