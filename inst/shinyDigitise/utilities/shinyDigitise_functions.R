@@ -43,6 +43,10 @@ calibrate_problem <- function(x){
   # stretched log axes are entered on the original scale, so need positive values
   axes <- if("axes" %in% names(x$log_axes)) x$log_axes[["axes"]] else "n"
   if( axes != "n" ){
+    # only one log axis is supported (e.g. figures digitised in metaDigitise with "xy")
+    if( !axes %in% c("x","y") ){
+      return("Only one axis can be on a log scale. Please recalibrate this figure with a log scale on the x or the y axis only.")
+    }
     if( !all(c("transformed","base") %in% names(x$log_axes)) ){
       return("Please say whether the log axis is transformed or stretched, and its base.")
     }
@@ -51,7 +55,7 @@ calibrate_problem <- function(x){
       return("The log base must be 'e' or a positive number other than 1.")
     }
     if( x$log_axes[["transformed"]] == "s" ){
-      logged <- c(if(grepl("y", axes)) 1:2, if(grepl("x", axes)) 3:4)
+      logged <- if(axes == "y") 1:2 else 3:4
       if( any(vals[logged] <= 0) ) return("Values on a stretched log axis must be above zero.")
     }
   }
@@ -121,7 +125,7 @@ check_icon <- function(ok){
 #'   (c(axes=, transformed=, base=)). Only boxplots and scatterplots can have log
 #'   axes in metaDigitise.
 #' @param plot_type plot type
-#' @param axes which axes are logged ("n","x","y","xy")
+#' @param axes which axis is logged ("n","x","y")
 #' @param transformed "t" (transformed) or "s" (stretched)
 #' @param base log base, "e" or a number
 make_log_axes <- function(plot_type, axes, transformed, base){

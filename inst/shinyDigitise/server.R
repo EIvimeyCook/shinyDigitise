@@ -1017,7 +1017,6 @@ if(!is.null(importDatapath()) & as.character(importDatapath()) != "/" & counter$
         if(input$plot_type %in% c("boxplot","scatterplot")){
           log_now <- values$log_axes
           log_sel <- if(is.null(log_now) || !"axes" %in% names(log_now)) "n" else log_now[["axes"]]
-          if(log_sel == "yx") log_sel <- "xy"
           if(input$plot_type == "boxplot"){
             # boxplots only have a y axis, so this is a yes/no question
             shinyWidgets::updatePrettyRadioButtons(session, "log_axes_sel",
