@@ -93,7 +93,7 @@ in the app when the installed metaDigitise can process it, because otherwise
 those figures could not be exported.
 
 ```r
-devtools::install_github("joelpick/metaDigitise")
+pak::pak("joelpick/metaDigitise@development")
 ```
 
 There is a known bug with some versions of RStudio
