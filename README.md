@@ -83,7 +83,7 @@ run the other install command.
 need the dev version of metaDigitise.**
 
 ```r
-pak::pak("joelpick/metaDigitise")
+pak::pak("joelpick/metaDigitise@development")
 ```
 
 There is a known bug with some versions of RStudio
