@@ -11,6 +11,14 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE.md)
 <!-- badges: end -->
 
+> [!IMPORTANT]
+> **You are viewing the `development` branch.** It has new features and bug
+> fixes that are not yet in the stable version on `master`, including typed
+> sample sizes for scatterplots and histograms, log axes, step-by-step checks,
+> and fixes for editing groups and reopening figures. See [what's new and
+> fixed](https://github.com/EIvimeyCook/shinyDigitise/blob/development/NEWS.md)
+> and [how to install either version](#installation).
+
 shinyDigitise builds upon the popular metaDigitise package and provides users
 with an **interactive UI to help extraction of data from five different plot
 types**. The main functions used in shinyDigitise are called from the
@@ -58,9 +66,26 @@ Now published in
 
 ## Installation
 
+shinyDigitise is not on CRAN. There are two versions:
+
+**Stable version** (the `master` branch):
+
 ```r
+install.packages("devtools")
 devtools::install_github("EIvimeyCook/ShinyDigitise")
 ```
+
+**Development version** (the `development` branch), with the latest features and
+bug fixes ([what's new and
+fixed](https://github.com/EIvimeyCook/shinyDigitise/blob/development/NEWS.md)):
+
+```r
+devtools::install_github("EIvimeyCook/ShinyDigitise", ref = "development")
+```
+
+To check which version you have, run `packageVersion("shinyDigitise")`: 0.1.0 is
+the stable version and 0.1.1 the development version. To switch between them,
+run the other install command.
 
 **If you plan on using shinyDigitise to extract data from xy mean graphs, you
 need the dev version of metaDigitise.** The xy mean/error option only appears
@@ -159,6 +184,13 @@ without digitising anything, nothing is exported and `NULL` is returned.
 
 Please file issues and feature requests at
 <https://github.com/EIvimeyCook/shinyDigitise/issues>. Pull requests are welcome.
+
+**Before reporting a bug, please install the development version (see
+[Installation](#installation)) and check whether the problem is still there.**
+Many bugs are already fixed on the `development` branch; they are listed in
+[NEWS.md](https://github.com/EIvimeyCook/shinyDigitise/blob/development/NEWS.md).
+When you file an issue, please include the output of
+`packageVersion("shinyDigitise")` and `sessionInfo()`.
 
 ## Related tools
 
