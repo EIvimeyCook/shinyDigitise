@@ -88,7 +88,7 @@ the stable version and 0.1.1 the development version. To switch between them,
 run the other install command.
 
 **If you plan on using shinyDigitise to extract data from xy mean graphs, you
-need the dev version of metaDigitise.** The xy mean/error option only appears
+need the GitHub version of metaDigitise.** The xy mean/error option only appears
 in the app when the installed metaDigitise can process it, because otherwise
 those figures could not be exported.
 
