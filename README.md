@@ -71,8 +71,8 @@ shinyDigitise is not on CRAN. There are two versions:
 **Stable version** (the `master` branch):
 
 ```r
-install.packages("devtools")
-devtools::install_github("EIvimeyCook/ShinyDigitise")
+install.packages("pak")
+pak::pak("EIvimeyCook/shinyDigitise")
 ```
 
 **Development version** (the `development` branch), with the latest features and
@@ -80,7 +80,7 @@ bug fixes ([what's new and
 fixed](https://github.com/EIvimeyCook/shinyDigitise/blob/development/NEWS.md)):
 
 ```r
-devtools::install_github("EIvimeyCook/ShinyDigitise", ref = "development")
+pak::pak("EIvimeyCook/shinyDigitise@development")
 ```
 
 To check which version you have, run `packageVersion("shinyDigitise")`: 0.1.0 is
@@ -93,7 +93,7 @@ in the app when the installed metaDigitise can process it, because otherwise
 those figures could not be exported.
 
 ```r
-pak::pak("joelpick/metaDigitise@development")
+pak::pak("joelpick/metaDigitise")
 ```
 
 There is a known bug with some versions of RStudio
