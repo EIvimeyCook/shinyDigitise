@@ -80,7 +80,7 @@ the stable version and 0.1.1 the development version. To switch between them,
 run the other install command.
 
 **If you plan on using shinyDigitise to extract data from xy mean graphs, you
-need the dev version of metaDigitise.**
+need the GitHub version of metaDigitise.**
 
 ```r
 pak::pak("joelpick/metaDigitise")
