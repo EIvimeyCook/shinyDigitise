@@ -1,4 +1,4 @@
-# shinyDigitise (development version)
+# shinyDigitise 0.1.1 (development version)
 
 Version 0.1.1, on the `development` branch. The stable version on `master` is
 0.1.0. Check which one you have with `packageVersion("shinyDigitise")`.

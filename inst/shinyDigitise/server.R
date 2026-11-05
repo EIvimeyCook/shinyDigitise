@@ -44,7 +44,7 @@ server <- function(input, output, session){
   add_mode <- shiny::reactiveValues(add = FALSE)
 
   # image import container
-  image_import <- shiny::reactiveValues(select = FALSE, multiple = FALSE, extract_rev = NULL)
+  image_import <- shiny::reactiveValues(multiple = FALSE, extract_rev = NULL)
 
   # create empty click counter for plotclicks.
   clickcounter <- shiny::reactiveValues(clickcount = 0)
@@ -125,21 +125,6 @@ server <- function(input, output, session){
            inline = TRUE, 
 ))),
 shiny::tags$br(),
-#removed for now - select individual image
-# shinyjs::hidden(shiny::div(id = "data_import_title3",
-#   shiny::tags$h5("Alternatively, please select a specific graph from your chosen directory:", align = "center"))), 
-# shiny::tags$br(),
-# shinyjs::hidden(shiny::div(id = "data_select_image",style = "text-align: center", offset = 0,
-#   shinyWidgets::pickerInput(
-#    inputId = "select_image_pick",#
-#     choices = c(""),
-#     selected = "",
-#    options = list(
-#       style = "btn-primary"),
-#    inline = TRUE,
-#    width = "auto"
-# ))), 
-# shiny::tags$br(),
 shinyjs::hidden(shiny::div(id = "data_import_extract",
                            shiny::actionButton("extract_but", "Get Extracting!"))),
     shinyjs::hidden(shiny::div(id = "data_import_review", 
@@ -307,21 +292,9 @@ if(length(details$image)==0){
   shinyjs::hide("choosefolder")
   shinyjs::show("data_import_title2")
   shinyjs::show("data_import_title1")
-  shinyjs::show("data_import_title3")
   shinyjs::show("data_all_or_unfin")
-  shinyjs::show("data_select_image")
   shinyjs::show("data_rev_or_extract")
   shinyjs::show("data_import_extract")
-
-#update the image with names of images.
-  shiny::div(style = "text-align: center", offset = 0,
-   shinyWidgets::updatePickerInput(
-    session = session,
-   inputId = "select_image_pick",
-    choices = c("",details$name),
-    selected = "",
-   clearOptions = TRUE
-   ))
 }
 })
 
@@ -355,7 +328,7 @@ shiny::observeEvent(input$rev_or_extractbut, {
   }
   })
 
-#obsrve the import mode selection. Either All or unfinished. Changes the metadigitise import and updates the picker 
+#obsrve the import mode selection. Either All or unfinished. Changes the metadigitise import
 shiny::observeEvent(input$all_or_unfin_but, {
 
   shiny::req(importDatapath())
@@ -364,20 +337,10 @@ shiny::observeEvent(input$all_or_unfin_but, {
   details <<- metaDigitise::dir_details(importDatapath())
   counter_total <<- length(details$paths)
   image_import$multiple <<- TRUE
-  image_import$select <<- FALSE
   
   #set counters and next values at 1
   counter$countervalue <<- 1
   counter$next_count <<- 1
-
- shiny::div(style = "text-align: center", offset = 0,
-   shinyWidgets::updatePickerInput(
-    session = session,
-   inputId = "select_image_pick",
-    choices = c("",details$name),
-    selected = "",
-   clearOptions = TRUE
-))
   } 
     else if(input$all_or_unfin_but == "Finished"){
   details <<- metaDigitise::dir_details(importDatapath())
@@ -390,40 +353,20 @@ shiny::observeEvent(input$all_or_unfin_but, {
 
   counter_total <<- length(details$paths)
   image_import$multiple <<- TRUE
-  image_import$select <<- FALSE
   
   #set counters and next values at 1
   counter$countervalue <<- 1
   counter$next_count <<- 1
-
- shiny::div(style = "text-align: center", offset = 0,
-   shinyWidgets::updatePickerInput(
-    session = session,
-   inputId = "select_image_pick",
-    choices = c("",details$name),
-    selected = "",
-   clearOptions = TRUE
-))
   } 
 
   else if(input$all_or_unfin_but == "Unfinished"){
     details <<- metaDigitise::get_notDone_file_details(importDatapath())
     counter_total <<- length(details$paths)
     image_import$multiple <<- TRUE
-    image_import$select <<- FALSE
 
     #set counters and next values at 1
     counter$countervalue <<- 1
     counter$next_count <<- 1
-
- shiny::div(style = "text-align: center", offset = 0,
-   shinyWidgets::updatePickerInput(
-    session = session,
-   inputId = "select_image_pick",
-    choices = c("",details$name),
-    selected = "",
-   clearOptions = TRUE
-))
        } else {
         image_import$multiple <<- FALSE
 
@@ -431,44 +374,13 @@ shiny::observeEvent(input$all_or_unfin_but, {
        })
 
 
-#observe event for specific image selection. If it doesnt equal nothing then import that specific photo. Also reset the choices buttons.
-shiny::observeEvent(input$select_image_pick, {
-    counter$countervalue <<- 0
-    counter$next_count <<- 0
-
-shiny::req(importDatapath())
-
-  if(input$select_image_pick != ""){
-    image_import$select <<- TRUE
-    details <<- metaDigitise::dir_details(importDatapath())
-    image_name <<- input$select_image_pick
-    details$paths <<- details$paths[match(image_name,details$name)]
-    details$images <<- details$images[match(image_name,details$name)]
-    details$name <<- image_name
-    counter_total <<- length(details$paths)
-
-    #set counters and next values at 1
-    counter$countervalue <<- 1
-    counter$next_count <<- 1
-    
-  shiny::div(style = "text-align: center", offset = 0,
-   shiny::updateRadioButtons(
-   inputId = "all_or_unfin_but",
-   selected = character(0),
-))
-  image_import$multiple <<- FALSE
-} else {
-  image_import$select <<- FALSE
-}
-})
-
 #if you click review or extract ok, update the counter, show the panels and remove the modal or show an error if you havent selected all or unfinished
 shiny::observeEvent(input$extract_but|input$review_but, {
 
   shiny::req(importDatapath())
   shiny::req(input$extract_but|input$review_but)
 
-  if(image_import$multiple | image_import$select){
+  if(image_import$multiple){
 
   #output the progress text
   output$progress <- shiny::renderText({
