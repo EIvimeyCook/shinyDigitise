@@ -37,7 +37,7 @@ extraction over the original image so errors are visible rather than silent.
 Now published in
 [Research Synthesis Methods](https://onlinelibrary.wiley.com/doi/full/10.1002/jrsm.1663).
 
-> Note on sample sizes for scatterplots and histograms. Always check the expected sample size versus the number of points clicked. For these plot types, the exported n comes from the digitised data, not the sample size typed when adding a group. For scatterplots it is the number of points clicked in each group, so if some points overlap or are hidden, check n against the true sample histograms showing counts. This is changed in the development branch in order to avoid any issues with clicks and sample sizes.
+> Note on sample sizes for scatterplots and histograms. Always check the expected sample size against the exported n. For these plot types, n comes from the digitised data, not from any sample size you typed. For scatterplots it is the number of points clicked in each group, so if some points overlap or are hidden, n will be too low. For histograms it is the total of the bar heights. This is changed in the development branch in order to avoid any issues with clicks and sample sizes.
 
 ## Features
 
@@ -46,15 +46,18 @@ Now published in
 - **Guided, six-stage workflow.** The app walks you through each stage in order.
 - **Live orientation and calibration.** Flip or rotate a figure with the rotation
   angle shown on screen, then set the axes by double-clicking.
-- **Zoom and adjust on the fly.** Click and drag a box over any area to zoom, and
-  adjust point size and group label positions as you work.
+- **Zoom and adjust on the fly.** Click and drag a box over any area and press
+  **Zoom** to zoom in, and adjust point size and group label positions as you
+  work.
 - **Replot and check.** Extractions can be redrawn over the source figure, so
   mistakes are caught rather than archived.
 - **Deliberately manual.** Semi-automated point detection makes users complacent
   and introduces errors that are hard to spot; extraction here is your judgement,
   recorded so others can check it.
-- **Output you can archive.** Results are returned as a caldat object that saves the extraction process and saved as a
-  `.csv` in the same folder as the images.
+- **Output you can archive.** Each figure's calibration and clicks are saved in a
+  `caldat/` folder inside the image folder, so an extraction can be reopened and
+  checked later. The extracted values are returned as a data frame and saved as
+  `ExtractedData.csv` in the image folder.
 
 ## Installation
 
@@ -120,10 +123,13 @@ from the image folder.
    name and values. These will then appear on the plot (the size will depend on
    the point size slider).
 4. **Add groups** — clicking add group will cause a pop up to appear to enter data
-   (name and sample size). This will then appear in the table. Clicking the group
+   (name and sample size). This will then appear in the table. Histograms are the
+   exception: they have a single group, Group1, created for you. Clicking the group
    will allow you to either double click points on the graph (you have to press
-   the click points button first) or delete the group. Lastly, you can select the
-   type of error shown (if a mean/error graph).
+   the click points button first) or delete the group. Lastly, for a mean/error or
+   xy mean/error graph, you must select the type of error shown (SE, SD or 95%
+   CI). The app does not stop you continuing without it, but a figure saved with
+   no error type makes the export fail for the whole folder.
 5. **Comments** — add a comment to your data.
 6. **Finished!** The app will close when you've reached the end of your graphs.
 
@@ -132,7 +138,8 @@ the resulting `.csv` file (which will be saved into the same folder as the
 images).*
 
 > **Tip.** You can adjust point size and group name positions on the fly, as well
-> as zoom in on the image by clicking and dragging a box over the desired area.
+> as zoom in on the image by clicking and dragging a box over the desired area
+> and pressing **Zoom** (press **Zoom** again with no box drawn to reset).
 
 ## Bug reports and contributions
 
@@ -157,10 +164,17 @@ When you file an issue, please include the output of
 
 ## Citation
 
+Please cite both shinyDigitise and metaDigitise:
+
 > Ivimey-Cook, E. R., Noble, D. W. A., Nakagawa, S., Lajeunesse, M. J., & Pick,
 > J. L. (2023). Advice for improving the reproducibility of data extraction in
 > meta-analysis. *Research Synthesis Methods*, 14(6), 911–915.
 > <https://doi.org/10.1002/jrsm.1663>
+
+> Pick, J. L., Nakagawa, S., & Noble, D. W. A. (2019). Reproducible, flexible and
+> high-throughput data extraction from primary literature: The metaDigitise R
+> package. *Methods in Ecology and Evolution*, 10(3), 426–431.
+> <https://doi.org/10.1111/2041-210X.13118>
 
 A machine-readable [`CITATION.cff`](CITATION.cff) is included, so GitHub's
 "Cite this repository" button gives formatted APA and BibTeX.
