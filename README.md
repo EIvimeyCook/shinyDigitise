@@ -56,7 +56,8 @@ Now published in
   and introduces errors that are hard to spot; extraction here is your judgement,
   recorded so others can check it.
 - **Output you can archive.** Each figure's calibration and clicks are saved
-  (as `.RDS` files in a `caldat/` folder inside the image folder), so an
+  (as RDS-format files named after each image, with no file extension, in a
+  `caldat/` folder inside the image folder), so an
   extraction can be reopened and checked later. The extracted values are returned
   as a data frame and saved as `ExtractedData.csv` in the image folder.
 - **Compatible with metaDigitise.** The extracted values are identical to
@@ -133,7 +134,9 @@ image file inside the image folder, and that folder is then used.
    values) or stretched (the labels are raw values on a log-spaced axis), and
    the log base.
 4. **Add groups** — clicking add group will cause a pop up to appear to enter data
-   (name and sample size). This will then appear in the table. Clicking the group
+   (name and sample size). This will then appear in the table. Histograms are the
+   exception: they have a single group, Group1, created for you, so enter the
+   sample size through **Edit Group Info**. Clicking the group
    will allow you to either double click points on the graph (you have to press
    the click points button first) or delete the group. For a mean/error graph,
    select the type of error shown (SE, SD or 95% CI); this is required.
@@ -165,8 +168,10 @@ without digitising anything, nothing is exported and `NULL` is returned.
 > and pressing **Zoom** (press **Zoom** again with no box drawn to reset).
 
 > **Note on sample sizes.** Always check the exported sample size against the
-> expected sample size. The sample size you type when adding a group is the
-> `n` in the exported data for every plot type. For scatterplots and histograms,
+> expected sample size. The sample size you enter for a group is the `n` in the
+> exported data for every plot type. Enter it when adding a group or, for
+> histograms (which have no add group step), through **Edit Group Info**. For
+> scatterplots and histograms,
 > if you leave it blank, `n` is estimated from your clicks instead: the number of
 > points clicked in each group (scatterplots) or the total of the bar heights
 > (histograms). 
@@ -175,7 +180,8 @@ without digitising anything, nothing is exported and `NULL` is returned.
 > histograms, even when a sample size was typed.* To correct an older extraction,
 > open that figure in version 0.1.1 or later, check the sample size in the group
 > table (scatterplot sample sizes typed when adding a group were saved and reappear;
-> histogram ones were not, so type them again) and press Continue.
+> histogram ones were not), enter or correct it with **Edit Group Info**, and
+> press Continue.
 > Versions up to 0.1.0 also removed a group's points when you re-digitised or
 > deleted another group whose name contained it (e.g. "males" and "females"), so
 > please re-check extractions with group names like these.
@@ -203,10 +209,17 @@ When you file an issue, please include the output of
 
 ## Citation
 
+Please cite both shinyDigitise and metaDigitise:
+
 > Ivimey-Cook, E. R., Noble, D. W. A., Nakagawa, S., Lajeunesse, M. J., & Pick,
 > J. L. (2023). Advice for improving the reproducibility of data extraction in
 > meta-analysis. *Research Synthesis Methods*, 14(6), 911–915.
 > <https://doi.org/10.1002/jrsm.1663>
+
+> Pick, J. L., Nakagawa, S., & Noble, D. W. A. (2019). Reproducible, flexible and
+> high-throughput data extraction from primary literature: The metaDigitise R
+> package. *Methods in Ecology and Evolution*, 10(3), 426–431.
+> <https://doi.org/10.1111/2041-210X.13118>
 
 A machine-readable [`CITATION.cff`](CITATION.cff) is included, so GitHub's
 "Cite this repository" button gives formatted APA and BibTeX.
