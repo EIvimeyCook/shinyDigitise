@@ -127,9 +127,8 @@ from the image folder.
    exception: they have a single group, Group1, created for you. Clicking the group
    will allow you to either double click points on the graph (you have to press
    the click points button first) or delete the group. Lastly, for a mean/error or
-   xy mean/error graph, you must select the type of error shown (SE, SD or 95%
-   CI). The app does not stop you continuing without it, but a figure saved with
-   no error type makes the export fail for the whole folder.
+   xy mean/error graph, select the type of error shown (SE, SD or 95% CI); every
+   saved figure needs one for the export to run.
 5. **Comments** — add a comment to your data.
 6. **Finished!** The app will close when you've reached the end of your graphs.
 
