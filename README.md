@@ -219,7 +219,7 @@ Please cite both shinyDigitise and metaDigitise:
 > package. *Methods in Ecology and Evolution*, 10(3), 426–431.
 > <https://doi.org/10.1111/2041-210X.13118>
 
-A machine-readable [`CITATION.cff`](CITATION.cff) is included, so GitHub's
+A machine-readable [`CITATION.cff`](https://github.com/EIvimeyCook/shinyDigitise/blob/HEAD/CITATION.cff) is included, so GitHub's
 "Cite this repository" button gives formatted APA and BibTeX.
 
 ## Contact

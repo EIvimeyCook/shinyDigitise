@@ -1,0 +1,42 @@
+citHeader("To cite shinyDigitise in publications, please cite both shinyDigitise and metaDigitise:")
+
+bibentry(
+  bibtype = "Article",
+  title   = "Advice for improving the reproducibility of data extraction in meta-analysis",
+  author  = c(person(c("Edward", "R."), "Ivimey-Cook"),
+              person(c("Daniel", "W.", "A."), "Noble"),
+              person("Shinichi", "Nakagawa"),
+              person(c("Marc", "J."), "Lajeunesse"),
+              person(c("Joel", "L."), "Pick")),
+  journal = "Research Synthesis Methods",
+  year    = "2023",
+  volume  = "14",
+  number  = "6",
+  pages   = "911--915",
+  doi     = "10.1002/jrsm.1663",
+  textVersion = paste(
+    "Ivimey-Cook, E. R., Noble, D. W. A., Nakagawa, S., Lajeunesse, M. J., & Pick, J. L. (2023).",
+    "Advice for improving the reproducibility of data extraction in meta-analysis.",
+    "Research Synthesis Methods, 14(6), 911-915. https://doi.org/10.1002/jrsm.1663"
+  )
+)
+
+bibentry(
+  bibtype = "Article",
+  title   = "Reproducible, flexible and high-throughput data extraction from primary literature: The metaDigitise R package",
+  author  = c(person(c("Joel", "L."), "Pick"),
+              person("Shinichi", "Nakagawa"),
+              person(c("Daniel", "W.", "A."), "Noble")),
+  journal = "Methods in Ecology and Evolution",
+  year    = "2019",
+  volume  = "10",
+  number  = "3",
+  pages   = "426--431",
+  doi     = "10.1111/2041-210X.13118",
+  textVersion = paste(
+    "Pick, J. L., Nakagawa, S., & Noble, D. W. A. (2019).",
+    "Reproducible, flexible and high-throughput data extraction from primary literature:",
+    "The metaDigitise R package. Methods in Ecology and Evolution, 10(3), 426-431.",
+    "https://doi.org/10.1111/2041-210X.13118"
+  )
+)

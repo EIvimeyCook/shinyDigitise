@@ -2,51 +2,77 @@
 % Please edit documentation in R/runApp.R
 \name{shinyDigitise}
 \alias{shinyDigitise}
-\title{shinyDigitise}
+\title{Extract data from figures with the shinyDigitise app}
 \usage{
 shinyDigitise(dir = NULL)
 }
 \arguments{
-\item{dir}{the path name to the directory / folder where the files are located /can be left blank}
+\item{dir}{Optional path to the folder containing the figures to digitise.
+If \code{NULL} (the default), choose the folder in the app.}
 }
 \value{
-A data frame or list containing the raw digitised data or the processed, summary statistics from the digitised data
+When the app is closed, a data frame of the extracted values (the
+same summary metaDigitise gives: for example group means, standard
+deviations and sample sizes), also saved as \code{ExtractedData.csv} in the
+image folder. \code{NULL} if nothing was digitised.
 }
 \description{
-shinyDigitise is the graphical user interface to the metaDigitise data extraction package. Allows for single or batch processing of figures with .png, .jpg, .tiff, .pdf extensions within a set directory. The metaDigitise() package then consolidates the data and exports the data for each image and image type. It can also summarise the data, provide the raw data (if scatterplots) and automatically imports previously finished data and merges it with newly digitised data. metaDigitise() also allows users to check their calibration along with editing previous digitisations.
+Opens the shinyDigitise app, a point-and-click interface to the
+\href{https://github.com/daniel1noble/metaDigitise}{metaDigitise} package for
+extracting data from figures in published papers, for example for a
+meta-analysis. Put the figures (\code{.png}, \code{.jpg}, \code{.tiff} or \code{.pdf}) in one
+folder, open it in the app, and digitise them one at a time or as a batch.
+
+For each figure the app walks you through orientation, axis calibration,
+and clicking the points, groups and error bars. It works with box plots,
+mean and error plots, scatter plots and histograms. Extractions are redrawn
+over the figure so they can be checked, and each figure's calibration and
+clicks are saved in a \verb{caldat/} folder inside the image folder, so it can be
+reopened, edited or checked later in shinyDigitise or metaDigitise. Figures
+already digitised are imported and combined with new ones.
 }
 \examples{
-\donttest{
-# temporary directory (taken from metaDigitise)
-tmp_dir <- tempdir()
-
-# Simulate data
-set.seed(103)
-x <- rnorm(20,0,1)
-y <- rnorm(20,0,1)
-means <- c(mean(x),mean(y))
-ses <- c(sd(x)/sqrt(length(x))*1.96, sd(y)/sqrt(length(y))*1.96)
-
-#Generate mock figures
-png(filename = paste0(tmp_dir,"/mean_error.png"), width = 480, height = 480)
-plot(means, ylim = c(min(means-ses)-0.1,max(means+ses)+0.1), xlim=c(0.5,2.5), 
-xaxt="n", pch=19, cex=2, ylab="Variable +/- SE", xlab="Treatment", main="Mean Error")
-arrows(1:length(means),means+ses, 1:length(means), means-ses, code=3, angle=90, length=0.1)
-axis(1,1:length(means),names(means))
-dev.off()
-png(filename = paste0(tmp_dir, "/boxplot.png"), width = 480, height = 480)
-boxplot(x,y, main="Boxplot")
-dev.off()
-png(filename = paste0(tmp_dir, "/histogram.png"),width = 480, height = 480)
-hist(c(x,y), xlab= "variable", main="Histogram")
-dev.off()
-png(filename = paste0(tmp_dir, "/scatterplot.png"), width = 480, height = 480)
-plot(x,y, main="Scatterplot")
-dev.off()
-
-#shinyDigitise figures
 \dontrun{
+# Choose the folder of figures in the app
+data <- shinyDigitise()
+
+# Or open a folder of figures directly
+data <- shinyDigitise(dir = "~/meta-analysis/figures")
+head(data)
+
+# To try the app without your own figures, make four example plots
+# (one of each type) in a temporary folder and open that
+tmp_dir <- file.path(tempdir(), "figures")
+dir.create(tmp_dir)
+set.seed(103)
+x <- rnorm(20)
+y <- rnorm(20)
+means <- c(mean(x), mean(y))
+ses <- c(sd(x), sd(y)) / sqrt(20) * 1.96
+
+png(file.path(tmp_dir, "mean_error.png"), width = 480, height = 480)
+plot(means, ylim = range(means - ses, means + ses) + c(-0.1, 0.1),
+     xlim = c(0.5, 2.5), xaxt = "n", pch = 19, cex = 2,
+     ylab = "Variable +/- SE", xlab = "Treatment", main = "Mean Error")
+arrows(1:2, means + ses, 1:2, means - ses, code = 3, angle = 90, length = 0.1)
+invisible(dev.off())
+
+png(file.path(tmp_dir, "boxplot.png"), width = 480, height = 480)
+boxplot(x, y, main = "Boxplot")
+invisible(dev.off())
+
+png(file.path(tmp_dir, "histogram.png"), width = 480, height = 480)
+hist(c(x, y), xlab = "variable", main = "Histogram")
+invisible(dev.off())
+
+png(file.path(tmp_dir, "scatterplot.png"), width = 480, height = 480)
+plot(x, y, main = "Scatterplot")
+invisible(dev.off())
+
 data <- shinyDigitise(dir = tmp_dir)
 }
 }
+\seealso{
+\code{\link[metaDigitise:metaDigitise]{metaDigitise::metaDigitise()}}, which works with the same saved
+files.
 }

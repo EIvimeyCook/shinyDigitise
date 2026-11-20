@@ -5,12 +5,15 @@
 \alias{shinyDigitise-package}
 \title{shinyDigitise: A GUI for extracting data from figures with metaDigitise}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 User-friendly shiny app for the metaDigitise package, which facilitates high-throughput, flexible and reproducible extraction of data from figures in primary research papers. shinyDigitise() can extract data and calculate summary statistics for users from box plots, mean and error plots, scatter plots and histograms.
 }
 \seealso{
 Useful links:
 \itemize{
   \item \url{https://github.com/EIvimeyCook/shinyDigitise}
+  \item \url{https://eivimeycook.github.io/shinyDigitise/}
   \item Report bugs at \url{https://github.com/EIvimeyCook/shinyDigitise/issues}
 }
 
@@ -20,6 +23,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Edward R. Ivimey-Cook \email{e.ivimeycook@gmail.com} (\href{https://orcid.org/0000-0003-4910-0443}{ORCID})
   \item Joel L. Pick \email{joel.l.pick@gmail.com} (\href{https://orcid.org/0000-0002-6295-3742}{ORCID})
 }
 
