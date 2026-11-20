@@ -1,10 +1,8 @@
 <p align="center">
-  <img src="https://github.com/EIvimeyCook/shinyDigitise/blob/master/inst/shinyDigitise/www/img/shinyDigitise.png" width = "200"/>
+  <a href="https://eivimeycook.github.io/shinyDigitise/"><img src="man/figures/logo.png" width="200" alt="shinyDigitise logo"/></a>
 </p>
 
-<div align="center">
- <h1>shinyDigitise</h1>
-</div>
+<h1 align="center">shinyDigitise</h1>
 
 <!-- badges: start -->
 [![DOI](https://img.shields.io/badge/DOI-10.1002%2Fjrsm.1663-blue)](https://doi.org/10.1002/jrsm.1663)

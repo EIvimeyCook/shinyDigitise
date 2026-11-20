@@ -13,7 +13,8 @@ Description: User-friendly shiny app for the metaDigitise package, which
     extract data and calculate summary statistics for users from box
     plots, mean and error plots, scatter plots and histograms.
 License: MIT + file LICENSE
-URL: https://github.com/EIvimeyCook/shinyDigitise
+URL: https://github.com/EIvimeyCook/shinyDigitise,
+    https://eivimeycook.github.io/shinyDigitise/
 BugReports: https://github.com/EIvimeyCook/shinyDigitise/issues
 Imports: 
     bslib,

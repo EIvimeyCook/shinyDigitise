@@ -4,3 +4,7 @@
 ^\.Rhistory$
 ^LICENSE\.md$
 ^\.gitignore$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
